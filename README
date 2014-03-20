@@ -26,7 +26,10 @@ Features:
 		- Extended Error Correction test on Plextor & BENQ drives
 		- Jitter/Asymmetry
 		- FE/TE (Plextor, Lite-On, BENQ)
-		- TA (only PX-7[14|16|55|60] can do this)
+		- TA (only Plextor PX-7[14|16|55|60] can do this)
+    - BD quality tests:
+		- LDC/BIS (Lite-On only)
+		- FE/TE (Lite-On only)
     - Saving test results as HTML or PDF or in internal XML-based format to see them later
     - Results printing
 
