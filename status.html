@@ -1,0 +1,340 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+  </head>
+  <body>
+
+<br>
+<div align="center"><font size=+2>
+QPxTool 0.7 status: Release
+</font></div>
+<br>
+<table border="0"  bgcolor="#F0F0F0" width=500 align="center">
+  <caption>Platforms support status</caption>
+  <tr align="center" bgcolor="#D0D0D0">
+	<td width="16%">OS</td>
+	<td width="16%">arch</td>
+	<td width="16%">status</td>
+	<td width="52%">notes</td>
+  </tr>
+  <tr bgcolor="#40E040"><td rowspan="3">GNU/Linux</td><td>x86</td><td>OK</td><td></td></tr>
+  <tr bgcolor="#40E040"><td>x86-64</td><td>OK</td><td></td></tr>
+  <tr bgcolor="#40E040"><td>SPARC</td><td>OK</td><td></td></tr>
+  <tr bgcolor="#F0F000"><td rowspan="2">MacOS X</td><td>PPC</td><td></td><td></td></tr>
+  <tr bgcolor="#F0F000"><td>x86</td><td>OK</td><td></td></tr>
+  <tr bgcolor="#F0F000"><td>FreeBSD</td><td></td><td>OK</td><td></td></tr>
+  <tr bgcolor="#F0F000"><td>OpenBSD</td><td></td><td>OK</td><td></td></tr>
+  <tr bgcolor="#F0F000"><td>NetBSD</td><td></td><td>OK</td><td></td></tr>
+  <tr bgcolor="#40E040"><td>win32</td><td>x86</td><td>OK</td>
+    <td>
+	no daemon mode in qscand<br>
+	no png support in f1tattoo<br>
+	print preview does not work if no printer installed<br>
+    </td>
+  </tr>
+</table>
+<br><br>
+<table border="0"  bgcolor="#F0F0F0" width=500 align="center">
+  <caption>qpxtool: GUI controls</caption>
+  <tr align="center" bgcolor="#D0D0D0">
+	<td width="50%">Feature</td>
+	<td width="25%">Detect</td>
+	<td width="25%">Control</td>
+  </tr>
+  <tr><td>Hide CD-R</td><td>+</td><td>+</td></tr>
+  <tr><td>Single Session</td><td>+</td><td>+</td></tr>
+  <tr><td>SpeedRead</td><td>+</td><td>+</td></tr>
+  <tr><td>DVD+R bitsetting</td><td>+</td><td>+</td></tr>
+  <tr><td>DVD+R DL bitsetting</td><td>+</td><td>+</td></tr>
+  <tr><td>DVD+R(W) testwrite</td><td>+</td><td>+</td></tr>
+  <tr><td>PoweRec</td><td>+</td><td>+</td></tr>
+  <tr><td>VariRec CD</td><td>+</td><td>+</td></tr>
+  <tr><td>VariRec DVD</td><td>+</td><td>+</td></tr>
+  <tr><td>GigaRec</td><td>+</td><td>+</td></tr>
+  <tr><td>SecuRec</td><td>+</td><td>+</td></tr>
+  <tr><td>Silent Mode</td><td>+</td><td>+</td></tr>
+  <tr><td>AutoStrategy</td><td>+</td><td>+</td></tr>
+  <tr><td>MQCK</td><td>+</td><td>+</td></tr>
+  <tr><td>AS DB</td><td>+</td><td>+</td></tr>
+  <tr><td>AS DB Save/Load</td><td></td><td></td></tr>
+  <tr><td>PlexEraser</td><td>+</td><td>+</td></tr>
+</table>
+<br>
+<table border="0"  bgcolor="#F0F0F0" width="100%" align="center">
+  <caption>qscan: Scan algo status</caption>
+  <tr align="center" bgcolor="#D0D0D0">
+	<td width="40%">Algo</td> 
+	<td width="15%">CD</td> 
+	<td width="15%">DVD</td> 
+	<td width="15%">BD</td> 
+  </tr> 
+  <tr>
+	<td>Read transfer</td> 
+	<td bgcolor="#40E040">OK</td> 
+	<td bgcolor="#40E040">OK</td> 
+	<td bgcolor="#40E040">OK</td> 
+  </tr> 
+  <tr>
+	<td>Write transfer</td> 
+	<td bgcolor="#40E040">OK</td> 
+	<td bgcolor="#40E040">OK</td> 
+	<td bgcolor="#D0D0D0"></td> 
+  </tr> 
+  <tr>
+	<td>Error correction</td> 
+	<td bgcolor="#40E040">OK</td> 
+	<td bgcolor="#40E040">OK</td> 
+	<td bgcolor="#40E040">OK</td> 
+  </tr> 
+  <tr>
+	<td>Jitter/Asymmetry</td> 
+	<td bgcolor="#40E040">OK</td> 
+	<td bgcolor="#40E040">OK</td> 
+	<td bgcolor="#D0D0D0"></td> 
+  </tr> 
+  <tr>
+	<td>Focus/Tracking</td> 
+	<td bgcolor="#40E040">OK</td> 
+	<td bgcolor="#40E040">OK</td> 
+	<td bgcolor="#D0D0D0"></td> 
+  </tr> 
+  <tr>
+	<td>Time Analyser</td> 
+	<td bgcolor="#D0D0D0"></td>
+	<td bgcolor="#40E040">OK</td>
+	<td bgcolor="#D0D0D0"></td>
+  </tr> 
+</table>
+
+<br>
+
+<table border="0"  bgcolor="#F0F0F0" width="100%" align="center">
+  <caption>qscan: Scan plugins status</caption>
+  <tbody>
+    <tr align="center" bgcolor="#D0D0D0">
+      <td align="right" colspan="5"></td>
+      <td colspan="3">CD</td>
+      <td colspan="4">DVD</td>
+      <td colspan="3">BD</td>
+    </tr>
+    <tr align="center" bgcolor="#D0D0D0">
+      <td rowspan="2">Plugin</td>
+      <td bgcolor="#40E040" rowspan="2">probe</td>
+      <td bgcolor="#D0D0D0" colspan="3">sectors per interval</td>
+<!-- CD -->
+      <td bgcolor="#40E040" rowspan="2">ERRC</td>
+      <td bgcolor="#40E040" rowspan="2">JB</td>
+      <td bgcolor="#40E040" rowspan="2">FE/TE</td>
+<!-- DVD -->
+      <td bgcolor="#40E040" rowspan="2">ERRC</td>
+      <td bgcolor="#40E040" rowspan="2">JB</td>
+      <td bgcolor="#40E040" rowspan="2">FE/TE</td>
+      <td bgcolor="#40E040" rowspan="2">TA</td>
+<!-- BD -->
+      <td bgcolor="#40E040" rowspan="2">ERRC</td>
+      <td bgcolor="#40E040" rowspan="2">JB</td>
+      <td bgcolor="#40E040" rowspan="2">FE/TE</td>
+    </tr>
+    <tr align="center" bgcolor="#D0D0D0">
+      <td bgcolor="#D0D0D0">CD<br>ideal is 75</td>
+      <td bgcolor="#D0D0D0">DVD<br>ideal is 16</td>
+      <td bgcolor="#D0D0D0">BD<br>ideal is 32</td>
+    </tr>
+
+    <tr align="center">
+      <td bgcolor="#40E040">PLEXTOR</td>
+      <td>never.<br>few models,<br>no clones</td>
+      <td bgcolor="#40E040">75</td>
+      <td bgcolor="#40E040">16</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- CD -->
+      <td bgcolor="#40E040">FULL</td>
+      <td bgcolor="#40E040">FULL</td>
+      <td bgcolor="#40E040">FULL</td>
+<!-- DVD -->
+      <td bgcolor="#40E040">FULL</td>
+      <td bgcolor="#40E040">FULL</td>
+      <td bgcolor="#40E040">FULL</td>
+      <td bgcolor="#40E040">OK</td>
+<!-- BD -->
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+    </tr>
+    <tr align="center">
+      <td bgcolor="#40E040">PIONEER</td>
+      <td bgcolor="#40E040"></td>
+      <td bgcolor="#40E040">75</td>
+      <td bgcolor="#40E040">16</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- CD -->
+      <td bgcolor="#40E040">bler,e22</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- DVD -->
+      <td bgcolor="#40E040">pie,pif</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- BD -->
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+    </tr>
+    <tr align="center">
+      <td bgcolor="#40E040">ASUS</td>
+      <td bgcolor="#40E040"></td>
+      <td bgcolor="#40E040">~75</td>
+      <td bgcolor="#40E040">~16</td>
+      <td></td>
+<!-- CD -->
+      <td bgcolor="#40E040">bler,e22</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- DVD -->
+      <td bgcolor="#40E040">pie,pif</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- BD -->
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+    </tr>
+    <tr align="center">
+      <td bgcolor="#40E040">NEC</td>
+      <td bgcolor="#40E040"></td>
+      <td bgcolor="#40E040">75</td>
+      <td bgcolor="#40E040">16</td>
+      <td>?</td>
+<!-- CD -->
+      <td bgcolor="#40E040">bler,e22</td>
+      <td></td>
+      <td bgcolor="#404040">N/A</td>
+<!-- DVD -->
+      <td bgcolor="#40E040">pie,pif</td>
+      <td></td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- BD -->
+      <td bgcolor="#F0B040">FULL<br>(untested)</td>
+      <td></td>
+      <td bgcolor="#404040">N/A</td>
+    </tr>
+    <tr align="center">
+      <td bgcolor="#40E040">LITE-ON</td>
+      <td bgcolor="#F04000">dangerous</td>
+      <td bgcolor="#40E040">75</td>
+      <td bgcolor="#40E040">16</td>
+      <td bgcolor="#40E040">32</td>
+<!-- CD -->
+      <td bgcolor="#40E040">bler,e22,e32</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#40E040">FULL</td>
+<!-- DVD -->
+      <td bgcolor="#40E040">pie,pif</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#40E040">FULL</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- BD -->
+      <td bgcolor="#40E040">FULL</td>
+      <td></td>
+      <td bgcolor="#F0F000">FULL</td>
+    </tr>
+    <tr align="center">
+      <td bgcolor="#40E040">BENQ</td>
+      <td bgcolor="#40E040"></td>
+      <td bgcolor="#40E040">75</td>
+      <td bgcolor="#D0D0D0">?</td>
+      <td></td>
+<!-- CD -->
+      <td bgcolor="#F0F000">FULL</td>
+      <td></td>
+      <td></td>
+<!-- DVD -->
+      <td bgcolor="#F0F000">FULL</td>
+      <td></td>
+      <td bgcolor="#F0F000">FULL</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- BD -->
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr align="center">
+      <td bgcolor="#F0B000">BENQ ROM</td>
+      <td bgcolor="#40E040"></td>
+      <td bgcolor="#40E040">75</td>
+      <td bgcolor="#F0B000">256</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- CD -->
+      <td bgcolor="#F0B000">bler,e22</td>
+      <td bgcolor="#F0B000">jitter</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- DVD -->
+      <td bgcolor="#F0B000">pie,pif</td>
+      <td bgcolor="#F0B000">jitter</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- BD -->
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+    </tr>
+    <tr align="center">
+      <td bgcolor="#40E040">TSST</td>
+      <td bgcolor="#40E040"></td>
+      <td bgcolor="#D0D0D0">?</td>
+      <td bgcolor="#D0D0D0">?</td>
+      <td></td>
+<!-- CD -->
+      <td bgcolor="#40E040">bler,e22</td>
+      <td></td>
+      <td bgcolor="#404040">N/A</td>
+<!-- DVD -->
+      <td bgcolor="#40E040">pie,pif</td>
+      <td></td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- BD -->
+      <td></td>
+      <td></td>
+      <td bgcolor="#404040">N/A</td>
+    </tr>
+    <tr align="center">
+      <td bgcolor="#40E040">Generic C2</td>
+      <td bgcolor="#40E040"></td>
+      <td bgcolor="#40E040">75</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- CD -->
+      <td bgcolor="#40E040">C2 only</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- DVD -->
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+<!-- BD -->
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+      <td bgcolor="#404040">N/A</td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<table border="0" bgcolor="#F0F0F0">
+  <caption>Legend</caption>
+  <tbody>
+	<tr align="center"><td bgcolor="#40E040">done</td></tr>
+	<tr align="center"><td bgcolor="#F0F000">unfinished</td></tr>
+	<tr align="center"><td bgcolor="#F0B040">untested</td></tr>
+	<tr align="center"><td bgcolor="#F04000">unstable</td></tr>
+	<tr align="center"><td bgcolor="#D0D0D0">planning</td></tr>
+  </tbody>
+</table>
+
+  </body>
+</html>
+

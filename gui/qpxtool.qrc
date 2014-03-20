@@ -1,0 +1,82 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+	<file>images/media/cd.png</file>
+	<file>images/media/cd_r.png</file>
+	<file>images/media/cd_rw.png</file>
+
+	<file>images/media/dvd-rom.png</file>
+	<file>images/media/dvd-ram.png</file>
+	<file>images/media/dvd-r.png</file>
+	<file>images/media/dvd-r_dl.png</file>
+	<file>images/media/dvd-rw.png</file>
+	<file>images/media/dvd+r.png</file>
+	<file>images/media/dvd+r_dl.png</file>
+	<file>images/media/dvd+rw.png</file>
+
+	<file>images/media/hddvd-rom.png</file>
+	<file>images/media/hddvd-ram.png</file>
+	<file>images/media/hddvd-r.png</file>
+	<file>images/media/hddvd-rw.png</file>
+
+	<file>images/media/bd.png</file>
+
+	<file>images/q.png</file>
+	<file>images/x.png</file>
+	<file>images/ok.png</file>
+	<file>images/add.png</file>
+	<file>images/edit.png</file>
+	<file>images/edit-redo.png</file>
+	<file>images/edit-undo.png</file>
+	<file>images/edit-clear.png</file>
+	<file>images/logo.png</file>
+	<file>images/splash.png</file>
+	<file>images/info.png</file>
+	<file>images/pdf.png</file>
+	<file>images/html.png</file>
+	<file>images/document.png</file>
+	<file>images/save.png</file>
+	<file>images/directory.png</file>
+	<file>images/fileopen.png</file>
+	<file>images/printer.png</file>
+	<file>images/page-setup.png</file>
+	<file>images/zoom-in.png</file>
+	<file>images/zoom-out.png</file>
+	<file>images/zoom-orig.png</file>
+
+	<file>images/disc.png</file>
+	<file>images/device.png</file>
+	<file>images/cdwriter.png</file>
+	<file>images/colors.png</file>
+	<file>images/loej.png</file>
+	<file>images/lock.png</file>
+
+	<file>images/test_rt.png</file>
+	<file>images/test_wt.png</file>
+	<file>images/test_errc.png</file>
+	<file>images/test_jb.png</file>
+	<file>images/test_ft.png</file>
+	<file>images/test_ta.png</file>
+
+	<file>images/settings2.png</file>
+	<file>images/varirec.png</file>
+	<file>images/gigarec.png</file>
+	<file>images/password.png</file>
+	<file>images/sound.png</file>
+	<file>images/eraser.png</file>
+	<file>images/disc-eraser.png</file>
+	<file>images/tattoo.png</file>
+
+	<file>images/search.png</file>
+
+	<file>images/scan.png</file>
+	<file>images/stop.png</file>
+	<file>images/refresh.png</file>
+	<file>images/refresh-info.png</file>
+	<file>images/refresh-media.png</file>
+	<file>images/settings.png</file>
+	<file>images/exit.png</file>
+
+	<file>../COPYING</file>
+	<file>about.html</file>
+</qresource>
+</RCC>

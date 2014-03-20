@@ -1,0 +1,22 @@
+scan plugins:
+    - fix BENQ FE/TE
+
+cdvdcontrol:
+    - check available PX716 MQCK speeds
+    - implement Lite-On SmartErase
+
+qscand:
+    - daemon mode on win32
+
+qpxtool:
+    - check VariRec CD disabling (win32)
+    - save drive/scan settings
+
+pxfw:
+    - crc calc for PX-708A2 / PX-712
+
+gui
+	- save selected test speeds
+    - table+images groups in print preview
+    - (?) OpenGL graph render engine
+

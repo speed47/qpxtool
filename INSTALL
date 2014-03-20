@@ -1,0 +1,16 @@
+To install from source:
+    ./configure
+    make
+    make install
+
+
+Alailable targets for `make`:
+all         - build all
+cli         - build libs and console tools
+gui         - build gui only
+install     - install all
+cli_install - install libs and console tools
+gui_install - install gui only
+
+clean       - clean source tree from object files
+uninstall   - uninstall all

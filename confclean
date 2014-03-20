@@ -1,0 +1,7 @@
+#!/bin/sh
+
+rm -f Makefile
+rm -f gui/Makefile
+rm -f lib/Makefile.lib
+rm -f plugins/Makefile.plugin
+rm -f config.h

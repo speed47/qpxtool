@@ -1,0 +1,925 @@
+#!/bin/sh
+
+TMPC=tmp.c
+TMPB=tmpb
+
+GMAKE="no"
+MAKE="make"
+QMAKE4_NAMES="qmake qmake4 qmake-qt4 qmake-4"
+OSDEFS=""
+OSLIBS=""
+OSLIBS_HW=""
+OSLIBS_INET=""
+OSLIBS_DL=""
+OSLIBS_THREAD=""
+
+__cc=cc
+__cxx=c++
+__defprefix=""
+__prefix=""
+__enable_debug=no
+__enable_png=yes
+__enable_gui=yes
+__wt_internal=yes
+__qmake=""
+__plugins_liteon_noprobe=no
+
+__binsuff=""
+__libpref="lib"
+__libsuff=".so"
+
+lpng_iopts=""
+lpng_ldflags=""
+LPNG_DEFS=""
+PLUGIN_DEFS=""
+DEFS=""
+
+qt_ver=""
+qt_dir=""
+
+cleanup()
+{
+	rm -f $TMPC $TMPB
+}
+
+check_make()
+{
+	echo -n "Checking for make... "
+	x=`gmake -v 2>/dev/null`
+	if test "$?" -gt 0; then
+		x=`make -v 2>/dev/null`
+		if test "$?" -gt 0; then
+			echo "no"
+			echo "Make not found! Can't continue"
+			exit
+		fi
+		MAKE="make"
+	else
+		MAKE="gmake"
+	fi
+	echo "yes"
+
+
+	echo -n "Checking if we have GNU Make... "
+	if test "$OSL" = "mingw32" ; then
+	    make_t0=`$MAKE -v | tr '[A-Z]' '[a-z]' | grep make | grep ver | cut -d ' ' -f 1`
+	else
+	    make_t0=`$MAKE -v | tr '[A-Z]' '[a-z]' | grep make | cut -d ' ' -f 1`
+	fi
+	
+	if test "$make_t0" = "gnu" ; then
+		GMAKE="yes"
+	else
+		GMAKE="no"
+	fi
+
+	echo $GMAKE
+}
+
+check_compiler()
+{
+	echo -n "Checking C compiler... "
+	cc_name=`$__cc -v 2>&1 | tail -n 1 | cut -d ' ' -f 1`
+	cc_ver=`$__cc -dumpversion 2>&1`
+	if test "$?" -gt 0; then
+		cc_name="not found"
+		cc_ver=""
+	fi
+	echo -n $cc_name $cc_ver
+
+	case $cc_name in
+		"not found")
+			echo ""
+			echo "** No C compiler found, can not continue!"
+			exit 1
+			;;
+		gcc)
+			echo ""
+			;;
+		*)
+			echo "  only gcc tested!"
+			;;
+	esac
+
+
+	echo -n "Checking C++ compiler... "
+	cxx_name=`$__cxx -v 2>&1 | tail -n 1 | cut -d ' ' -f 1`
+	cxx_ver=`$__cxx -dumpversion 2>&1`
+	if test "$?" -gt 0; then
+		cxx_name="not found"
+		cxx_ver=""
+	fi
+	echo $cxx_name $cxx_ver
+	
+	if test  "$cxx_name" = "not found" ; then
+		echo ""
+		echo "** No C++ compiler found, can not continue!"
+		exit 1
+	fi
+}
+
+check_libpng()
+{
+	__enable_png=no
+	echo -n "Checking for libpng... "
+	lpng_ver=`libpng-config --version 2>/dev/null`
+	if test "$?" -gt 0; then
+		lpng_ver="not found"
+	fi
+	echo $lpng_ver
+
+	if test "$lpng_ver" != "not found" ; then
+
+		echo -n "  libpng compiler flags: "
+		lpng_iopts=`libpng-config --I_opts`
+		echo $lpng_iopts
+		echo -n "  libpng linker flags: "
+		lpng_ldflags=`libpng-config --ldflags`
+		echo $lpng_ldflags
+	
+		echo -n "Checking png.h presense... "
+
+		echo "
+		#include <png.h>
+		int main(int ac, char** av) { return 0; } 
+		" > $TMPC
+
+		$__cc $lpng_iopts $TMPC -o $TMPB 2>&1 1>/dev/null
+		if test "$?" -gt 0; then
+			echo "no"
+			lpng_iopts=""
+			lpng_ldflags=""
+		else
+			echo "yes"
+
+			echo -n "Checking png.h usability... "
+			echo "
+			#include <png.h>
+			int main(int ac, char** av) {
+			png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);	
+			return 0; }
+			" > $TMPC
+
+
+			$__cc $lpng_iopts $lpng_ldflags $TMPC -o $TMPB 2>&1 1>/dev/null
+			if test "$?" -gt 0; then
+				echo "no"
+				lpng_iopts=""
+				lpng_ldflags=""
+			else
+				echo "yes"
+				__enable_png=yes
+				LPNG_DEFS="-DUSE_LIBPNG"
+			fi
+		fi
+	fi
+}
+
+check_offset64()
+{
+	echo -n "Checking off_t size with _FILE_OFFSET_BITS = 64... "
+	echo "
+			#define _FILE_OFFSET_BITS 64
+			#include <sys/types.h>
+			#include <stdio.h>
+			#include <unistd.h>
+			int main(int ac, char** av) {
+				printf(\"%d\", sizeof(off_t));
+			return 0; }
+	" > $TMPC
+
+#	$__cc $TMPC -o $TMPB 2>/dev/null 1>/dev/null
+	$__cc $TMPC -o $TMPB
+	if test "$?" -eq 0; then
+		OFFT_SIZE=`./$TMPB`
+		echo $OFFT_SIZE
+		if test "$OFFT_SIZE" -eq 8; then
+			OSDEFS=$OSDEFS" -DOFFT_64BIT"
+		fi
+	else
+		echo "no off_t type defined!"
+		exit 1
+	fi
+
+
+	echo -n "Checking for fopen64()... "
+	echo "
+			#define _FILE_OFFSET_BITS 64
+			#include <stdio.h>
+			int main(int ac, char** av) {
+			FILE* f;
+			f = fopen64(\"f\",\"r+\");
+			return 0; }
+	" > $TMPC
+
+	$__cc $TMPC -o $TMPB 2>/dev/null 1>/dev/null
+	if test "$?" -gt 0; then
+		echo "no"
+	else
+		echo "yes"
+		OSDEFS=$OSDEFS" -DHAVE_FOPEN64"
+	fi
+
+
+	echo -n "Checking for fseek64()... "
+	echo "
+			#define _FILE_OFFSET_BITS 64
+			#include <stdio.h>
+			int main(int ac, char** av) {
+			FILE* f;
+			fseek64(f,0, SEEK_SET);
+			return 0; }
+	" > $TMPC
+
+	$__cc $TMPC -o $TMPB 2>/dev/null 1>/dev/null
+	if test "$?" -gt 0; then
+		echo "no"
+	else
+		echo "yes"
+		OSDEFS=$OSDEFS" -DHAVE_FSEEK64"
+	fi
+
+
+	echo -n "Checking for fseeko()... "
+	echo "
+			#define _FILE_OFFSET_BITS 64
+			#include <stdio.h>
+			int main(int ac, char** av) {
+			FILE* f;
+			fseeko(f,0, SEEK_SET);
+			return 0; }
+	" > $TMPC
+
+	$__cc $TMPC -o $TMPB 2>/dev/null 1>/dev/null
+	if test "$?" -gt 0; then
+		echo "no"
+	else
+		echo "yes"
+		OSDEFS=$OSDEFS" -DHAVE_FSEEKO"
+	fi
+}
+
+qt_check_qmake()
+{
+    qt_ver=`$1 -v 2>/dev/null`
+    if test "$?" -gt 0; then
+	qt_ver="not found"
+	qt_dir=""
+    else
+	qt_ver=`$1 -v 2>/dev/null | tail -n 1 | cut -d' ' -f 4 `
+	qt_dir=`$1 -v 2>/dev/null | tail -n 1 | cut -d' ' -f 6 `
+    fi
+
+
+    case $qt_ver in
+	"not found")
+		__qmake=""
+		;;
+	4.*)
+		__qmake=$1
+		;;
+	*)
+		echo "Unknown/unsupported Qt version"
+		__qmake=""
+		;;
+    esac
+}
+
+qt_check_default()
+{
+    for qmake4 in $QMAKE4_NAMES ; do
+	qt_check_qmake $qmake4
+	if test "$qt_dir" != "" ; then
+	    return
+	fi
+    done
+}
+
+
+ckeck_qt4()
+{
+	__enable_gui=no
+	echo -n "Checking for Qt4... "
+	if test "$__qmake" = "" ; then
+		qt_check_default
+	else
+		qt_check_qmake $__qmake
+	fi
+
+	if test "$qt_dir" = "" ; then
+	    echo "no, GUI will not be compiled.
+	If you really have Qt4 and want to build GUI try --qmake=/path/to/qmake"
+	else
+		__enable_gui=yes
+	    echo "$qt_dir ($qt_ver), qmake command: $__qmake"
+	fi
+}
+
+create_makefile_top()
+{
+	echo "* Makefile"
+	rm -f Makefile
+
+	echo "#ifndef __CONFIG_H__" > config.h
+	echo "#define __CONFIG_H__" >> config.h
+	echo "#define INSTALL_PREFIX \"$__prefix\"" >> config.h
+	echo "#endif //__CONFIG_H__" >> config.h
+
+	echo "PREFIX    = $__prefix
+BINDIR    = $__bindir
+SBINDIR   = $__sbindir
+LIBDIR    = $__libdir
+PLUGINDIR = $__plugindir
+INCDIR    = $__incdir
+MANDIR    = $__mandir
+
+BINSUFF   = $__binsuff
+LIBS_HW   = $OSLIBS_HW
+LIBS_INET = $OSLIBS_INET
+LIBS_DL   = $OSLIBS_DL
+LIBS_THREAD = $OSLIBS_THREAD
+
+LPNG_INC  = $lpng_iopts
+LPNG_LIB  = $lpng_ldflags
+
+" >> Makefile
+
+	echo "CXXFLAGS += -Wall -O2 $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
+	echo "CFLAGS   += -Wall -O2 $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
+
+	if test "$__enable_debug" = "yes" ; then
+		echo "# additional debug options" >> Makefile
+		echo "CXXFLAGS += -g" >> Makefile
+		echo "CFLAGS   += -g" >> Makefile
+	fi
+
+	if test "$OSL" = "darwin" ; then
+		echo "QMAKESPEC=macx-g++" >> Makefile
+		echo "export QMAKESPEC" >> Makefile
+	fi
+
+	if test "$GMAKE" = "yes" ; then
+		echo "export PREFIX BINDIR SBINDIR LIBDIR PLUGINDIR INCDIR MANDIR BINSUFF LIBS_HW LIBS_INET LIBS_DL LIBS_THREAD" >> Makefile
+		echo "export LPNG_INC LPNG_LIB" >> Makefile
+		echo "export CXXFLAGS CFLAGS" >> Makefile
+	fi
+
+	
+	echo "
+all: cli gui
+cli: lib console plugins man" >> Makefile
+
+echo "
+lib:
+	\$(MAKE) -C lib
+
+console: lib
+	\$(MAKE) -C console
+
+plugins: lib
+	\$(MAKE) -C plugins
+
+man:
+	\$(MAKE) -C man
+" >> Makefile
+
+
+	echo "
+gui: lib" >> Makefile
+	if test "$__enable_gui" = "yes" ; then
+	echo "	\$(MAKE) -C gui" >> Makefile
+	fi
+
+	echo "
+clean:" >> Makefile
+	echo "	\$(MAKE) -C lib clean
+	\$(MAKE) -C console clean
+	\$(MAKE) -C plugins clean
+	\$(MAKE) -C man clean" >> Makefile
+	if test "$__enable_gui" = "yes" ; then
+	echo "	\$(MAKE) -C gui clean" >> Makefile
+	fi
+
+	echo "
+install: all cli_install gui_install" >> Makefile
+
+	echo "
+cli_install:" >> Makefile
+	echo "	\$(MAKE) -C lib install
+	\$(MAKE) -C console install
+	\$(MAKE) -C plugins install
+	\$(MAKE) -C man install" >> Makefile
+
+	echo "
+gui_install:" >> Makefile
+	if test "$__enable_gui" = "yes" ; then
+		echo "	\$(MAKE) -C gui install" >> Makefile
+	fi
+
+	echo "
+uninstall: cli_uninstall gui_uninstall" >> Makefile
+
+	echo "
+cli_uninstall:" >> Makefile
+	echo "	\$(MAKE) -C lib uninstall
+	\$(MAKE) -C console uninstall
+	\$(MAKE) -C plugins uninstall
+	\$(MAKE) -C man uninstall" >> Makefile
+
+	echo "
+gui_uninstall:" >> Makefile
+	if test "$__enable_gui" = "yes" ; then
+	echo "	\$(MAKE) -C gui uninstall" >> Makefile
+	fi
+
+	echo "
+help:
+	@echo \"\"
+	@echo \"Alailable targets:\"
+	@echo \"all           - build all\"
+	@echo \"cli           - build libs and console tools\"
+	@echo \"gui           - build gui only\"
+	@echo \"plugins       - build plugins only\"
+	@echo \"install       - install all\"
+	@echo \"cli_install   - install libs and console tools\"
+	@echo \"gui_install   - install gui only\"
+	@echo \"\"
+	@echo \"clean         - clean source tree from object files\"
+	@echo \"uninstall     - uninstall all\"
+	@echo \"cli_uninstall - uninstall libs and console tools\"
+	@echo \"gui_uninstall - uninstall gui only\"" >> Makefile
+
+	echo "
+.PHONY: all clean cli lib console plugins man nogui gui install cli_install gui_install uninstall cli_uninstall gui_uninstall help" >> Makefile
+}
+
+create_makefile_gui()
+{
+	mf="gui/Makefile"
+	echo "* $mf"
+
+	rm -f $mf
+
+	if test "$OSL" = "netbsd" ; then
+		qt_dir="/usr/pkg/qt4"
+		echo "QTDIR=$qt_dir" >> $mf
+		echo "LDFLAGS+=-Wl,-R/usr/X11R7/lib" >> $mf
+	fi
+	echo "QTDIR=$qt_dir" >> $mf
+	echo "QMAKE4= $__qmake" >> $mf
+
+	if test "$GMAKE" = "yes" ; then
+	    echo "export QTDIR QMAKE4" >> $mf
+	fi
+
+	echo "
+all: Makefile.qmake" >> $mf
+if test "$OSL" = "mingw32" ; then
+	if test "$__enable_debug" = "yes" ; then
+		echo "	\$(MAKE) -f Makefile.qmake debug $@" >> $mf
+	else
+		echo "	\$(MAKE) -f Makefile.qmake release $@" >> $mf
+	fi
+else
+	echo "	\$(MAKE) -f Makefile.qmake $@" >> $mf
+	if test "$__enable_debug" = "no" ; then
+		if test "$OSL" = "darwin" ; then
+#			echo "	strip qpxtool.app/Contents/MacOS/qpxtool" >> $mf
+			echo "	" >> $mf
+		else
+			echo "	strip --strip-unneeded qpxtool" >> $mf
+		fi
+	fi
+fi
+	echo "	lrelease -verbose qpxtool.pro" >> $mf
+
+	echo "
+clean: Makefile.qmake
+	rm -f Makefile.qmake
+	rm -f qpxtool$__binsuff
+	rm -f obj/*
+	rm -f moc/*
+	rm -f *~
+	rm -f src/*~
+	rm -f include/*~
+	rm -f locale/*.qm
+	rm -f qrc_qpxtool.cpp" >> $mf
+
+	case "$OSL" in
+		"mingw32")
+			echo "
+install: Makefile.qmake" >> $mf
+			if test "$__enable_debug" = "yes" ; then
+				echo "	install -m 755 debug/qpxtool.exe \$(DESTDIR)\$(BINDIR)" >> $mf
+			else
+				echo "	install -m 755 release/qpxtool.exe \$(DESTDIR)\$(BINDIR)" >> $mf
+			fi
+			echo "	mkdir -p \$(DESTDIR)\$(BINDIR)/locale" >> $mf
+			echo "	install -m 644 locale/*.qm \$(DESTDIR)\$(BINDIR)/locale" >> $mf
+			echo "
+uninstall:
+	rm -f \$(DESTDIR)\$(BINDIR)/qpxtool.exe
+	rm -rf \$(DESTDIR)\$(BINDIR)/locale" >> $mf
+			;;
+		*)
+			echo "
+install: Makefile.qmake" >> $mf
+
+			if test "$OSL" = "darwin" ; then
+				echo "	install -m 755 qpxtool.app/Contents/MacOS/qpxtool \$(DESTDIR)\$(BINDIR)/qpxtool" >> $mf
+			else
+				echo "	install -m 755 qpxtool \$(DESTDIR)\$(BINDIR)/qpxtool" >> $mf
+			fi
+
+			echo "	mkdir -p \$(DESTDIR)\$(PREFIX)/share/qpxtool/locale" >> $mf
+			echo "	install -m 644 locale/*.qm \$(DESTDIR)\$(PREFIX)/share/qpxtool/locale" >> $mf
+			echo "	mkdir -p \$(DESTDIR)\$(PREFIX)/share/pixmaps" >> $mf
+			echo "	install -m 644 images/q.png \$(DESTDIR)\$(PREFIX)/share/pixmaps/qpxtool.png" >> $mf
+			echo "	mkdir -p \$(DESTDIR)\$(PREFIX)/share/applications" >> $mf
+			echo "	install -m 644 qpxtool.desktop \$(DESTDIR)\$(PREFIX)/share/applications/qpxtool.desktop" >> $mf
+			echo "
+uninstall:
+	rm -f \$(DESTDIR)\$(BINDIR)/qpxtool
+	rm -rf \$(DESTDIR)\$(PREFIX)/share/qpxtool
+	rm -f \$(DESTDIR)\$(PREFIX)/share/pixmaps/qpxtool.png
+	rm -f \$(DESTDIR)\$(PREFIX)/share/applications/qpxtool.desktop" >> $mf
+			;;
+	esac
+
+	echo "
+Makefile.qmake:
+	rm -f Makefile.qmake
+	\$(QMAKE4) LIBS+=-L../lib/lib LIBS+=-lqpxtransport $QDEBUG -o Makefile.qmake" >> $mf	
+	echo "
+.PHONY: all clean install uninstall" >> $mf
+}
+
+create_makefile_lib()
+{
+	mf="lib/Makefile.lib"
+	echo "* $mf"
+
+	rm -f $mf
+
+	case "$OSL" in
+		darwin)
+			echo "
+LIB_SHORT  = $__libpref\$(LIBN)$__libsuff
+LIB        = $__libpref\$(LIBN).\$(VER_MAJOR).\$(VER_MINOR).\$(VER_MICRO)$__libsuff
+
+CXXFLAGS += -I. -I./include -I../include
+LDFLAGS  += -dynamiclib -Wl -install_name \$(LIBDIR)/\$(LIB_SHORT)
+" >> $mf
+			;;
+
+
+		mingw32)
+			echo "
+LIB_SHORT  = $__libpref\$(LIBN)$__libsuff
+LIB        = \$(LIB_SHORT)
+
+CXXFLAGS += -I. -I./include -I../include
+LDFLAGS  += -shared -Wl,-soname,\$(LIB_SHORT)
+" >> $mf
+			;;
+		*)
+			echo "
+LIB_SHORT  = $__libpref\$(LIBN)$__libsuff
+LIB_SONAME = \$(LIB_SHORT).\$(VER_MAJOR)
+LIB_SONAMEV= \$(LIB_SONAME).\$(VER_MINOR)
+LIB        = \$(LIB_SONAMEV).\$(VER_MICRO)
+
+CXXFLAGS += -I. -I./include -I../include
+LDFLAGS  += -shared -Wl,-soname,\$(LIB_SONAME)
+" >> $mf
+			;;
+	esac
+
+
+echo "
+all: \$(LIB)
+
+\$(LIB): \$(OBJS)
+	\$(CXX) \$(CXXFLAGS) \$(LDFLAGS) $^ -o \$@ \$(LDLIBS)
+	mkdir -p ../lib
+	ln -fs ../\$(DIR)/\$(LIB) ../lib/\$(LIB_SHORT)
+" >> $mf
+
+
+	case "$OSL" in
+		darwin)
+			echo "
+clean:
+	rm -f \$(LIB)* \$(OBJS) ../lib/\$(LIB) *~ include/*~
+
+install: " >> $mf
+			if test "$__enable_debug" = "no" ; then
+				echo "	strip --strip-unneeded \$(LIB)" >> $mf
+			fi
+			echo "
+	mkdir -p \$(DESTDIR)\$(LIBDIR)
+	install -m 755 \$(LIB) \$(DESTDIR)\$(LIBDIR)
+	ln -sf \$(LIB) \$(DESTDIR)\$(LIBDIR)/\$(LIB_SHORT)
+	install -m 644 \$(HDRS) \$(DESTDIR)\$(INCDIR)/qpxtool
+
+uninstall:
+	rm -f \$(DESTDIR)\$(LIBDIR)/\$(LIB_SHORT)
+	rm -f \$(DESTDIR)\$(LIBDIR)/\$(LIB)
+" >> $mf
+
+			;;
+		mingw32)
+			echo "
+clean:
+	rm -f \$(LIB_SHORT)* \$(OBJS) ../lib/\$(LIB_SHORT) *~ include/*~
+
+install:
+	mkdir -p \$(DESTDIR)\$(LIBDIR)
+	install -m 755 \$(LIB) \$(DESTDIR)\$(LIBDIR)
+
+uninstall:
+	rm -f \$(DESTDIR)\$(LIBDIR)/\$(LIB)
+" >> $mf
+			;;
+		*)
+			echo "
+clean:
+	rm -f \$(LIB_SHORT)* \$(OBJS) ../lib/\$(LIB_SHORT) *~ include/*~
+
+install: " >> $mf
+			if test "$__enable_debug" = "no" ; then
+				echo "	strip --strip-unneeded \$(LIB)" >> $mf
+			fi
+			echo "
+	mkdir -p \$(DESTDIR)\$(LIBDIR)
+	install -m 755 \$(LIB) \$(DESTDIR)\$(LIBDIR)
+	ln -sf \$(LIB) \$(DESTDIR)\$(LIBDIR)/\$(LIB_SONAME)
+	ln -sf \$(LIB_SONAME) \$(DESTDIR)\$(LIBDIR)/\$(LIB_SHORT)
+	install -m 644 \$(HDRS) \$(DESTDIR)\$(INCDIR)/qpxtool
+
+uninstall:
+	rm -f \$(DESTDIR)\$(LIBDIR)/\$(LIB_SHORT)
+	rm -f \$(DESTDIR)\$(LIBDIR)/\$(LIB_SONAME)
+	rm -f \$(DESTDIR)\$(LIBDIR)/\$(LIB)
+" >> $mf
+			;;
+	esac
+	
+	echo "
+.PHONY: all clean install uninstall" >> $mf
+}
+
+
+create_makefile_plugin()
+{
+	mf="plugins/Makefile.plugin"
+	echo "* $mf"
+
+	rm -f $mf
+
+	case "$OSL" in
+		darwin)
+			PLUGIN_LDFLAGS=" -dynamiclib -Wl"
+			;;
+		*)
+			PLUGIN_LDFLAGS=" -shared -Wl,-soname,\$(LIB_SONAME)"
+			;;
+	esac
+
+echo "
+SRC  = qscan_plugin   qscan_cmd
+HDRS = qscan_plugin.h
+
+SRCS = \$(patsubst %,%.cpp, \$(SRC))
+OBJS = \$(patsubst %.cpp,%.o,\$(SRCS))
+
+LIB_SHORT  = lib\$(LIBN)$__libsuff
+LIB_SONAME = \$(LIB_SHORT)
+LIB        = \$(LIB_SHORT)
+
+CPPFLAGS += -I. -I../../lib/include
+LDFLAGS  += $PLUGIN_LDFLAGS
+LDLIBS   += -L../../lib/lib -lqpxtransport -lqpxscan
+
+all: \$(LIB)
+
+\$(LIB): \$(OBJS)
+	\$(CXX) \$(CXXFLAGS) \$(LDFLAGS) $^ -o \$@ \$(LDLIBS)
+
+
+	mkdir -p ../lib
+	ln -fs ../\$(DIR)/\$(LIB) ../lib/\$(LIB_SHORT)
+
+clean:
+	rm -f \$(LIB_SHORT) \$(OBJS) ../lib/\$(LIB_SHORT) *~ include/*~
+
+install: " > $mf
+	if test "$__enable_debug" = "no" ; then
+		echo "	strip --strip-unneeded \$(LIB_SHORT)" >> $mf
+	fi
+echo "
+	mkdir -p \$(DESTDIR)\$(PLUGINDIR)
+	install -m 755 \$(LIB_SHORT) \$(DESTDIR)\$(PLUGINDIR)
+
+uninstall:
+	rm -f \$(DESTDIR)\$(PLUGINDIR)/\$(LIB_SHORT)
+
+.PHONY: all clean install uninstall
+" >> $mf
+
+}
+
+show_help()
+{
+	echo "--prefix=PREFIX         set installation prefix"
+	echo "--bindir=BINDIR         set path to install binaries"
+	echo "--sbindir=SBINDIR       set path to install system binaries"
+	echo "--libdir=LIBDIR         set path to install libraries"
+	echo "--mandir=MANDIR         set path to install mans"
+	echo "--qmake=QMAKE_COMMAND   set QT4 qmake command"
+	echo "                        default is to check folowing: $QMAKE4_NAMES"
+	echo "--disable-png           disable PNG support in f1tattoo (auto)"
+	echo "--disable-gui           don't compile GUI"
+	echo "--enable-debug          build debug version"
+	echo "--disable-liteon-probe  disable device probing in LiteOn plugin"
+	echo "                        enabled by default, but this code may cause some devices hang"
+	echo "--disable-internal-wt   disable internal CD/DVD writing implementation and use cdrecord instead"
+	exit
+}
+
+
+#echo "Parsing parameters..."
+for arg in $* ; do
+	case $arg in
+		--help|-h) show_help ;;
+		--prefix=*)  __prefix=`echo $arg | cut -d '=' -f 2-` ;;
+		--bindir=*)  bindir=`echo $arg | cut -d '=' -f 2-` ;;
+		--sbindir=*) sbindir=`echo $arg | cut -d '=' -f 2-` ;;
+		--libdir=*)  libdir=`echo $arg | cut -d '=' -f 2-` ;;
+		--mandir=*)  mandir=`echo $arg | cut -d '=' -f 2-` ;;
+
+		--qmake=*) __qmake=`echo $arg | cut -d '=' -f 2-` ;;
+		--disable-png) __enable_png="no" ;;
+		--disable-gui) __enable_gui="no" ;;
+		--enable-debug) __enable_debug="yes" ;QDEBUG="CONFIG+=debug" ;;
+		--disable-liteon-probe) __plugins_liteon_noprobe="yes" ; PLUGIN_DEFS+="-DPLUGINS_LITEON_NOPROBE" ;;
+		--disable-internal-wt) __wt_internal="no" ; DEFS+="-DDISABLE_INTERNAL_WT" ;;
+		*)
+			echo "invalid argument: $arg"
+			exit
+			;;
+	esac
+done
+
+
+echo -n "Checking OS... "
+OS=`uname -s`
+OSL=`uname -s | tr '[A-Z]' '[a-z]'`
+echo $OS
+
+case $OSL in
+	linux)
+		OSDEFS="-fPIC"
+		OSLIBS_DL="-ldl"
+		OSLIBS_THREAD="-lpthread"
+		__defprefix="/usr/local"
+		;;
+	darwin)
+		OSDEFS="-D__unix -fPIC"
+		OSLIBS_THREAD="-lpthread"
+		OSLIBS_HW="-framework CoreFoundation -framework IOKit"
+		__defprefix="/usr"
+		__libsuff=".dylib"
+		;;	
+	freebsd)
+		OSDEFS="-fPIC"
+		OSLIBS_THREAD="-lpthread"
+		OSLIBS_HW="-lcam"
+		__defprefix="/usr"
+		;;
+	netbsd|openbsd)
+		OSDEFS="-fPIC"
+		OSLIBS_THREAD="-lpthread"
+		__defprefix="/usr"
+		;;
+	mingw32*)
+		OSL="mingw32"
+		__cc=gcc
+		__cpp=g++
+		OSLIBS_THREAD=""
+		OSLIBS_INET="-lws2_32"
+		__defprefix="/c/Progra~1/QPxTool"
+		__binsuff=".exe"
+		__libpref=""
+		__libsuff=".dll"
+
+		;;
+	*)
+		echo "OS not supported: $OS"
+		;;
+esac
+
+if test "$__prefix" = "" ; then
+	__prefix=$__defprefix
+fi
+
+echo -n "Checking machine arch... "
+ARCH=`uname -m | tr '[A-Z]' '[a-z]' | tr ', /\\()"' ',//////' | tr ',/' ',-'`
+BHOST=`uname -srv`
+
+case "$OSL" in
+	linux)
+		__bindir=$__prefix/bin
+		__sbindir=$__prefix/sbin
+		if test "$ARCH" = "x86_64" ; then
+			__libdir=$__prefix/lib64
+		else
+			__libdir=$__prefix/lib
+		fi
+		__plugindir=$__libdir/qpxtool
+		__incdir=$__prefix/include
+		__mandir=$__prefix/share/man
+		;;
+	netbsd|openbsd|freebsd|darwin)
+		__bindir=$__prefix/bin
+		__sbindir=$__prefix/sbin
+		__libdir=$__prefix/lib
+		__plugindir=$__libdir/qpxtool
+		__incdir=$__prefix/include
+		__mandir=$__prefix/share/man
+		;;
+	mingw32*)
+		__bindir=$__prefix
+		__sbindir=$__prefix
+		__libdir=$__prefix
+		__plugindir=$__prefix/plugins
+		__incdir=$__prefix/include
+		__mandir=$__prefix/man
+		;;
+	*)
+		__bindir=$__prefix/bin
+		__sbindir=$__prefix/sbin
+		__libdir=$__prefix/lib
+		__plugindir=$__libdir/qpxtool
+		__incdir=$__prefix/include
+		__mandir=$__prefix/man
+		;;
+esac
+echo $ARCH
+
+
+if test "$bindir" != "" ; then
+	__bindir=$bindir
+fi
+if test "$sbindir" != "" ; then
+	__sbindir=$sbindir
+fi
+if test "$libdir" != "" ; then
+	__libdir=$libdir
+fi
+if test "$mandir" != "" ; then
+	__mandir=$mandir
+fi
+
+
+check_make
+check_compiler
+check_offset64
+
+if test "$__enable_png" = "yes" ; then
+	check_libpng
+fi
+
+if test "$__enable_gui" = "yes" ; then
+	ckeck_qt4
+fi
+
+echo ""
+echo "** Creating Makefiles..."
+
+create_makefile_top
+create_makefile_lib
+create_makefile_plugin
+
+if test "$__enable_gui" = "yes" ; then
+	create_makefile_gui
+fi
+
+echo ""
+echo "**  install prefix: "$__prefix
+echo "**   debug version: "$__enable_debug
+echo "**     PNG support: "$__enable_png
+echo "**       build gui: "$__enable_gui
+echo "** use internal WT: "$__wt_internal
+echo ""
+echo "Installation paths:"
+echo "  bin      : "$__bindir
+echo "  sbin     : "$__sbindir
+echo "  libs     : "$__libdir
+echo "  plugins  : "$__plugindir
+echo "  includes : "$__incdir"/qpxtool"
+echo "  man      : "$__mandir
+echo "** Configuration finished! run \`$MAKE\` now"
+
+cleanup
+

@@ -1,0 +1,13 @@
+qpxtool:
+qpxtool: QPxTool     - CD/DVD media check/drive control tools
+qpxtool:
+qpxtool:
+qpxtool: qpxtool     - Qt4 frontend for other tools
+qpxtool:
+qpxtool: qscan       - quality check tool
+qpxtool: qscand      - network quality check daemon (frontend to qscan)
+qpxtool: readdvd     - a little tool for reading damaged CD/DVD (multi-pass)
+qpxtool: cdvdcontrol - extended drive features control tool
+qpxtool: pxfw        - firmware flasher for Plextor drives
+qpxtool: f1tattoo    - DiscT@2 tool for Yamaha CRW-F1
+qpxtool:

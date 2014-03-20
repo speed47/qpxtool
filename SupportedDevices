@@ -1,0 +1,161 @@
+Per-plugin supported divices list (hardcoded in plugins, does not need probing)
+
+********************************************************************
+** C2P
+** Generic scan plugin for devices supported C2 pointers
+**
+  works on drives that can report C2 pointers with READ_CD command
+
+********************************************************************
+** ASUS
+** Scan plugin for real ASUS devices (based on MediaTek chipset)
+**
+  ASUS     DRW-1612
+  ASUS     DRW-1814
+  ASUS     DRW-2014S1
+  ASUS     DRW-2014L1
+
+********************************************************************
+** PLEXTOR
+** Scan plugin for PLEXTOR devices (based on SANYO chipset)
+**
+  PLEXTOR  CD-R   PREMIUM
+  PLEXTOR  CD-R   PREMIUM2
+  PLEXTOR  DVDR   PX-708A2
+  PLEXTOR  DVDR   PX-712A
+  PLEXTOR  DVDR   PX-714A
+  PLEXTOR  DVDR   PX-716A
+  PLEXTOR  DVDR   PX-716AL
+  PLEXTOR  DVDR   PX-755A
+  PLEXTOR  DVDR   PX-760A
+
+********************************************************************
+** LITEON
+** Scan plugin for LITE-ON and LITE-ON-based devices, MediaTek chipset
+**
+** iHAS-xxx and iHAP-xxx devices also works if Lite-On plugin probe is not disabled
+**
+
+  LITE-ON  LTR-52327S
+  LITE-ON  DVDRW LDW-811S
+  LITE-ON  DVDRW LDW-451S
+  LITE-ON  DVDRW LDW-851S
+  LITE-ON  DVDRW SOHW-812S
+  LITE-ON  DVD+RW SOHW-802S
+  LITE-ON  DVDRW SOHW-832S
+  LITE-ON  DVD+RW SOHW-822S
+  LITE-ON  DVDRW SOHW-1213S
+  LITE-ON  DVDRW SOHW-1613S
+  LITE-ON  DVDRW SOHW-1633S
+  LITE-ON  DVDRW SOHW-1653S
+  LITE-ON  DVDRW SOHW-1673S
+  LITE-ON  DVDRW SOHW-1693S
+  LITE-ON  DVDRW SHW-1635S
+  LITE-ON  DVDRW SHW-16H5S
+  LITE-ON  DVDRW SHW-160P6S
+  LITE-ON  DVDRW SHW-160H6S
+  LITE-ON  DVDRW SHM-165P6S
+  LITE-ON  DVDRW SHM-165H6S
+  LITE-ON  DVDRW SH-16A7
+  LITE-ON  DVDRW LH-16W1
+  LITE-ON  DVDRW LH-16A1
+  LITE-ON  DVDRW LH-18A1
+  LITE-ON  DVDRW LH-20A1
+  LITE-ON  DVDRW DH-20A3
+  LITE-ON  DVDRW DH-20A4
+  Slimtype DVD+RW SDW-421S
+  Slimtype DVDRW SDW-431S
+  Slimtype DVDRW SOSW-852S
+  Slimtype DVD+RW SOSW-862S
+  Slimtype DVDRW SOSW-813S
+  Slimtype DVDRW SOSW-833S
+  Slimtype DVD A  DS8A2S
+  SONY     DVD RW DW-U18A
+  SONY     DVD RW DRU-700A
+  SONY     DVD RW DW-D18A
+  SONY     DVD RW DW-U20A
+  SONY     DVD RW DW-U21A
+  SONY     DVD RW DRU-710A
+  SONY     DVD RW DW-D22A
+  SONY     DVD RW DW-D23A
+  SONY     DVD RW DRU-720A
+  SONY     DVD RW DW-D26A
+  SONY     DVD RW DRU-800A
+  SONY     DVD RW DW-Q28A
+  SONY     DVD RW DW-Q30A
+  SONY     DVD RW DW-Q31A
+  SONY     DVD RW DW-Q120A
+  SONY     DVD RW DW-G120A
+  TEAC     DV-W58G
+  TEAC     DV-W58G-A
+  TEAC     DV-W512G
+  TEAC     DV-W516G
+  TEAC     DV-W516GA
+  TEAC     DV-W516GB
+  PLEXTOR  DVR   PX-806
+  PLEXTOR  DVR   PX-850
+  SONY     DVD RW DW-D56A
+  SONY     DVD+RW DW-R56A
+  SONY     DVD RW DW-Q58A
+  SONY     DVD RW DW-Q60A
+
+********************************************************************
+** NEC
+** Scan plugin for NEC devices
+**
+  _NEC     DVD_RW ND-3520
+  _NEC     DVD_RW ND-353
+  _NEC     DVD_RW ND-354
+  _NEC     DVD_RW ND-355
+  _NEC     DVD_RW ND-357
+  _NEC     DVD_RW ND-365
+  _NEC     DVD_RW ND-455
+  _NEC     DVD_RW ND-457
+  _NEC     DVD_RW ND-465
+  Optiarc  DVD RW AD-717
+
+********************************************************************
+** TSST
+** Scan plugin for Toshiba-Samsung devices
+**
+  TSSTcorp CDDVDRW SH-S202N
+
+********************************************************************
+** PIONEER
+** Scan plugin for PIONEER and PIONEER-based devices
+**
+  PIONEER  DVD-RW  DVR-106
+  PIONEER  DVD-RW  DVR-107
+  PIONEER  DVD-RW  DVR-108
+  PIONEER  DVD-RW  DVR-109
+  PIONEER  DVD-RW  DVR-110
+  PIONEER  DVD-RW  DVR-111
+  PIONEER  DVD-RW  DVR-112
+  ASUS     DRW-0402P
+  ASUS     DRW-0804P
+  ASUS     DRW-1604P
+  ASUS     DRW-1608P
+  ASUS     DRW-1608P2
+  ASUS     DRW-1608P3
+  TEAC     DV-W50D
+  TEAC     DV-W58D
+  TEAC     DV-W516D
+  PLEXTOR  DVR   PX-810
+
+********************************************************************
+** BENQ_DVDROM
+** Scan plugin for BENQ DVD-ROM devices
+**
+  PLEXTOR  DVD-ROM PX-130
+
+********************************************************************
+** BENQ
+** Scan plugin for BENQ and BENQ-based devices
+**
+  BENQ     DVD DD DW1620
+  BENQ     DVD DD DW1625
+  BENQ     DVD DD DW1640
+  BENQ     DVD DD DW1650
+  BENQ     DVD DD DW1655
+
+********************************************************************

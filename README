@@ -1,0 +1,52 @@
+************************************************************
+
+QPxTool 0.7.2
+
+http://qpxtool.sourceforge.net
+
+Authors:
+    Gennady "ShultZ" Kozlov <qpxtool@mail.ru>
+
+SCSI transport code (transport.cpp, transport.h) based on transport.hxx from dvd+rw-tools
+some plextor-specific code got from pxScan/CDVDlib (C) Alex Noe`
+CD-R(W) manufacturer identification code got from cdrecord (C) Joerg Schilling
+
+************************************************************
+
+Features:
+    - detecting drive R/W and general features
+    - Read/Write transfer rate tests
+    - CD quality tests:
+		- C1/C2/CU (logarythmic scale)
+		- Extended Error Correction test on Plextor & BENQ drives
+		- FE/TE (Plextor)
+		- Jitter/Asymmetry
+    - DVD quality tests:
+		- PIE/PIF
+		- Extended Error Correction test on Plextor & BENQ drives
+		- Jitter/Asymmetry
+		- FE/TE (Plextor, Lite-On, BENQ)
+		- TA (only PX-7[14|16|55|60] can do this)
+    - Saving test results as HTML or PDF or in internal XML-based format to see them later
+    - Results printing
+
+    - Plextor features control (via cdvdcontrol):
+		- Hide-CDR
+		- Single-Session
+		- Speed Read
+		- GigaRec
+		- PoweRec
+		- Silent mode
+		- VariRec (CD & DVD)
+		- Bitsetting on DVD+R & DVD+R DL
+		- Simulation on DVD+R(W)
+		- AutoStrategy
+		- Media Quality Check
+		- PlexEraser
+		- SecuRec
+		- AutoStrategy
+    - Other vendors features:
+		- Pioneer DVR-A**XL QuietMode (tested on A09)
+    - DiscT@2 burning on Yamaha CRW-F1 (via f1tattoo and from gui), accepts PNG images
+
+************************************************************

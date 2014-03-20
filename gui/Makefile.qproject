@@ -1,0 +1,10 @@
+all: qproject
+
+qproject:
+	qmake-qt4 -project MOC_DIR="moc" OBJECTS_DIR="obj" -o qpxtool.pro \
+	QT+=network \
+	CONFIG+="thread" \
+	INCLUDEPATH+="../lib/include" \
+	INCLUDEPATH+="include"
+
+.PHONY: qproject all
