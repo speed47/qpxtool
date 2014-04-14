@@ -1,0 +1,107 @@
+.\" f1tattoo is released under the GNU GENERAL PUBLIC LICENSE.
+.TH "f1tattoo" "1" "10. April, 2009" "Gennady ShultZ Kozlov" "f1tattoo 0.7"
+.br
+.SH "NAME"
+f1tattoo \- disc T@2 feature for Yamaha F1 CD-RW devices
+.SH "SYNOPSIS"
+.br 
+\fBf1tattoo [-l] [-h] \fr
+.br 
+\fBf1tattoo -d DEVICE [-c] [-s] [--tattoo-test]\fR
+.br 
+\fBf1tattoo -d DEVICE --tattoo-raw <file.raw>\fR
+.br 
+\fBf1tattoo -d DEVICE --tattoo-png <file.png>\fR
+.br 
+.SH "DESCRIPTION"
+f1tattoo is the linux console tool to use the Yamaha disc T@2 feature. You won't get satisfying results on Phtalocyanin dye.
+.SH "FEATURES"
+You can disc T@2 with these drives: 
+.br 
+Yamaha F1 CD-RW, Yamaha F1DX  
+
+.SH "DEVICE"
+can be an IDE, SCSI, SATA, USB or FireWire connected optical drive. Not all SATA controller support all Plextor features.
+
+\fBLinux:\fR 
+.br 
+.I /dev/hdX:
+IDE device
+.br
+.I /dev/scdX:
+Linux 2.4: SATA, SCSI, USB device, or IDE device via ide-scsi emulation
+.br
+.I /dev/srX:
+Linux 2.6: IDE device via new ATA layer, SCSI or USB device
+.br
+
+\fBOpenBSD/NetBSD:\fR
+.br
+.I /dev/rcdX
+.br
+
+\fBFreeBSD:\fR
+.br
+.I /dev/cd:
+SCSI device
+.br
+.I /dev/acd:
+ATA device
+.br
+
+\fBMacOS X:\fR
+.br
+.I /dev/disk:
+.br
+
+\fBwin32:\fR
+.br
+.I C:,D:,E:, ... X:,Y:,Z:
+.br
+
+.SH "OPTIONS"
+
+\fB\-l, --scanbus\fR   
+.br
+		scan busses for all available CD and DVD devices.
+
+\fB\-h, --help\fR   
+.br
+		help. show available options.
+ 
+\fB\-c, --current\fR   
+.br
+		show current drive settings of selected device
+
+\fB\-s, --supported\fR   
+.br
+		show supported features of selected device                        
+
+\fB\--tattoo-test\fR  
+.br
+		write DiscT@2 test image
+
+\fB\--tattoo-raw tattoo.raw\fR  
+.br
+		write DiscT@2 using raw data from tattoo.raw file
+
+\fB\--tattoo-png tattoo.png\fR  
+.br
+		write DiscT@2 using png image from tattoo.png file
+		check if f1tattoo compiled with png support using --help option
+
+\fB\-v, --verbose\fR   
+.br
+		give verbose output
+.SH "EXAMPLES"
+\fBf1tattoo -l\fR
+.br 
+		list all available CD- and DVD-devices\fR
+
+\fBf1tattoo -d /dev/hdc \--tattoo-raw filename.raw\fR
+.br 
+		writes DiscT@2 using filename.raw file on media in device /dev/hdc
+\fR \fB
+\fR \fB
+\fR \fB
+\fRplease report man page improvements to T.Maguin@web.de\fR

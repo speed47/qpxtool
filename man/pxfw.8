@@ -1,0 +1,96 @@
+.\" pxfw is released under the GNU GENERAL PUBLIC LICENSE.
+.TH "pxfw" "8" "02 April, 2009" "Gennady ShultZ Kozlov" "pxfw 0.5"
+.SH "NAME"
+pxfw \- Firmware flashing tool for Plextor CD/DVD devices
+.SH "SYNOPSIS"
+\fBpxfw -l
+.br 
+\fBpxfw -d DEVICE [\-if\fR firmware.bin\fB] [\-u] [\-f] [\-v]\fR
+.br 
+\fBpxfw -d DEVICE [\-e] [\-r] [\-t] [\-v]\fR
+.br 
+.SH "DESCRIPTION"
+pxfw is the linux firmware flasher for Plextor CD and DVD drives.  Remove any disks before flashing.
+.SH "FEATURES"
+You can flash the firmware of these drives: 
+.br 
+Plextor Premium, Premium-2, PX\-712, PX\-716, PX\-755 and PX\-760.
+.br
+.SH "DEVICE"
+can be an IDE, SCSI, SATA, USB or FireWire connected optical drive. Not all SATA controller support all Plextor features.
+
+\fBLinux:\fR 
+.br 
+.I /dev/hdX:
+IDE device
+.br
+.I /dev/scdX:
+Linux 2.4: SATA, SCSI, USB device, or IDE device via ide-scsi emulation
+.br
+.I /dev/srX:
+Linux 2.6: IDE device via new ATA layer, SCSI or USB device
+.br
+
+\fBOpenBSD/NetBSD:\fR
+.br
+.I /dev/rcdX
+.br
+
+\fBFreeBSD:\fR
+.br
+.I /dev/cd:
+SCSI device
+.br
+.I /dev/acd:
+ATA device
+.br
+
+\fBMacOS X:\fR
+.br
+.I /dev/disk:
+.br
+
+\fBwin32:\fR
+.br
+.I C:,D:,E:, ... X:,Y:,Z:
+.br
+
+.SH "OPTIONS"
+
+\fB\-l\fR   scan busses for all available CD and DVD devices
+.br
+
+\fB\-if\fR  select inputfile. Specify the firmware binary file, which should
+.br 
+     be written to DEVICE.
+ 
+\fB\-u\fR   proceed update. When the firmware checksum test has succeeded, 
+.br 
+     write firmware to DEVICE.
+
+\fB\-f\fR   force flashing. Even if DEVICE is not recognized, or firmware. 
+.br 
+     checksum has failed, firmware writing will be forced. 
+.br 
+     Handle with care.
+
+\fB\-e\fR   read EEPROM from DEVICE.
+
+\fB\-r\fR   reboot the device.
+ 
+\fB\-t\fR   test which opcodes are supported by the device.
+ 
+\fB\-v\fR   debug.
+
+.SH "EXAMPLES"
+\fBpxfw -d /dev/hdc \-if 755_1.07.bin \-u\fR
+.br 
+writes firmware file 755_1.07.bin into Master Drive on Secondary IDE\-Port.
+
+\fBpxfw -d /dev/sr3 \-e -oe file.foo\fR
+.br 
+reades EEPROM from device /dev/sr3 and writes it to file.foo.
+\fR \fB
+\fR \fB
+\fR \fB
+\fRplease report man page improvements to T.Maguin@web.de\fB

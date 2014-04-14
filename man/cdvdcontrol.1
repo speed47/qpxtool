@@ -1,0 +1,423 @@
+.\" cdvdcontrol is released under the GNU GENERAL PUBLIC LICENSE.
+.TH "cdvdcontrol" "1" "04. May, 2009" "Gennady ShultZ Kozlov" "cdvdcontrol 1.4 Manual"
+.SH "NAME"
+cdvdcontrol \- Tool to get full control on your Plextor optical device
+.SH "SYNOPSIS"
+\fBcdvdcontrol -l\fR
+.br
+\fBcdvdcontrol [-d DEVICE] [OPTION]\fR
+.SH "DESCRIPTION"
+pxcontrol gives you access on all features that are supported by your Plextor drive. This tool is what you want, when you use optical devices which were manufactured by Plextor.
+
+\fB\-l\fR	scan busses for all available optical devices
+.br
+.SH "FEATURES"
+cdvdcontrol supports the following features: \fBAutoStrategy, BitSetting, DiagnoseMode, GigaRec, Hide-CDR, 
+MediaLock, PlexEraser, PoweRec, SecuRec, SilentMode, SingleSession, Simulation, SpeedRead and VariRec\fR.
+
+The available features depend on your drive. Take a look at http://www.plextor.com or simply read the glossar on:
+.br 
+http://qpxtool.sourceforge.net/glossar.html to see supported features.
+
+.SH "DEVICE"
+can be an IDE, SCSI, SATA, USB or FireWire connected optical drive. Not all SATA controller support all Plextor features.
+
+\fBLinux:\fR 
+.br 
+.I /dev/hdX:
+IDE device
+.br
+.I /dev/scdX:
+Linux 2.4: SATA, SCSI, USB device, or IDE device via ide-scsi emulation
+.br
+.I /dev/srX:
+Linux 2.6: IDE device via new ATA layer, SCSI or USB device
+.br
+
+\fBOpenBSD/NetBSD:\fR
+.br
+.I /dev/rcdX
+.br
+
+\fBFreeBSD:\fR
+.br
+.I /dev/cd:
+SCSI device
+.br
+.I /dev/acd:
+ATA device
+.br
+
+\fBMacOS X:\fR
+.br
+.I /dev/disk:
+.br
+
+\fBwin32:\fR
+.br
+.I C:,D:,E:, ... X:,Y:,Z:
+.br
+
+.SH "AutoStrategy"
+AutoStrategy (AS) is a Feature to determine a writing strategy for an inserted empty DVD media. Writing strategies are saved in the AutoStrategy DataBase (ASDB). This command needs a specified \fBDEVICE\fR.
+
+.B --as-mode 
+.I mode
+.br
+		select the AutoStrategy mode
+ 
+\fB	auto\fR 	drive selects the strategy from the ASDB or from 
+.br 
+			the firmware. If there is no entry available, a 
+.br 			
+			new one is created.
+.br 
+\fB	forced\fR	creates a new ASDB entry, even if there is already 
+.br
+ 			one available in the ASDB.
+.br 
+\fB	on\fR		an existing AS from the DB is used. If there is no 
+ 			entry, the strategy from the firmware is used.
+.br 
+\fB	off\fR		only strategy from the firmware is used. If there
+ 			is no entry available, the default strategy is used.
+
+.B --as-list
+		view complete ASDB list.
+
+.B --as-on
+.I #
+.br
+		activate ASDB entry number X (value between 1\-10).
+
+.B --as-off
+.I #
+.br
+		deactivate ASDB entry number X (value between 1\-10).
+
+.B --as-del
+.I #
+.br
+		delete ASDB entry number X (value between 1\-10).
+
+.B --as-clear
+.br
+		remove all ASDB entries form the ASDB.
+
+.B --as-create 
+.I mode
+.br
+		creates an AS database entry.
+.br
+		Mode should be combination if [q|f] and [a|r]
+
+\fB		   q\fR		quick AS creating.
+.br 
+\fB		   f\fR		full AS creating. Media is written.
+.br 
+\fB		   a\fR		AS is appended to the list in the ASDB.
+.br 
+\fB		   r\fR		AS entry replaces relying ASDB entry.
+
+
+.B --as-load 
+.I #
+.br
+		load an ASDB from a file.
+.br
+.I			Experimental
+
+.B --as-save 
+.I #
+.br
+		save ASDB into file. For PX-755/PX-760 only!
+.br
+		PX\-755 export maybe buggy.
+.br
+.I			Experimental
+
+
+.SH "BitSetting"
+due to some compatibility problems of some DVD readers, it could make sense to use BitSetting, which sets the Booktype of media to DVD\-ROM. This \fBOPTION\fR requiers a specified \fBDEVIVE\fR.
+
+.B --bitset+r 
+.I mode
+.br
+	        enable / disable Bitsetting for DVD+R.
+.br
+\fB		on\fR	defines DVD+R as DVD\-ROM media.
+.br 
+\fB		off\fR	keeps DVD+R media as what it is.
+
+.B --bitset+rdl 
+.I mode
+.br
+		enable / disable Bitsetting for DVD+R DL.
+
+\fB		on\fR	define DVD+R DL media as DVD\-ROM media.
+.br 
+\fB		off\fR	keeps DVD+R DL media as what it is.
+	
+.SH "DiagnoseMode"
+are \fBOPTIONS\fR to detect the drive itself, the current settings and the available features.
+
+\fB\-c, --current\fR		show current status of selected \fBDEVICE\fR.
+
+\fB\-h, --help\fR		show help.
+
+\fB\-l, --scan\fR		search all busses and list detected drives.
+
+\fB-s, --supported\fR	show features supported by selected \fBDEVICE\fR.
+
+\fB\-v\fR				show output in verbose mode.
+		
+.SH "GigaRec"
+Increase (higher value) or Decrease (lower value) the regular capacity, which can be written on CD media. Ejecting the disc results in flushing the GigaRec settings. Buffer UnderrunProof is disabled while GigaRec is active. The recording speed is limited to 4x or 8x DAO.
+Use cdrdao or cdrskin for writing media with GigaRec function. Otherwise if you use cdrecord your values are flushed. GigaRec settings need a specified \fBDEVICE\fR.
+
+.B --gigarec 
+.I #
+.br
+ 		set GigaRec to <state>, which is a value in the 
+.br
+		range of 0.6, 0.7, ..., 1.3, 1.4 or off.
+
+.SH "Hide-CDR"
+prevents media from being detected by an application as CD\-R to defeat the ATIP protection. Hide\-CDR settings need a specified \fBDEVICE\fR.
+
+.B --hcdr 
+.I [on|off]
+.br
+		enable / disable Hide\-CDR.
+.br
+\fB	   	on\fR	enable Hide\-CDR. Defeating ATIP protection.
+.br 
+\fB	   	off\fR	disable Hide\-CDR.
+.SH "MediaLock"
+can lock your media to prevent an accidently opening. It is always a good idea lock the drive. This \fBOPTION\fR needs a specified \fBDEVICE\fR.
+.br
+.B --lock
+.br
+		enable lock modus. Media can not be removed.
+.br
+.B --unlock
+.br
+		disable lock modus. Media can be removed.
+	
+.SH "PlexEraser"
+destroys the data on your CD/DVD and makes it unreadable. \fBDEVICE\fR needs to be specified for this command.
+
+.B --destruct
+.I mode
+.br
+		WARNING: command destroys your media.
+ 
+\fB		quick\fR	destroy only the lead in of CD/DVD media.
+.br 
+\fB		full\fR		destroy complete CD/DVD media.
+	
+.SH "PoweRec"
+\fBP\fRlextor \fBO\fRptimised \fBW\fRriting \fBE\fRrror \fBRe\fRduction \fBC\fRontrol (PoweRec) should detect the optimized writing speed for your media\-combination. Higher recording speeds than recommended can result in increased writing errors. PoweRec should prevent you from these errors. \fBDEVICE\fR needs to be specified for this command.
+
+.B --powerec 
+.I [on|off]
+.br
+		enable / disable PoweRec.
+.br
+\fB		on\fR	enable PoweRec. enabled by default.
+.br 
+\fB		off\fR	disable PoweRec.
+
+.SH "SecuRec"
+Creates a password protected CD\-R. To access a password protected CD\-R, it is necessary to enter the correct password and to specify the \fBDEVICE\fR
+
+.BI --nosecurec
+	   disable SecuRec.
+
+.B --securec 
+.I <passwd>
+.br
+		enable SecuRec and use a given password. <passwd>
+.br 
+		must have at least four, but not more than ten characters.
+.SH "SilentMode"
+Allows some speed finetuning on your drives. Lower values result in more silence. You can specify read speed and tray loading speed. \fBDEVICE\fR must be specified for this command. All settings will be active after reboot. ;\-) pxfw /dev/hdX \-r 
+
+.B --silent 
+.I [on|off]
+.br
+		enable / disable SilentMode
+
+\fB		on\fR	enables SilentMode. This will give you access to 
+.br 
+			further speed and read settings. Default is on.
+.br
+\fB		off\fR	disables SilentMode.
+
+.B --sm-access 
+.I mode
+.br
+		set access time to slow or fast. This has only an affect in combination with CD/DVD speed setting.
+
+\fB		fast\fR	enables fast access mode. Use with speed setting.
+.br
+\fB		slow\fR	enables slow access mode. Use with speed setting.
+
+.B --sm-cd-rd 
+.I #
+.br
+		set maximum  read speed for CDs. Default is 32x. 
+.br
+		Select speed value from 4, 8, 24, 32, 40, 48.
+
+.B --sm-cd-wr 
+.I #
+.br
+		set maximum write speed for CDs. Default is 32x.
+.br
+		Select speed value from 4, 8, 16, 32, 48.
+
+.B --sm-dvd-rd 
+.I #
+.br
+		set maximum read speed for DVDs. Default is 12x.
+.br
+		Select speed value from 2, 5, 8, 12, 16.
+
+.B --sm-eject 
+.I #
+.br
+		set tray eject speed. Default is 0.
+.br
+		Select speed value from 0, 1, ..., 80.
+
+.B --sm-load 
+.I #
+.br
+		set tray load speed. Default is 63.
+.br
+		Select speed value from 0, 1, ... , 80.
+
+.B --sm-nosave
+	   do not save SilentMode settings
+
+.SH "SingleSession"
+shows only the first session of the CD. You have to enable this feature before you insert the media. This is a useful option for copy protected audio discs. \fBDEVICE\fR must be specified for this command.
+
+.B --sss
+.I mode
+.br
+		enable / disable SingleSession. Default is off.
+
+\fB	  	on\fR	enable SingleSession mode for CD.
+.br
+\fB	  	off\fR	disable SingleSession mode for CD.
+
+.SH "Simulation"
+allows DVD+R writing simulation. \fBDEVICE\fR must be specified for this command.
+
+.B --dvd-testwrite
+.I [on|off]
+.br
+		mode	enable / disable DVD+R writing simulation
+\fB		on\fR	enable DVD+R writing simulation mode
+.br 
+\fB		off\fR	disable DVD+R writing simulation mode 
+.SH "SpeedRead"
+allows increasing the read speed. This deactivates the so called Rip Lock for Video\-DVDs. You can also deativate this feature by keeping the open button of your empty DVD drive pressed for three seconds. SpeedRead can increase vibrations and read errors. \fBDEVICE\fR must be specified for this command.
+
+.B --spdread
+.I mode
+.br
+		enable / disable SpeedRead
+
+\fB		on\fR	enable SpeedRead. Disable Rip Lock.
+.br 
+\fB		off\fR	disable SpeedRead. Set Rip Lock.
+.SH "VariRec"
+allows some laser power calibration in a range from \-4 to +4. The recording speed is limited to 4x or 8x on CD\-R media and to 2x, 2.4x or 4x on DVD media. The recording strategy can also be changed relying on the used media dye. The writing strategies are determining and documenting your own strategies. You would determine the differences by selecting a stretegy and doimg a writing test.
+VariRec settings persist after a reboot. \fBDEVICE\fR must be specified for this command.
+Use cdrdao or cdrskin for writing media with VariRec function. Otherwise if you use cdrecord, your values are flushed.
+
+.B --varirec-cd
+.I #
+.br
+		set VariRec power for CD writing or set it to off.
+.br 
+		Select value \fB\-4, \-3, \-2, \-1, 0, +2, +2, +3, +4\fR
+
+.B --varirec\-cd\-strategy
+.I mode
+.br
+		select writing strategy for CDs depending
+.br
+		on the used dye (Azo, Cyanine, PhtaloCyanine): 
+.br 
+		select: \fBdefault, azo, cya, pha, phb, phc, phd\fR
+
+.B --varirec-dvd 
+.I #
+.br
+		set VariRec power value for DVD writing or set it to off. 
+.br
+		Select value \fB\-4, \-3, \-2, \-1, 0, +2, +2, +3, +4\fR
+
+.B --varirec-dvd-strategy
+.I #
+.br
+		select a predefined DVD writing strategy.
+.br 
+		select value \fB0, 1, 2, 3, 4, 5, 6, 7\fR 
+.br
+.SH "PioQuiet"
+Pioneer QuietMode feature.
+.br
+.B --pio-limit
+.I [on|off]
+.br
+		turns on/off read speed limit by 24X for CD and 8X for DVD
+
+.B --pio-quiet
+.I mode
+.br
+		sets Pioneer performance profile
+.br
+		available values: quiet, perf, std
+.br
+		    \fBquiet\fR turn drive into silent mode
+.br
+		    \fBperf\fR  turn drive into performance ptomized mode
+.br
+		    \fBstd\fR   reset drive to standard mode
+.br
+
+.B --pio-nosave
+.br
+		don't make Pioquiet setting permanent
+
+.SH "EXAMPLES"
+\fBcdvdcontrol \-l\fR
+.br 
+		list all available optical devices.  
+
+\fBcdvdcontrol -d /dev/hdc \-\-supported\fR
+.br 
+		show features that are supported by drive hdc.
+
+\fBcdvdcontrol -d /dev/hda \-\-as\-create q a\fR
+.br 
+		create a new ASDB entry for device hda and the 
+.br 
+		inserted DVD media. Strategy is created quickly 
+.br 
+		and appended to the already existing ASDB list.
+
+\fBcdvdcontrol -d /dev/sr2 \-\-gigarec 0.9\fR
+.br 				
+		prepare CD for GigaRec 0.9 recording. Use cdrskin
+.br 
+		or cdrdao/k3b for writing process.
+\fR \fB
+\fR \fB
+\fR \fB
+\fRplease report man page improvements to T.Maguin@web.de\fR

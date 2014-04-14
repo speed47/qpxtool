@@ -1,0 +1,80 @@
+.\" readdvd is released under the GNU GENERAL PUBLIC LICENSE.
+.TH "readdvd" "1" "10. April, 2009" "Gennady ShultZ Kozlov" "readdvd 1.0"
+.SH "NAME"
+readdvd \- is creating an image of your source dvd media or medias even if it has / they have corrupted blocks
+.SH "SYNOPSIS"
+\fBreaddvd [-l] [-h]
+.br 
+\fBreaddvd -d DEVICE1 [-d DEVICE2] [-d ...] -o\fR file.iso\fB [\-s #] [\-v] [\-vv]\fR
+.br 
+.SH "DESCRIPTION"
+readdvd reads even a corrupted dvd and writes the the result into a new image file on your harddisk. 
+.br
+.SH "DEVICE"
+can be an IDE, SCSI, SATA, USB or FireWire connected optical drive. Not all SATA controller support all Plextor features.
+
+\fBLinux:\fR 
+.br 
+.I /dev/hdX:
+IDE device
+.br
+.I /dev/scdX:
+Linux 2.4: SATA, SCSI, USB device, or IDE device via ide-scsi emulation
+.br
+.I /dev/srX:
+Linux 2.6: IDE device via new ATA layer, SCSI or USB device
+.br
+
+\fBOpenBSD/NetBSD:\fR
+.br
+.I /dev/rcdX
+.br
+
+\fBFreeBSD:\fR
+.br
+.I /dev/cd:
+SCSI device
+.br
+.I /dev/acd:
+ATA device
+.br
+
+\fBMacOS X:\fR
+.br
+.I /dev/disk:
+.br
+
+\fBwin32:\fR
+.br
+.I C:,D:,E:, ... X:,Y:,Z:
+.br
+
+.SH "OPTIONS"
+
+\fB\-l\fR   	scan busses for all available CD and DVD devices
+
+\fB\-h\fR   	help shows available options.
+
+\fB\-o file.iso\fR   
+.br
+		write data to imagefile named file.iso
+ 
+\fB\-s \fR#		read source media with selected speed
+
+\fB\-v\fR		use verbose mode 
+
+\fB\-vv\fR		use extended verbose mode
+
+.SH "INTERACTIVE MODUS"
+\fBq\fR   	stop reading media and exit
+ 
+\fBw\fR   	save sector map which is currently read and continue with the next one
+
+.SH "EXAMPLES"
+\fBreaddvd -d /dev/sr0 \-o filename.iso \-s 8 -v\fR
+.br 
+	create an image filename.bin of inserted media in device /dev/sr0 with read speed 8 in verbose mode.
+\fR \fB
+\fR \fB
+\fR \fB
+\fRplease report man page improvements to T.Maguin@web.de\fB
