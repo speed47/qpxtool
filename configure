@@ -784,6 +784,12 @@ case $OSL in
 		OSLIBS_THREAD="-lpthread"
 		__defprefix="/usr/local"
 		;;
+	gnu)
+		OSDEFS="-fPIC"
+		OSLIBS_DL="-ldl"
+		OSLIBS_THREAD="-lpthread"
+		__defprefix="/usr"
+		;;
 	darwin)
 		OSDEFS="-D__unix -fPIC"
 		OSLIBS_THREAD="-lpthread"
@@ -835,7 +841,7 @@ ARCH=`uname -m | tr '[A-Z]' '[a-z]' | tr ', /\\()"' ',//////' | tr ',/' ',-'`
 BHOST=`uname -srv`
 
 case "$OSL" in
-	linux|gnu/kfreebsd)
+	linux|gnu/kfreebsd|gnu)
 		__bindir=$__prefix/bin
 		__sbindir=$__prefix/sbin
 		if test "$ARCH" = "x86_64" ; then

@@ -90,14 +90,20 @@ class autofree {
 	operator unsigned char *()		{ return ptr; }
 };
 
-#if defined(__linux)
+#if defined(__linux) || defined(__GNU__)
 
 //#include <sys/ioctl.h>
+#if defined(__linux)
 #include <linux/cdrom.h>
+#elif defined(__GNU__)
+#include <sys/cdrom.h>
+#endif
 //#include <mntent.h>
 //#include <sys/wait.h>
 //#include <sys/utsname.h>
+#if defined(__linux)
 #include <scsi/sg.h>
+#endif
 #if !defined(SG_FLAG_LUN_INHIBIT)
 # if defined(SG_FLAG_UNUSED_LUN_INHIBIT)
 #  define SG_FLAG_LUN_INHIBIT SG_FLAG_UNUSED_LUN_INHIBIT

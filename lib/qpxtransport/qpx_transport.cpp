@@ -136,16 +136,22 @@ autofree::autofree()
 autofree::~autofree()
 	{ if (ptr) free(ptr); }
 
-#if defined(__linux)
+#if defined(__linux) || defined(__GNU__)
 
 #include <limits.h>
-#include <sys/ioctl.h>
+#if defined(__linux)
 #include <linux/cdrom.h>
+#elif defined(__GNU__)
+#include <sys/cdrom.h>
+#endif
+#include <sys/ioctl.h>
 #include <mntent.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <sys/utsname.h>
+#if defined(__linux)
 #include <scsi/sg.h>
+#endif
 #if !defined(SG_FLAG_LUN_INHIBIT)
 # if defined(SG_FLAG_UNUSED_LUN_INHIBIT)
 #  define SG_FLAG_LUN_INHIBIT SG_FLAG_UNUSED_LUN_INHIBIT
@@ -238,11 +244,13 @@ int Scsi_Command::transport(Direction dir,void *buf,size_t sz)
 		cgc.buffer		= (unsigned char *)buf;
 		cgc.buflen		= sz;
 		cgc.data_direction	= dir;
+#if !defined(__GNU__)
 		if (ioctl (fd,CDROM_SEND_PACKET,&cgc))
 		{
 			ret = ERRCODE(_sense.u);
 			if (ret==0) ret=-1;
 		}
+#endif
 	}
 	return ret;
 }
