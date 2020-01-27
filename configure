@@ -876,6 +876,7 @@ if test "$sbindir" != "" ; then
 fi
 if test "$libdir" != "" ; then
 	__libdir=$libdir
+	__plugindir=$__libdir/qpxtool
 fi
 if test "$mandir" != "" ; then
 	__mandir=$mandir
