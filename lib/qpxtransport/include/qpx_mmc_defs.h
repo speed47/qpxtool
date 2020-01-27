@@ -231,8 +231,8 @@ static const	manuf	mi[]={
 	{ { 97, 48, 50 }, "Mitsui" },
 	{ { 97, 17,  0 }, "Moser Baer India" },
 	{ { 97, 25,  0 }, "MPO" },
-	{ { 97, 28, 20 }, "MultiMediaMasters & Machinary" },
-	{ { 97, 46, 20 }, "MultiMediaMasters & Machinary" },
+	{ { 97, 28, 20 }, "MultiMediaMasters & Machinery" },
+	{ { 97, 46, 20 }, "MultiMediaMasters & Machinery" },
 
 	{ { 97, 23, 20 }, "Nacar Media srl" },
 	{ { 97, 15, 30 }, "NAN-YA" },
