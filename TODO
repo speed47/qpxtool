@@ -15,8 +15,8 @@ qpxtool:
 pxfw:
     - crc calc for PX-708A2 / PX-712
 
-gui
-	- save selected test speeds
+gui:
+    - save selected test speeds
     - table+images groups in print preview
     - (?) OpenGL graph render engine
 
