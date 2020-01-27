@@ -31,6 +31,9 @@ const unsigned char scsi_command_size[8] =
 
 //#include <sys/types.h>
 //#include <sys/stat.h>
+#ifdef open64
+#undef open64
+#endif
 #include <fcntl.h>
 //#include <poll.h>
 #include <sys/time.h>

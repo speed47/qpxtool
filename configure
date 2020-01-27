@@ -797,6 +797,13 @@ case $OSL in
 		OSLIBS_HW="-lcam"
 		__defprefix="/usr"
 		;;
+	gnu/kfreebsd)
+		OSDEFS="-fPIC"
+		OSLIBS_DL="-ldl"
+		OSLIBS_THREAD="-lpthread"
+		OSLIBS_HW="-lcam"
+		__defprefix="/usr"
+		;;
 	netbsd|openbsd)
 		OSDEFS="-fPIC"
 		OSLIBS_THREAD="-lpthread"
@@ -828,7 +835,7 @@ ARCH=`uname -m | tr '[A-Z]' '[a-z]' | tr ', /\\()"' ',//////' | tr ',/' ',-'`
 BHOST=`uname -srv`
 
 case "$OSL" in
-	linux)
+	linux|gnu/kfreebsd)
 		__bindir=$__prefix/bin
 		__sbindir=$__prefix/sbin
 		if test "$ARCH" = "x86_64" ; then
