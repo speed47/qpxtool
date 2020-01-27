@@ -1,5 +1,4 @@
 [Desktop Entry]
-Encoding=UTF-8
 Name=QPxTool
 GenericName=CD/DVD media quality checker
 GenericName[ru]=Проверка качества носителей CD/DVD
@@ -11,3 +10,4 @@ Comment[ru]=Проверка качества носителей CD/DVD
 Categories=System;
 StartupNotify=true
 Terminal=false
+Keywords=CD/DVD;quality;test;
