@@ -37,6 +37,7 @@
 #include <QFileDialog>
 #include <QUrl>
 #include <QTextDocument>
+#include <QMimeData>
 #include <QDateTime>
 
 #include <QDropEvent>

@@ -680,9 +680,9 @@ int  AbstractPreview::sizeToCountPage()
 
     int rows = (d->pagesData.count() + cols - 1) / cols;
     int h = qRound(rows * (d->paperHeightToScale() + d->pageLabelHeight) +
-                   (rows - 1) * d->interPageSpacing + 
-				   2 * d->pageMargin);
-    int w = qRound(cols * d->paperWidthToScale() + 2 * d->pageMargin);
+                   (rows - 1.) * d->interPageSpacing + 
+				   2. * d->pageMargin);
+    int w = qRound(cols * d->paperWidthToScale() + 2. * d->pageMargin);
     horizontalScrollBar()->setRange(0, w - viewport()->width());
     horizontalScrollBar()->setPageStep(viewport()->width());
     verticalScrollBar()->setRange(0, h - viewport()->height());

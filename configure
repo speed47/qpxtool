@@ -5,7 +5,7 @@ TMPB=tmpb
 
 GMAKE="no"
 MAKE="make"
-QMAKE4_NAMES="qmake qmake4 qmake-qt4 qmake-4"
+QMAKE5_NAMES="qmake qmake5 qmake-qt5 qmake-5"
 OSDEFS=""
 OSLIBS=""
 OSLIBS_HW=""
@@ -275,7 +275,7 @@ qt_check_qmake()
 	"not found")
 		__qmake=""
 		;;
-	4.*)
+	5.*)
 		__qmake=$1
 		;;
 	*)
@@ -287,8 +287,8 @@ qt_check_qmake()
 
 qt_check_default()
 {
-    for qmake4 in $QMAKE4_NAMES ; do
-	qt_check_qmake $qmake4
+    for qmake5 in $QMAKE5_NAMES ; do
+	qt_check_qmake $qmake5
 	if test "$qt_dir" != "" ; then
 	    return
 	fi
@@ -296,10 +296,10 @@ qt_check_default()
 }
 
 
-ckeck_qt4()
+ckeck_qt5()
 {
 	__enable_gui=no
-	echo -n "Checking for Qt4... "
+	echo -n "Checking for Qt5... "
 	if test "$__qmake" = "" ; then
 		qt_check_default
 	else
@@ -308,7 +308,7 @@ ckeck_qt4()
 
 	if test "$qt_dir" = "" ; then
 	    echo "no, GUI will not be compiled.
-	If you really have Qt4 and want to build GUI try --qmake=/path/to/qmake"
+	If you really have Qt5 and want to build GUI try --qmake=/path/to/qmake"
 	else
 		__enable_gui=yes
 	    echo "$qt_dir ($qt_ver), qmake command: $__qmake"
@@ -461,15 +461,15 @@ create_makefile_gui()
 	rm -f $mf
 
 	if test "$OSL" = "netbsd" ; then
-		qt_dir="/usr/pkg/qt4"
+		qt_dir="/usr/pkg/qt5"
 		echo "QTDIR=$qt_dir" >> $mf
 		echo "LDFLAGS+=-Wl,-R/usr/X11R7/lib" >> $mf
 	fi
 	echo "QTDIR=$qt_dir" >> $mf
-	echo "QMAKE4= $__qmake" >> $mf
+	echo "QMAKE5= $__qmake" >> $mf
 
 	if test "$GMAKE" = "yes" ; then
-	    echo "export QTDIR QMAKE4" >> $mf
+	    echo "export QTDIR QMAKE5" >> $mf
 	fi
 
 	echo "
@@ -549,7 +549,7 @@ uninstall:
 	echo "
 Makefile.qmake:
 	rm -f Makefile.qmake
-	\$(QMAKE4) LIBS+=-L../lib/lib LIBS+=-lqpxtransport $QDEBUG -o Makefile.qmake" >> $mf	
+	\$(QMAKE5) LIBS+=-L../lib/lib LIBS+=-lqpxtransport $QDEBUG -o Makefile.qmake" >> $mf	
 	echo "
 .PHONY: all clean install uninstall" >> $mf
 }
@@ -736,8 +736,8 @@ show_help()
 	echo "--sbindir=SBINDIR       set path to install system binaries"
 	echo "--libdir=LIBDIR         set path to install libraries"
 	echo "--mandir=MANDIR         set path to install mans"
-	echo "--qmake=QMAKE_COMMAND   set QT4 qmake command"
-	echo "                        default is to check folowing: $QMAKE4_NAMES"
+	echo "--qmake=QMAKE_COMMAND   set QT5 qmake command"
+	echo "                        default is to check folowing: $QMAKE5_NAMES"
 	echo "--disable-png           disable PNG support in f1tattoo (auto)"
 	echo "--disable-gui           don't compile GUI"
 	echo "--enable-debug          build debug version"
@@ -905,7 +905,7 @@ if test "$__enable_png" = "yes" ; then
 fi
 
 if test "$__enable_gui" = "yes" ; then
-	ckeck_qt4
+	ckeck_qt5
 fi
 
 echo ""

@@ -2,7 +2,7 @@ qpxtool:
 qpxtool: QPxTool     - CD/DVD media check/drive control tools
 qpxtool:
 qpxtool:
-qpxtool: qpxtool     - Qt4 frontend for other tools
+qpxtool: qpxtool     - Qt frontend for other tools
 qpxtool:
 qpxtool: qscan       - quality check tool
 qpxtool: qscand      - network quality check daemon (frontend to qscan)

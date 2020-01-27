@@ -27,7 +27,7 @@ Summary:	QPxTool libraries
 Group:		Development/Libraries
 
 %package gui
-Summary:	QPxTool Qt4 GUI
+Summary:	QPxTool GUI
 Group:		X11/Applications
 Requires:	%{name} = %{version}-%{release}
 Requires:	%{name}-lib = %{version}-%{release}
@@ -73,7 +73,7 @@ Authors:
     Gennady "ShultZ" Kozlov <qpxtool@mail.ru>
 
 %description gui
-Qt4 frontend for CD/DVD media check and drive control tools
+Qt frontend for CD/DVD media check and drive control tools
 
 Authors:
 --------

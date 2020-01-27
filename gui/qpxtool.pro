@@ -4,7 +4,7 @@
 
 MOC_DIR=moc
 OBJECTS_DIR=obj
-QT+=network sql
+QT+=widgets network sql printsupport
 CONFIG+=thread
 INCLUDEPATH+=../lib/include
 
