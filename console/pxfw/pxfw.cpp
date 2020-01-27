@@ -606,7 +606,7 @@ int main(int argc,char *argv[]) {
 		if (dev->media.type > 1) {
 			printf("Disc found, doing eject...\n");
 			if (load_eject(dev, false, false)) {
-				printf("Can't eject disc:( remove disc manualy and try again\n");
+				printf("Can't eject disc:( remove disc manually and try again\n");
 				delete dev;
 				fclose(fwfile);
 				exit (1);

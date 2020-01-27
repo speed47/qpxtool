@@ -96,14 +96,14 @@ static struct option long_options[] = {
 int child_create(int idx)
 {
 	int r;
-	if ((r = thread_create(&childs[idx].tid, NULL, &child_thread, (void*)&childs[idx].arg))) {
+	if ((r = thread_create(&children[idx].tid, NULL, &child_thread, (void*)&children[idx].arg))) {
 #ifdef DAEMON_EN
 		syslog(LOG_ERR, "Error creating thread!\n");
 #else
 		printf("Error creating thread!\n");
 #endif
 		return r;
-		close(childs[idx].arg.connfd);
+		close(children[idx].arg.connfd);
 	}
 	return 0;
 }
@@ -267,7 +267,7 @@ int main (int argc, char **argv)
 
 	for (; !term ;) {
 	//	printf("listen loop...\n");
-		socklen_t cliaddr_len = sizeof(childs[cli_idx].arg.cliaddr);
+		socklen_t cliaddr_len = sizeof(children[cli_idx].arg.cliaddr);
 		FD_SET(listenfd, &rd_set);
 		tv.tv_sec =1;
 		tv.tv_usec=0;
@@ -275,42 +275,42 @@ int main (int argc, char **argv)
 		cli_idx = child_find_unused();
 		if (cli_idx<0) continue;
 
-		childs[cli_idx].arg.connfd=0;
+		children[cli_idx].arg.connfd=0;
 	//	printf("select...\n");
 		int sret = select(listenfd+1, &rd_set, NULL, NULL, &tv);
 	//	printf("Sret = %d, err: %s\n", sret, strerror(errno));
 		if ( sret > 0 ) {
 			if ( FD_ISSET(listenfd, &rd_set) ) {
 // #ifndef _WIN32
-				childs[cli_idx].arg.connfd = accept(listenfd,(struct sockaddr*) &childs[cli_idx].arg.cliaddr, &cliaddr_len);
+				children[cli_idx].arg.connfd = accept(listenfd,(struct sockaddr*) &children[cli_idx].arg.cliaddr, &cliaddr_len);
 /*
 #else
-				int tconnfd = accept(listenfd,(struct sockaddr*) &childs[cli_idx].arg.cliaddr, &cliaddr_len);
+				int tconnfd = accept(listenfd,(struct sockaddr*) &children[cli_idx].arg.cliaddr, &cliaddr_len);
 #endif
 */
 				if (errno == ECONNABORTED) {
-					childs[cli_idx].arg.used=0;
+					children[cli_idx].arg.used=0;
 					continue;
 				}
 #if 0
 //#ifdef _WIN32
-			//	childs[cli_idx].arg.connfd = _get_osfhandle( tconnfd );
-				childs[cli_idx].arg.connfd = _open_osfhandle( tconnfd, _O_RDWR | _O_BINARY | _O_SEQUENTIAL);
-				// write(childs[cli_idx].arg.connfd, "012345678\n", 10);
+			//	children[cli_idx].arg.connfd = _get_osfhandle( tconnfd );
+				children[cli_idx].arg.connfd = _open_osfhandle( tconnfd, _O_RDWR | _O_BINARY | _O_SEQUENTIAL);
+				// write(children[cli_idx].arg.connfd, "012345678\n", 10);
 				// write(tconnfd, "012345678\n", 10);
-				printf("connfd: %d, errno: [%d] %s\n", childs[cli_idx].arg.connfd, errno, strerror(errno));
+				printf("connfd: %d, errno: [%d] %s\n", children[cli_idx].arg.connfd, errno, strerror(errno));
 #endif
 			}
 		}
 		//if (errno == EINTR) continue;
-		if (childs[cli_idx].arg.connfd > 0) {
+		if (children[cli_idx].arg.connfd > 0) {
 	//		write(connfd, IDENT, IDENT_LEN);
 	//		fcntl(connfd, F_SETFL, fcntl(connfd, F_GETFL) | O_NONBLOCK);
 			cmutex->lock();
 			if (clients>=CLIENTS_MAX) {
-				write(childs[cli_idx].arg.connfd, "QSCAND: clients limit reached!\n", 31);
-				close(childs[cli_idx].arg.connfd);
-				childs[cli_idx].arg.used=0;
+				write(children[cli_idx].arg.connfd, "QSCAND: clients limit reached!\n", 31);
+				close(children[cli_idx].arg.connfd);
+				children[cli_idx].arg.used=0;
 				cmutex->unlock();
 				continue;
 			}
@@ -332,7 +332,7 @@ int main (int argc, char **argv)
 					printf("%d: Error creating child process\n", pid);
 			}
 		} else {
-			childs[cli_idx].arg.used=0;
+			children[cli_idx].arg.used=0;
 		}
 	}
 
@@ -340,11 +340,11 @@ int main (int argc, char **argv)
 		printf("%d: Closing listen socket...\n",pid);
 	close(listenfd);
 
-	printf("%d: Waiting for childs: %d remains...\n",pid,clients);
+	printf("%d: Waiting for children: %d remains...\n",pid,clients);
 	for (int i=0; i<CLIENTS_MAX; i++ ) {
-		if (!childs[i].arg.used) continue;
-//		printf("waiting for thread %d. used: %d\n", i, childs[i].arg.used);
-		if (thread_join(childs[i].tid, NULL)) {
+		if (!children[i].arg.used) continue;
+//		printf("waiting for thread %d. used: %d\n", i, children[i].arg.used);
+		if (thread_join(children[i].tid, NULL)) {
 #ifdef DAEMON_EN
 			if (daemonized)
 				syslog(LOG_ERR, "Error waiting for child %d\n", i);

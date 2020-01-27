@@ -28,7 +28,7 @@ typedef struct {
 	child_arg_t	arg;
 } child_t;
 
-extern child_t childs[CLIENTS_MAX+1];
+extern child_t children[CLIENTS_MAX+1];
 extern void *child_thread(void *argp);
 extern int  child_find_unused();
 extern void child_list_clear();

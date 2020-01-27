@@ -295,7 +295,7 @@ int main(int argc, char** argv)
     read_multi(reader, devcnt, map, PASS_RECOVER1, 4);
 
 dreader_done:
-    if (verbose) printf("\nDestroing readers...\n");
+    if (verbose) printf("\nDestroying readers...\n");
     for (i=0; i<devcnt; i++) {
 		reader[i]->print_stat();
 		delete reader[i];
@@ -311,11 +311,11 @@ dreader_done:
 
 //	map->save();
 
-//    printf("Destroing drive_info*...\n");
+//    printf("Destroying drive_info*...\n");
     for (i=0; i<devcnt; i++) delete dev[i];
-//    printf("Destroing imgwriter...\n");
+//    printf("Destroying imgwriter...\n");
     delete iso;
-//    printf("Destroing smap...\n");
+//    printf("Destroying smap...\n");
     delete map;
     return 0;
 }

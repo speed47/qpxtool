@@ -3106,7 +3106,7 @@ int plextor_px755_do_auth(drive_info* dev)
 		printf("|_______________________________________________________|\n");
 		return 1;
 	} else {
-		if (!dev->silent) printf("PX-755/PX-760/Premium-II auth successfull:)\n");
+		if (!dev->silent) printf("PX-755/PX-760/Premium-II auth successful:)\n");
 		return 0;
 	}
 }

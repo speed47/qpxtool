@@ -22,7 +22,7 @@
 int    clients;
 Mutex* cmutex;
 
-child_t childs[CLIENTS_MAX+1];
+child_t children[CLIENTS_MAX+1];
 
 int child_find_unused()
 {
@@ -31,8 +31,8 @@ int child_find_unused()
 	int i=0;
 	cmutex->lock();
 	while (idx<0 && i<(CLIENTS_MAX+1)) {
-		if (!childs[i].arg.used) {
-			childs[i].arg.used=1;
+		if (!children[i].arg.used) {
+			children[i].arg.used=1;
 			idx=i;
 		}
 		i++;
@@ -44,7 +44,7 @@ int child_find_unused()
 void child_list_clear()
 {
 	for (int i=0; i<(CLIENTS_MAX+1); i++)
-		childs[i].arg.used=0;
+		children[i].arg.used=0;
 }
 
 const char helpstr[] = "QSCAND: valid commands:\n\
@@ -57,7 +57,7 @@ run             run test (have to set device and test type first)\n\
 get             get current parameters\n\
 set <PAR>=<VAL> set parameter. PAR can be:\n\
                 dev   - set device, VAL should be like '/dev/hdX' or '/dev/sdX'\n\
-                test  - set test type, VAL should be one of folowing:\n\
+                test  - set test type, VAL should be one of following:\n\
                         rt   - read transfer rate\n\
                         wt   - write transfer rate\n\
                         errc - error correction test\n\

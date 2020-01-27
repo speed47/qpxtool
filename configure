@@ -737,7 +737,7 @@ show_help()
 	echo "--libdir=LIBDIR         set path to install libraries"
 	echo "--mandir=MANDIR         set path to install mans"
 	echo "--qmake=QMAKE_COMMAND   set QT5 qmake command"
-	echo "                        default is to check folowing: $QMAKE5_NAMES"
+	echo "                        default is to check following: $QMAKE5_NAMES"
 	echo "--disable-png           disable PNG support in f1tattoo (auto)"
 	echo "--disable-gui           don't compile GUI"
 	echo "--enable-debug          build debug version"

@@ -838,10 +838,10 @@ int main(int argc, char** argv) {
 	}
 end:
 	if (scanner) {
-		if (!dev->silent) printf( MSGPREF "destroing scanner...\n");
+		if (!dev->silent) printf( MSGPREF "destroying scanner...\n");
 		delete scanner;
 	}
-    if (!dev->silent) printf( MSGPREF "destroing dev...\n");
+    if (!dev->silent) printf( MSGPREF "destroying dev...\n");
     delete dev;
     return result;
 }

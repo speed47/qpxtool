@@ -251,7 +251,7 @@ int plextor_get_powerec(drive_info* drive) {
 	drive->plextor.powerec_state = drive->rd_buf[2];
 //	drive->plextor.powerec_spd = ((drive->rd_buf[4] & 0xFF)<<8) | (drive->rd_buf[5] & 0xFF);
 	drive->plextor.powerec_spd = ntoh16(drive->rd_buf+4);
-	if (!drive->silent) printf("\tPoweRec %s, Recomended speed: %d kB/s\n",
+	if (!drive->silent) printf("\tPoweRec %s, Recommended speed: %d kB/s\n",
 		drive->plextor.powerec_state ? "ON" : "OFF",drive->plextor.powerec_spd);
 //	printf("\t"); for (int i=0; i<8; i++) printf("0x%02X ",drive->rd_buf[i]&0xFF); printf("\n");
 	return 0;
