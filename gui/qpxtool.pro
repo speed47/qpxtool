@@ -13,6 +13,9 @@ TARGET = qpxtool
 DEPENDPATH += . include locale src
 INCLUDEPATH += . include
 
+QMAKE_CXXFLAGS += $$(CXXFLAGS)
+QMAKE_LFLAGS += $$(LDFLAGS)
+
 # Input
 HEADERS += include/about.h \
            include/abstractpreview.h \
