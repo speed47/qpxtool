@@ -1,17 +1,17 @@
 .\" f1tattoo is released under the GNU GENERAL PUBLIC LICENSE.
-.TH "f1tattoo" "1" "10. April, 2009" "Gennady ShultZ Kozlov" "f1tattoo 0.7"
+.TH "f1tattoo" "1" "26 Feb 2014"
 .br
 .SH "NAME"
 f1tattoo \- disc T@2 feature for Yamaha F1 CD-RW devices
 .SH "SYNOPSIS"
 .br 
-\fBf1tattoo [-l] [-h] \fr
+\fBf1tattoo [\-l] [\-h] \fr
 .br 
-\fBf1tattoo -d DEVICE [-c] [-s] [--tattoo-test]\fR
+\fBf1tattoo \-d DEVICE [\-c] [\-s] [\-\-tattoo-test]\fR
 .br 
-\fBf1tattoo -d DEVICE --tattoo-raw <file.raw>\fR
+\fBf1tattoo \-d DEVICE \-\-tattoo-raw <file.raw>\fR
 .br 
-\fBf1tattoo -d DEVICE --tattoo-png <file.png>\fR
+\fBf1tattoo \-d DEVICE \-\-tattoo-png <file.png>\fR
 .br 
 .SH "DESCRIPTION"
 f1tattoo is the linux console tool to use the Yamaha disc T@2 feature. You won't get satisfying results on Phtalocyanin dye.
@@ -61,44 +61,44 @@ ATA device
 
 .SH "OPTIONS"
 
-\fB\-l, --scanbus\fR   
+\fB\-l, \-\-scanbus\fR   
 .br
 		scan busses for all available CD and DVD devices.
 
-\fB\-h, --help\fR   
+\fB\-h, \-\-help\fR   
 .br
 		help. show available options.
  
-\fB\-c, --current\fR   
+\fB\-c, \-\-current\fR   
 .br
 		show current drive settings of selected device
 
-\fB\-s, --supported\fR   
+\fB\-s, \-\-supported\fR   
 .br
 		show supported features of selected device                        
 
-\fB\--tattoo-test\fR  
+\fB\-\-tattoo-test\fR  
 .br
 		write DiscT@2 test image
 
-\fB\--tattoo-raw tattoo.raw\fR  
+\fB\-\-tattoo-raw tattoo.raw\fR  
 .br
 		write DiscT@2 using raw data from tattoo.raw file
 
-\fB\--tattoo-png tattoo.png\fR  
+\fB\-\-tattoo-png tattoo.png\fR  
 .br
 		write DiscT@2 using png image from tattoo.png file
-		check if f1tattoo compiled with png support using --help option
+		check if f1tattoo compiled with png support using \-\-help option
 
-\fB\-v, --verbose\fR   
+\fB\-v, \-\-verbose\fR   
 .br
 		give verbose output
 .SH "EXAMPLES"
-\fBf1tattoo -l\fR
+\fBf1tattoo \-l\fR
 .br 
 		list all available CD- and DVD-devices\fR
 
-\fBf1tattoo -d /dev/hdc \--tattoo-raw filename.raw\fR
+\fBf1tattoo \-d /dev/hdc \-\-tattoo-raw filename.raw\fR
 .br 
 		writes DiscT@2 using filename.raw file on media in device /dev/hdc
 \fR \fB

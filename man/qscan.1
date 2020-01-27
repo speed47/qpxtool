@@ -1,21 +1,21 @@
 .\" qscan is released under the GNU GENERAL PUBLIC LICENSE.
-.TH "qscan" "1" "10. April, 2009" "Gennady ShultZ Kozlov" "qscan 0.7"
+.TH "qscan" "1" "26 Feb 2014"
 .SH "NAME"
 qscan \- console tool for quality measurement of optical media
 .SH "SYNOPSIS"
-\fBqscan [-l] [-h] 
+\fBqscan [\-l] [\-h] 
 .br 
-\fBqscan -d DEVICE [\-S] [\-i] [\-m] \fR
+\fBqscan \-d DEVICE [\-S] [\-i] [\-m] \fR
 .br 
-\fBqscan -d DEVICE [\-p] [\-r] [\-w] [\-v] \fR
+\fBqscan \-d DEVICE [\-p] [\-r] [\-w] [\-v] \fR
 .br 
-\fBqscan -d DEVICE [\-f] [\-s] [\-t] [\-v] \fR
+\fBqscan \-d DEVICE [\-f] [\-s] [\-t] [\-v] \fR
 .br 
-\fBqscan -d DEVICE -t wt [-s #] [-W] \fR
+\fBqscan \-d DEVICE \-t wt [\-s #] [\-W] \fR
 .br 
 .SH "DESCRIPTION"
 qscan is the linux console tool for error correction measuring with optical devices. 
-The related plugin allows to use vendor specific commands on your optical device. 
+The related plugin allows one to use vendor specific commands on your optical device. 
 Currently supported vendors are Asus, Benq, Liteon, NEC, Pioneer and Plextor. 
 For detailed information look at http://qpxtool.sourceforge.net/supported.html
 .SH "DEVICE"
@@ -59,31 +59,31 @@ ATA device
 
 .SH "OPTIONS"
 
-\fB\-l, --scanbus\fR
+\fB\-l, \-\-scanbus\fR
 .br
 		scan busses for all available optical devices
 
-\fB\-h, --help\fR	
+\fB\-h, \-\-help\fR	
 .br
 		show help
  
-\fB\-S, --speeds\fR	
+\fB\-S, \-\-speeds\fR	
 .br
-		detect available read and write speeds for selected -d DEVICE and the relating media 
+		detect available read and write speeds for selected \-d DEVICE and the relating media 
 
-\fB\-i, --info\fR
+\fB\-i, \-\-info\fR
 .br
-		show device info of selected -d DEVICE  
+		show device info of selected \-d DEVICE  
 
-\fB\-m, --media\fR	
+\fB\-m, \-\-media\fR	
 .br
-		show media info of selected -d DEVICE 
+		show media info of selected \-d DEVICE 
 
-\fB\-p, --plugins\fR   	
+\fB\-p, \-\-plugins\fR   	
 .br
 		list all available plugins
 
-\fB\-f, --force-plugin PLUGIN [ ASUS | BENQ | BENQ_DVDROM |GENERIC |LITEON |NEC |PIONEER |PLEXTOR ]\fR   	
+\fB\-f, \-\-force-plugin PLUGIN [ ASUS | BENQ | BENQ_DVDROM |GENERIC |LITEON |NEC |PIONEER |PLEXTOR ]\fR   	
 .br
 		force usage of the selected plugin to use the vendor specific commands for the slected device. 
 .br		
@@ -106,21 +106,21 @@ ATA device
 \fB		[PLEXTOR]\fR		use Plextor vendor specific commands
 .br
 
-\fB\-r #, --rspeed #\fR	
+\fB\-r #, \-\-rspeed #\fR	
 .br
 		set read performance speed to selected value. 
 .br
-		Use -S option before, if you are unsure which speeds are supported 
+		Use \-S option before, if you are unsure which speeds are supported 
  
-\fB\-s #, --speed #\fR	
+\fB\-s #, \-\-speed #\fR	
 .br
 		set measurement speed to selected value.
 .br
-		Use -S option before, if you don't know what speeds are supported by your device.
+		Use \-S option before, if you don't know what speeds are supported by your device.
 .br
-		Don't use this with -r or -w option. 
+		Don't use this with \-r or \-w option. 
 
-\fB\-t, --test [rt|wt|errc|ft|jb|ta] \fR           
+\fB\-t, \-\-test [rt|wt|errc|ft|jb|ta] \fR           
 .br
 		select the q-check you want to be proceeded. Not all tests are supported by all devices. 
 .br
@@ -132,7 +132,7 @@ ATA device
 .br
 \fB		[wt]\fR			write transfer rate on blank media
 .br
-\fB		[errc]\fR		errror correction - Cx-scan / PIE, PIF, POE, POF
+\fB		[errc]\fR		error correction \- Cx-scan / PIE, PIF, POE, POF
 .br
 \fB		[ft]\fR 		focus and tracking error measurement
 .br
@@ -141,34 +141,34 @@ ATA device
 \fB		[ta]\fR			time analyzer measurement
 .br
 
-\fB\-w #, --wspeed #\fR	
+\fB\-w #, \-\-wspeed #\fR	
 .br
 		set write speed to selected value. 
 .br
-		Use -S option before, if you don't know what write speeds are supported by your device.
+		Use \-S option before, if you don't know what write speeds are supported by your device.
  
-\fB\-v, --verbose\fR
+\fB\-v, \-\-verbose\fR
 .br
 		gives verbose output and debug information
 
-\fB\-W, --write\fR
+\fB\-W, \-\-write\fR
 .br
 		perform real write instead simulation for write transfer rate
 
 .SH "EXAMPLES"
-\fBqscan -l\fR
+\fBqscan \-l\fR
 .br 
-		scan all buses for availabale optical devices
+		scan all buses for available optical devices
 
-\fBqscan -d /dev/sr2 \-S\fR
+\fBqscan \-d /dev/sr2 \-S\fR
 .br 
 		Show available speed steps of device /dev/sr2.
 
-\fBqscan -d /dev/sr2 -t errc -s 5\fR
+\fBqscan \-d /dev/sr2 \-t errc \-s 5\fR
 .br 
 		Proceed an error correction scan on device /dev/sr2 with 5x speed.
 
-\fBqscan -d /dev/sr0 -t wt -s 12\fR
+\fBqscan \-d /dev/sr0 \-t wt \-s 12\fR
 .br
 		Proceed a write performance test in simulation mode on device /dev/sr0 (dummy mode) with 12x speed
 \fR \fB

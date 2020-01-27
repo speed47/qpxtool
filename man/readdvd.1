@@ -1,11 +1,11 @@
 .\" readdvd is released under the GNU GENERAL PUBLIC LICENSE.
-.TH "readdvd" "1" "10. April, 2009" "Gennady ShultZ Kozlov" "readdvd 1.0"
+.TH "readdvd" "1" "26 Feb 2014"
 .SH "NAME"
 readdvd \- is creating an image of your source dvd media or medias even if it has / they have corrupted blocks
 .SH "SYNOPSIS"
-\fBreaddvd [-l] [-h]
+\fBreaddvd [\-l] [\-h]
 .br 
-\fBreaddvd -d DEVICE1 [-d DEVICE2] [-d ...] -o\fR file.iso\fB [\-s #] [\-v] [\-vv]\fR
+\fBreaddvd \-d DEVICE1 [\-d DEVICE2] [\-d ...] \-o\fR file.iso\fB [\-s #] [\-v] [\-vv]\fR
 .br 
 .SH "DESCRIPTION"
 readdvd reads even a corrupted dvd and writes the the result into a new image file on your harddisk. 
@@ -71,7 +71,7 @@ ATA device
 \fBw\fR   	save sector map which is currently read and continue with the next one
 
 .SH "EXAMPLES"
-\fBreaddvd -d /dev/sr0 \-o filename.iso \-s 8 -v\fR
+\fBreaddvd \-d /dev/sr0 \-o filename.iso \-s 8 \-v\fR
 .br 
 	create an image filename.bin of inserted media in device /dev/sr0 with read speed 8 in verbose mode.
 \fR \fB

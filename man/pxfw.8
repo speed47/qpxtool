@@ -1,13 +1,13 @@
 .\" pxfw is released under the GNU GENERAL PUBLIC LICENSE.
-.TH "pxfw" "8" "02 April, 2009" "Gennady ShultZ Kozlov" "pxfw 0.5"
+.TH "pxfw" "8" "26 Feb 2014"
 .SH "NAME"
 pxfw \- Firmware flashing tool for Plextor CD/DVD devices
 .SH "SYNOPSIS"
-\fBpxfw -l
+\fBpxfw \-l
 .br 
-\fBpxfw -d DEVICE [\-if\fR firmware.bin\fB] [\-u] [\-f] [\-v]\fR
+\fBpxfw \-d DEVICE [\-if\fR firmware.bin\fB] [\-u] [\-f] [\-v]\fR
 .br 
-\fBpxfw -d DEVICE [\-e] [\-r] [\-t] [\-v]\fR
+\fBpxfw \-d DEVICE [\-e] [\-r] [\-t] [\-v]\fR
 .br 
 .SH "DESCRIPTION"
 pxfw is the linux firmware flasher for Plextor CD and DVD drives.  Remove any disks before flashing.
@@ -83,11 +83,11 @@ ATA device
 \fB\-v\fR   debug.
 
 .SH "EXAMPLES"
-\fBpxfw -d /dev/hdc \-if 755_1.07.bin \-u\fR
+\fBpxfw \-d /dev/hdc \-if 755_1.07.bin \-u\fR
 .br 
 writes firmware file 755_1.07.bin into Master Drive on Secondary IDE\-Port.
 
-\fBpxfw -d /dev/sr3 \-e -oe file.foo\fR
+\fBpxfw \-d /dev/sr3 \-e \-oe file.foo\fR
 .br 
 reades EEPROM from device /dev/sr3 and writes it to file.foo.
 \fR \fB
