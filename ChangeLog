@@ -1,6 +1,24 @@
 QPxTool ChangeLog
 
 ***********************************************
+** 0.8.0 (2020-01-xx)
+
+    common:
+    - add support of libpng >= 1.4
+    - compress man pages at build time instead of storing compressed ones
+    - fix installation path for plugins when configuration option --libdir
+      is used
+    - use compiler options from build environment
+    - fix spelling errors
+    gui:
+    - port to Qt 5.x
+    - fix desktop file for GNU/Linux and *FSD systems
+    - fix build on Debian GNU/kFreeBSD
+    - add support of Debian GNU/Hurd
+    libqpxtransport:
+    - fix build on architectures where char is unsigned
+
+***********************************************
 ** 0.7.2 (2012-12-13)
 
     - initial Blu-Ray media support
@@ -39,10 +57,10 @@ QPxTool ChangeLog
     - fixed write transfer rate test on DVD+RW
     - fixed info about last block in read transfer rate test
     - internal write transfer rate implementation:
-	- CD-R(W) (SAO & TAO write modes supported, TAO is used by default)
-	- DVD-R(W), sequential write only (only single layer media tested)
-	- DVD+R(W) (only single layer media tested)
-	- DVD-RAM
+        - CD-R(W) (SAO & TAO write modes supported, TAO is used by default)
+        - DVD-R(W), sequential write only (only single layer media tested)
+        - DVD+R(W) (only single layer media tested)
+        - DVD-RAM
     gui:
     - added German translation (Thomas Maguin)
     - some interface changes
@@ -124,7 +142,7 @@ QPxTool ChangeLog
 
     - added options to configuration script
     - successfully builds on OpenBSD (needs GNU Make)
-	all features works with libpng and qt4 installed:)
+      (all features works with libpng and qt4 installed)
     - some fixes for 64-bit machines
 
 ***********************************************
@@ -156,7 +174,7 @@ QPxTool ChangeLog
 
     - win32(mingw32) and experimental MacOSX support
     - qpxtool gui completely rewritten using QT4
-	(gui is just front-end now)
+      (gui is just front-end now)
     - deadreader renamed to readdvd
     - pxcontrol and pioquiet merged (and named cdvdcontrol)
     - added qscan: console quality scan tool
@@ -195,7 +213,7 @@ new:
     - new tool called deadreader - multi-pass damaged discs reading
     - pxcontrol: full AutoStrategy support
     - pxcontrol: experimental AS database save/load, PX755/PX760 only
-	(PX755 output is buggy, PX760 is more or less stable)
+      (PX755 output is buggy, PX760 is more or less stable)
     - media change detection
 
 fixed:
@@ -211,22 +229,22 @@ fixed:
 ** 0.6.0 (2006-08-25)
 
     - scons is used to compile stuff
-	(get it at http://scons.org)
+      (get it at http://scons.org)
     - transport and vendor-specific code moved to separate libraries,
-	you can use it for you purposes, but API is far to be stable
+      you can use it for you purposes, but API is far to be stable
     - more informative SCSI error reporting
     - stability improved:)
     - Pi/Cx graph plot rewritten
-	(readability improved)
+      (readability improved)
 
 new:
     - POF on Plextor drives
     - C1/C2 on Pioneer drives
     - generic C2 scan on drives supported C2-pointers
     - changes in Pioneer PIE/PIF scan
-	(especialy DVR-111 support improved)
+      (especialy DVR-111 support improved)
     - one-pass PIE/PIF sum8 scan on many drives
-	(separate PIF sum1 on Plextor & Nec only)
+      (separate PIF sum1 on Plextor & Nec only)
     - scale for all tests (except TA) in saved html
     - SecuRec support
     - Pioneer QuietMode support (for XL modifications)
@@ -235,11 +253,11 @@ new:
 fixed:
     - fixed CD-R detection problems on some drives
     - changed CD track list reading algorythm,
-	now it should also work on old MMC-1 drives
+      now it should also work on old MMC-1 drives
     - transfer rate can be performed on Audio-CD now if drive can do DAE
     - spinup is a time controled now, not fixed sectors count
     - problem with resolving png's path if it's relative
-	(then saving results as html)
+      (then saving results as html)
     - various minor bugfixes
     - some bugfixes in pxcontrol
 
@@ -268,27 +286,27 @@ new:
 
 fixed:
     - manual vendor-specific command set selection didn't work in 0.5.0
-	NB: some drives may hang, if you selected Lite-On commands
+      NB: some drives may hang, if you selected Lite-On commands
 
 ***********************************************
 ** 0.5.1 (2006-05-27)
 
     - To get full fuctionality of Plextor PX-755/760 you need Plexluthor patched FW.
-	can be found at this page:
-	http://forum.rpc1.org/dl_firmware.php?category=4&manufactor=38
+      can be found at this page:
+      http://forum.rpc1.org/dl_firmware.php?category=4&manufactor=38
 
 new:
     - Extended CD scan for Plextor drives.
-	it shows BLER, E11, E21, E31, E12, E22, E32!
-	(this graphs automatically included in saved html if Cx checked)
+      it shows BLER, E11, E21, E31, E12, E22, E32!
+      (this graphs automatically included in saved html if Cx checked)
     - autoclearing tests results before new scan
     - manual selection of vendor-specific command set for you drive,
-	if automatic recognition fails.
-	Please report INQUIRY of your drive and command set, if it works!
+      if automatic recognition fails.
+      Please report INQUIRY of your drive and command set, if it works!
 
 fixed:
     - more realistic PIE/PIF scan results on Pioneer drives.
-	now it runs with 8ECC interval, also results changed interpreting
+      now it runs with 8ECC interval, also results changed interpreting
 
 ***********************************************
 ** 0.5.0 (2006-03-19)
@@ -302,7 +320,7 @@ new:
     - C1/C2 scan on LiteOn drives
     - disc lock and eject ability
     - full VariRec support:
-	separate Laserpower & Strategy change for CD & DVD
+      separate Laserpower & Strategy change for CD & DVD
     - PoweRec support
     - shows GigaRec rate of inserted CD
     - Silent Mode support
@@ -315,7 +333,7 @@ new:
 fixed:
     - drive selection is disabled during scan to prevent some problems
     - fixed speed detection problems on some DVD drives
-	supported Realtime Streaming but refuses GET_PERFORMANCE command
+      supported Realtime Streaming but refuses GET_PERFORMANCE command
 
 ***********************************************
 ** 0.4.3 (2006-01-26)
@@ -323,13 +341,13 @@ fixed:
 
 problem:
     - PX-7[55|60] are not really supported due to
-	'authorised commands'
+      'authorised commands'
 
 new:
     - shows CD-R(W) manufacturer
     - Jitter in percentage
     - spindown setting
-	(works correctly on all drives I have)
+      (works correctly on all drives I have)
     - reduced CPU usage during Transfer Rate test
     - supported speeds detection instead fixed speeds list
 
@@ -341,7 +359,7 @@ fixed:
 
 new:
     - Plextor PX-755 support 
-	(same as PX760, but can't write DVD+/-R at 18x)
+      (same as PX760, but can't write DVD+/-R at 18x)
 fixed:
     - fixed average CD read speed (it was multiplyed by 100)
     - fixed Segmentation Fault then selecting CD-ROM drive
@@ -374,18 +392,18 @@ fixed:
 
     - improvements in media check code
     - changes in Capabilities page:
-	"V" = drive supported this feature
-	"X" = unsupported
-	"?" = detection incomplete
+      "V" = drive supported this feature
+      "X" = unsupported
+      "?" = detection incomplete
 
 new:
     - C1/C2 scan on NEC drives. UNTESTED!
 
 fixed:
     - now correctly detects DVD+/-R(W)[DL]
-	even if drive is DVD-ROM.
-	only one problem - can't differ DVD-RW
-	Restricted Overwrite from Sequential
+      even if drive is DVD-ROM.
+      only one problem - can't differ DVD-RW
+      Restricted Overwrite from Sequential
     - some minor bugfixes
 
 ***********************************************
@@ -413,7 +431,7 @@ new:
 fixed:
     - C1/C2/CU total & max error rate were zeroed at the end of scan
     - now zeroing writable size if drive is not writer,
-	because readers can't perfectly detect free size
+      because readers can't perfectly detect free size
 
 ***********************************************
 ** 0.3.2 (2005-10-07)
@@ -436,7 +454,7 @@ new:
 
 fixed:
     - Plextor Hide CD-R and SingleSession goes off
-	while detecting it (bug only in 0.3.0)
+      while detecting it (bug only in 0.3.0)
     - DVD DL media testing
 
 ***********************************************
@@ -452,7 +470,7 @@ new:
 
 fixed:
     - for stability improvement all GUI operations moved to main thread
-	(to prevent X assync reply error)
+      (to prevent X assync reply error)
     - media type detection problems on MMC-1 drives
     - CD transfer rate test on drives not supported CD-DA commands
 
@@ -474,8 +492,8 @@ new:
     - vertical grid
     - grid for read transfer rate test
     - fixed horizontal scale:
-	    750 sectors/pix for CD 
-	    4368 sectors/pix for DVD
+        - 750 sectors/pix for CD 
+        - 4368 sectors/pix for DVD
 fixed:
     - missing Plextor Premium ID string
     - main thread goes down during tests in older versions
@@ -499,26 +517,26 @@ fixed:
 
 drives supported for disc quality testing:
     - Plextor:
-	- PlexWriter Premium
-	- PX-712
-	- PX-716
+        - PlexWriter Premium
+        - PX-712
+        - PX-716
 
 features:
     - bus scanning (hda..hdt, sr0..sr15)
     - detecting media type (CD-ROM/R/RW, DVD-ROM/RAM/R/RDL/RW/+R/+RW/+RDL)
-	    and MID code for DVD's
+      and MID code for DVD's
     - Plextor features:
-	- GigaRec	
-	- Hide-CDR
-	- Single-Session
-	- Speed Read	
+        - GigaRec
+        - Hide-CDR
+        - Single-Session
+        - Speed Read
     - Read transfer rate test
     - CD quality tests:
-	- C1/C2/CU (logarythmic scale)
-	- Beta/Jitter
+        - C1/C2/CU (logarythmic scale)
+        - Beta/Jitter
     - DVD quality tests:
-	- PIE (sum8) (logarythmic scale)
-	- PIF (sum1) (logarythmic scale)
-	- Beta/Jitter
-	- TA (only PX-716 supported this)
+        - PIE (sum8) (logarythmic scale)
+        - PIF (sum1) (logarythmic scale)
+        - Beta/Jitter
+        - TA (only PX-716 supported this)
 
