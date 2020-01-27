@@ -81,6 +81,58 @@ int get_device_info(drive_info* drive)
 }
 
 #ifdef USE_LIBPNG
+static int my_png_get_image_width(png_structp png_ptr, png_infop info_ptr) {
+#if PNG_LIBPNG_VER_MAJOR == 1 && PNG_LIBPNG_VER_MINOR >= 4 
+	return png_get_image_width(png_ptr, info_ptr);
+#else
+	return info_ptr->width;
+#endif
+}
+
+static int my_png_get_image_height(png_structp png_ptr, png_infop info_ptr) {
+#if PNG_LIBPNG_VER_MAJOR == 1 && PNG_LIBPNG_VER_MINOR >= 4 
+	return png_get_image_height(png_ptr, info_ptr);
+#else
+	return info_ptr->height;
+#endif
+}
+
+static png_byte my_png_get_color_type(png_structp png_ptr, png_infop info_ptr)
+{
+#if PNG_LIBPNG_VER_MAJOR == 1 && PNG_LIBPNG_VER_MINOR >= 4
+	return png_get_color_type(png_ptr, info_ptr);
+#else
+	return info_ptr->color_type;
+#endif
+}
+
+static png_uint_32 my_png_get_valid(png_structp png_ptr, png_infop info_ptr, png_uint_32 flags)
+{
+#if PNG_LIBPNG_VER_MAJOR == 1 && PNG_LIBPNG_VER_MINOR >= 4
+	return png_get_valid(png_ptr, info_ptr, PNG_INFO_PLTE);
+#else
+	return (info_ptr->valid & flags);
+#endif
+}
+
+static int my_png_get_bit_depth(png_structp png_ptr, png_infop info_ptr)
+{
+#if PNG_LIBPNG_VER_MAJOR == 1 && PNG_LIBPNG_VER_MINOR >= 4
+	return png_get_bit_depth(png_ptr, info_ptr);
+#else
+	return info_ptr->bit_depth;
+#endif
+}
+
+static int my_png_get_rowbytes(png_structp png_ptr, png_infop info_ptr)
+{
+#if PNG_LIBPNG_VER_MAJOR == 1 && PNG_LIBPNG_VER_MINOR >= 4
+	return png_get_rowbytes(png_ptr, info_ptr);
+#else
+	return info_ptr->rowbytes;
+#endif
+}
+
 bool tattoo_read_png(unsigned char *buf, uint32_t rows, FILE *fp)
 {
 	png_byte	header[8];	// 8 is the maximum size that can be checked
@@ -95,6 +147,10 @@ bool tattoo_read_png(unsigned char *buf, uint32_t rows, FILE *fp)
 	uint32_t row, col;
 	int      c;
 	int32_t  r,g,b;
+	int num_palette;
+#if PNG_LIBPNG_VER_MAJOR == 1 && PNG_LIBPNG_VER_MINOR >= 4
+	png_colorp palette;
+#endif
 
 	if (fread(header, 1, 8, fp) < 8) {
 		printf("Error reading PNG header\n");
@@ -129,9 +185,11 @@ bool tattoo_read_png(unsigned char *buf, uint32_t rows, FILE *fp)
 
 	png_read_info(png_ptr, info_ptr);
 
-	printf("Image size: %ld x %ld\n", info_ptr->width, info_ptr->height);
+	printf("Image size: %ld x %ld\n",
+					my_png_get_image_width(png_ptr, info_ptr),
+					my_png_get_image_height(png_ptr, info_ptr));
 
-	if (info_ptr->width != 3744U || info_ptr->height != rows ) {
+	if (my_png_get_image_width(png_ptr, info_ptr) != 3744U || my_png_get_image_height(png_ptr, info_ptr) != rows ) {
 		printf("Image should be 3744 x %d", rows);
 		return 1;
 	}
@@ -140,17 +198,21 @@ bool tattoo_read_png(unsigned char *buf, uint32_t rows, FILE *fp)
 //	height = info_ptr->height;
 //	bit_depth = info_ptr->bit_depth;
 
+#if PNG_LIBPNG_VER_MAJOR == 1 && PNG_LIBPNG_VER_MINOR >= 4 
 	number_of_passes = png_set_interlace_handling(png_ptr);
+#else
+	number_of_passes = png_set_interlace_handling(png_ptr);
+#endif
 	png_read_update_info(png_ptr, info_ptr);
 
-	printf("Color type: [%d] ", info_ptr->color_type);
-	switch (info_ptr->color_type) {
+	printf("Color type: [%d] ", my_png_get_color_type(png_ptr, info_ptr));
+	switch (my_png_get_color_type(png_ptr, info_ptr)) {
 	    case PNG_COLOR_TYPE_GRAY:
 			printf("PNG_COLOR_TYPE_GRAY\n");
 			break;
 	    case PNG_COLOR_TYPE_PALETTE:
 			printf("PNG_COLOR_TYPE_PALETTE\n");
-			if (!(info_ptr->valid & PNG_INFO_PLTE)) {
+			if (!(my_png_get_valid(png_ptr, info_ptr, PNG_INFO_PLTE))) {
 				printf("PNG color type is indexed, but no palette found!");
 				goto err_read_png;
 			}
@@ -168,49 +230,64 @@ bool tattoo_read_png(unsigned char *buf, uint32_t rows, FILE *fp)
 			printf("unlnown PNG color type!\n");
 			goto err_read_png;
 	}
-	printf("Bit depth : %d\n", info_ptr->bit_depth);
-	if (info_ptr->bit_depth != 8) {
+	printf("Bit depth : %d\n", my_png_get_bit_depth(png_ptr, info_ptr));
+	if (my_png_get_bit_depth(png_ptr, info_ptr) != 8) {
 		printf("Unsupported bit depth!\n");
 		goto err_read_png;
 	}
-	if (info_ptr->valid & PNG_INFO_PLTE) {
-		printf("Palette   : %d colors\n", info_ptr->num_palette);
+
+#if PNG_LIBPNG_VER_MAJOR == 1 && PNG_LIBPNG_VER_MINOR >= 4
+	png_get_PLTE(png_ptr, info_ptr, &palette, &num_palette);
+#else
+	num_palette = info_ptr->num_palette;
+#endif
+	if (my_png_get_valid(png_ptr, info_ptr, PNG_INFO_PLTE)) {
+		printf("Palette   : %d colors\n", num_palette);
 	} else {
 		printf("Palette   : NO\n");
 	}
-	printf("ROW bytes : %ld\n", info_ptr->rowbytes);
+	printf("ROW bytes : %ld\n", my_png_get_rowbytes(png_ptr, info_ptr));
 
 
 	raw_row_pointer = buf;
-	png_row_pointer = (png_byte*) malloc(info_ptr->rowbytes);
+	png_row_pointer = (png_byte*) malloc(my_png_get_rowbytes(png_ptr, info_ptr));
 	for (row=0; row<rows; row++) {
 		if (setjmp(png_jmpbuf(png_ptr))) {
 			printf("png_jmpbuf failed!\n");
 			goto err_read_png;
 		}
 		png_read_row(png_ptr, png_row_pointer, NULL);
-		if (info_ptr->width < 3744U)
+		if (my_png_get_image_width(png_ptr, info_ptr) < 3744U)
 			memset(raw_row_pointer, 0, 3744);
 
-		switch (info_ptr->color_type) {
+		switch (my_png_get_color_type(png_ptr, info_ptr)) {
 		    case PNG_COLOR_TYPE_GRAY:
-				for (col=0; col<info_ptr->width; col++) {
+				for (col=0; col<my_png_get_image_width(png_ptr, info_ptr); col++) {
 					raw_row_pointer[col] = png_row_pointer[col] ^ 0xFF;
 //					memcpy(raw_row_pointer, png_row_pointer, 3744);
 				}
 				break;
 		    case PNG_COLOR_TYPE_PALETTE:
-				for (col=0; col<info_ptr->width; col++) {
+				for (col=0; col<my_png_get_image_width(png_ptr, info_ptr); col++) {
 					c = png_row_pointer[col];
+#if PNG_LIBPNG_VER_MAJOR == 1 && PNG_LIBPNG_VER_MINOR >= 4
+					r = palette[c].red;
+					g = palette[c].green;
+					b = palette[c].blue;
+#else
 					r = info_ptr->palette[c].red;
 					g = info_ptr->palette[c].green;
 					b = info_ptr->palette[c].blue;
+#endif
 					c = (r*11 + g*16 + b*5) / 32;
 					raw_row_pointer[col] = c ^ 0xFF;
 				}
+#if PNG_LIBPNG_VER_MAJOR == 1 && PNG_LIBPNG_VER_MINOR >= 4
+				png_set_PLTE(png_ptr, info_ptr, palette, num_palette);
+#endif
 				break;
 		    case PNG_COLOR_TYPE_RGB:
-				for (col=0; col<info_ptr->width; col++) {
+				for (col=0; col< my_png_get_image_width(png_ptr, info_ptr); col++) {
 					r = png_row_pointer[col*3];
 					g = png_row_pointer[col*3+1];
 					b = png_row_pointer[col*3+2];
@@ -219,7 +296,7 @@ bool tattoo_read_png(unsigned char *buf, uint32_t rows, FILE *fp)
 				}
 				break;
 		    case PNG_COLOR_TYPE_RGB_ALPHA:
-				for (col=0; col<info_ptr->width; col++) {
+				for (col=0; col<my_png_get_image_width(png_ptr, info_ptr); col++) {
 					r = png_row_pointer[col*4];
 					g = png_row_pointer[col*4+1];
 					b = png_row_pointer[col*4+2];
@@ -228,7 +305,7 @@ bool tattoo_read_png(unsigned char *buf, uint32_t rows, FILE *fp)
 				}
 				break;
 		    case PNG_COLOR_TYPE_GRAY_ALPHA:
-				for (col=0; col<info_ptr->width; col++) {
+				for (col=0; col<my_png_get_image_width(png_ptr, info_ptr); col++) {
 					raw_row_pointer[col] = png_row_pointer[col*2] ^ 0xFF;
 				}
 				break;
