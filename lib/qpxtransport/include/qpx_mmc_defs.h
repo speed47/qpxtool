@@ -581,8 +581,8 @@ static const	dev_desc _devtbl[]= {
 #define WTYPE_LJ		4
 
 typedef struct {
-	char wtype;
-	char dtype;
+	signed char wtype;
+	signed char dtype;
 	uint32_t	id;
 	char		name[32];
 } wr_mode;
