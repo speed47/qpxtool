@@ -1277,7 +1277,7 @@ dev->silent++;
 
 // PIONEER features
 	if (flags & FL_PIOQUIET) {
-		pioneer_set_silent(dev, silent, silent_save);
+		pioneer_set_silent(dev, piosilent, silent_save);
 	}
 	if (flags & FL_PIOLIMIT) {
 		pioneer_set_spdlim(dev, piolimit, silent_save);
