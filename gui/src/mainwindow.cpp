@@ -1706,7 +1706,7 @@ void QPxToolMW::save_results()
 	device *dev = devices.current();
 
 	fname = QFileDialog::getSaveFileName(this, tr("Save results to file..."), set.last_res_path_native, "QPxTool data files (*.qpx)");
-	if (fname.isEmpty()) return
+	if (fname.isEmpty()) return;
 
 	f.setFileName(fname);
 	finfo.setFile(f);
