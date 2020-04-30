@@ -1,6 +1,16 @@
 QPxTool ChangeLog
 
 ***********************************************
+** 0.8.1 (2020-xx-xx)
+
+    gui:
+    - fix saving results to *.qpx files
+    cdvdcontrol:
+    - fix Pioneer QuietMode operation: the argument given to --pio-quiet is
+      stored in piosilent, but pioneer_set_silent() was called with silent
+      instead
+
+***********************************************
 ** 0.8.0 (2020-01-28)
 
     common:
