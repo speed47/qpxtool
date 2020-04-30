@@ -17,6 +17,7 @@
 #include <QStringList>
 #include <QList>
 #include <QMutex>
+#include <QIODevice>
 
 #include <sys/time.h>
 #include <inttypes.h>
