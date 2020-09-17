@@ -2,6 +2,16 @@
 
 rm -f Makefile
 rm -f gui/Makefile
+rm -f gui/Makefile.qmake.Debug
+rm -f gui/Makefile.qmake.Release
+rm -f gui/object_script.qpxtool.Debug
+rm -f gui/object_script.qpxtool.Release
+rm -f gui/.qmake.stash
+rm -f gui/qpx_plugin_import.cpp
+rm -rf gui/debug/
+rm -rf gui/release/
+rm -rf gui/obj/
+rm -rf gui/moc/
 rm -f lib/Makefile.lib
 rm -f plugins/Makefile.plugin
 rm -f config.h

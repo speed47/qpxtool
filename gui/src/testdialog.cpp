@@ -30,7 +30,10 @@
 #include <QDebug>
 #include <progresswidget.h>
 #include <defs.h>
+#if defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
+#else // in case legacy mingw32 ever works with Qt5, left this here
 #include <unistd.h>
+#endif
 
 #include <qpx_mmc_defs.h>
 

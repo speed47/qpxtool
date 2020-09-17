@@ -68,7 +68,7 @@ int qscanner::readline(int fd, char *buf, int maxlen) {
 		tv.tv_sec  = 1;
 		tv.tv_usec = 0;
 
-#ifndef _WIN32
+#if !defined (_WIN32) && !defined (_WIN64)
 		sret = select(fd+1, &rd_set, NULL, NULL, &tv);
 #else
 //		sret = WaitForSingleObject((void*)fd, 1000);
@@ -283,7 +283,7 @@ int qscanner::run_wr_transfer()
 	argv = add_arg(argv, &argc, linef);
 
 	argv = add_arg(argv, &argc, "-sao");
-#ifndef _WIN32
+#if !defined (_WIN32) && !defined (_WIN64)
 	argv = add_arg(argv, &argc, "/dev/zero");
 #else
 	argv = add_arg(argv, &argc, "ZERO");

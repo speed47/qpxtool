@@ -11,7 +11,6 @@
 
 #ifndef __common_functions_h
 #define __common_functions_h
-
 //#warning "COMMON_FUNCTIONS_H"
 
 #include <inttypes.h>
@@ -29,13 +28,16 @@
 #include <sys/endian.h>
 #endif
 
-
 #include <arpa/inet.h>
 
-#elif defined(_WIN32)
+//#warning "_WIN32"
+
+#elif defined(_WIN32) || defined (_WIN64)
 
 #include <sys/param.h>
 #include <winsock2.h>
+
+// some manual POSIX-like aliasing follow here
 
 #ifndef _SOCKLEN_T
 typedef int socklen_t;
@@ -47,7 +49,7 @@ typedef int socklen_t;
 #define SHUT_RDWR		SD_BOTH
 #endif
 
-#endif
+#endif 
 
 typedef struct{
 	int	m;
@@ -231,17 +233,31 @@ extern int  msf2lba(msf time);
 extern void int2hms(int intt, hms* time);
 
 
-#if defined (_WIN32)
-#include <stdlib.h>
+#if defined (_WIN32) || defined (_WIN64)
+// get header file with Sleep function
+#if defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
+#include <winbase.h>  // legacy msys/mingw32
+#else
+#include <synchapi.h> // all other Windows targets
+#endif
+
 #define msleep(t) Sleep(t)
 #define sleep(t)  Sleep((t) << 10)
+
+#ifndef max
+#define max(a,b) (((a) > (b)) ? (a) : (b))
+#endif
+#ifndef min
+#define min(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+
 extern int inet_aton(const char *cp, struct in_addr *addr);
-#else
+
+#else  // not WIN32
 #define msleep(t) usleep((t) << 10)
 extern int min(int a, int b);
 extern int max(int a, int b);
 #endif
-
 
 extern void remove_double_spaces(char* str);
 extern void remove_end_spaces(char* str);

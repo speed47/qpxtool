@@ -17,7 +17,7 @@
 //#include <sys/time.h>
 #include <unistd.h>
 
-#include <qpx_transport.h>
+//#include <qpx_transport.h> // already included in <qpx_mmc.h>
 #include <qpx_mmc.h>
 #include "yamaha_features.h"
 

@@ -15,7 +15,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+// <threads.h> used to call <windows.h>; made more specific
+// in order to avoid modern mingw-w64 warnings related to <winsock2.h>
 #include <threads.h>
+// <common_functions.h> calls <winsock2.h>, which "child.h" relies on
 #include <common_functions.h>
 #include "child.h"
 
@@ -109,11 +112,11 @@ int readline(int fd, char *buf, int maxlen, fdtype_t fdtype)
 		FD_SET(fd, &rd_set);
 		tv.tv_sec  = 1;
 		tv.tv_usec = 0;
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 		if (fdtype == FD_SOCKET) {
 #endif
 			sret = select(fd+1, &rd_set, NULL, NULL, &tv);
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 			errno = GetLastError();
 		} else {
 			sret  = 1;
@@ -132,7 +135,7 @@ int readline(int fd, char *buf, int maxlen, fdtype_t fdtype)
 			return -1;
 		}
 		else if (sret > 0 && FD_ISSET(fd, &rd_set)) {
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 			if (fdtype == FD_SOCKET)
 				r = recv(fd, cbuf, 1, 0);
 			else
@@ -186,7 +189,7 @@ void child_proc(child_arg_t *arg)
 	char	test[8]     = "\0";
 	int		speed       = -1;
 	bool	WT_simul	 = 1;
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 	send(arg->connfd, IDENTV, IDENTV_LEN, 0);
 #else
 	write(arg->connfd, IDENTV, IDENTV_LEN);
@@ -194,7 +197,7 @@ void child_proc(child_arg_t *arg)
 	for (;;) {
 		mode = none;
 		if (term) return;
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 		send(arg->connfd, PROMPT, PROMPT_LEN, 0);
 #else
 		write(arg->connfd, PROMPT, PROMPT_LEN);
@@ -207,7 +210,7 @@ void child_proc(child_arg_t *arg)
 		}
 		if (n<=1) continue;
 		linei[n]=0;
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 		send(arg->connfd, "\n", 1, 0);
 #else
 		write(arg->connfd, "\n", 1);
@@ -218,7 +221,7 @@ void child_proc(child_arg_t *arg)
 					ntohs(arg->cliaddr.sin_port),
 					linei);
 		if (!strcmp(linei, "help\n")) {
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 			send(arg->connfd, helpstr, helpstr_sz, 0);
 #else
 			write(arg->connfd, helpstr, helpstr_sz);
@@ -243,7 +246,7 @@ void child_proc(child_arg_t *arg)
 					test,
 					speed,
 					WT_simul ? "on" : "off");
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 			send(arg->connfd, lineo, strlen(lineo), 0);
 #else
 			write(arg->connfd, lineo, strlen(lineo));
@@ -254,7 +257,7 @@ void child_proc(child_arg_t *arg)
 			size_t  len;
 			if ((strlen(linei) <=4) || linei[3]!=' ') {
 				sprintf(lineo, "QSCAND: set: needs parameter!\n");
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 				send(arg->connfd, lineo, strlen(lineo), 0);
 #else
 				write(arg->connfd, lineo, strlen(lineo));
@@ -268,7 +271,7 @@ void child_proc(child_arg_t *arg)
 					strncpy(device, linet, len-1);
 				} else {
 					sprintf(lineo, "QSCAND: too long device name!\n");
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 					send(arg->connfd, lineo, strlen(lineo), 0);
 #else
 					write(arg->connfd, lineo, strlen(lineo));
@@ -281,7 +284,7 @@ void child_proc(child_arg_t *arg)
 					strncpy(test, linet, len-1);
 				} else {
 					sprintf(lineo, "QSCAND: too long test name!\n");
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 					send(arg->connfd, lineo, strlen(lineo), 0);
 #else
 					write(arg->connfd, lineo, strlen(lineo));
@@ -295,7 +298,7 @@ void child_proc(child_arg_t *arg)
 				WT_simul = atol(linet) ? 1 : 0;
 			} else {
 				sprintf(lineo, "QSCAND: set: invalid parameter!\n");
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 				send(arg->connfd, lineo, strlen(lineo), 0);
 #else
 				write(arg->connfd, lineo, strlen(lineo));
@@ -307,7 +310,7 @@ void child_proc(child_arg_t *arg)
 			//sprintf(lineo, "str len: %d, cmd len: %d, last %02x %02x\n", n, strlen(linei), linei[n-2], linei[n-1]);
 		//	write(arg->connfd, lineo, strlen(lineo));
 			sprintf(lineo, "QSCAND: invalid command. try \"help\"\n");
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 			send(arg->connfd, lineo, strlen(lineo), 0);
 #else
 			write(arg->connfd, lineo, strlen(lineo));
@@ -387,7 +390,7 @@ void child_proc(child_arg_t *arg)
 				close(pipefd[1]); // unused write end
 
 				sprintf(lineo, "QSCAND: child created, reading from pipe...\n");
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 				send(arg->connfd, lineo, strlen(lineo), 0);
 #else
 				write(arg->connfd, lineo, strlen(lineo));
@@ -401,7 +404,7 @@ void child_proc(child_arg_t *arg)
 //					printf(lineo);
 					woffs=0;
 					while (woffs<n) {
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 						wn = send(arg->connfd, lineo+woffs, n-woffs, 0);
 #else
 						wn = write(arg->connfd, lineo+woffs, n-woffs);

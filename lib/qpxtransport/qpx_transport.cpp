@@ -65,19 +65,22 @@ long getusecs()
 
 //*
 
-#elif defined(_WIN32)
-#include <windows.h>
-#include <stdio.h>
+#elif defined(_WIN32) || defined (_WIN64)
 
-#define EINVAL		ERROR_BAD_ARGUMENTS
-#define ENOMEM		ERROR_OUTOFMEMORY
 #define EMEDIUMTYPE	ERROR_MEDIA_INCOMPATIBLE
 #define ENOMEDIUM	ERROR_MEDIA_OFFLINE
+
+#include <stdio.h>
+
+//#ifndef _WIN64 // these are already defined in x64 mingw not x86, needs investigation
+#define EINVAL		ERROR_BAD_ARGUMENTS
+#define ENOMEM		ERROR_OUTOFMEMORY
 #define ENODEV		ERROR_BAD_COMMAND
 #define EAGAIN		ERROR_NOT_READY
 #define ENOSPC		ERROR_DISK_FULL
 #define EIO			ERROR_NOT_SUPPORTED
 #define ENXIO		ERROR_GEN_FAILURE
+//#endif
 
 static class _win32_errno {
     public:
@@ -106,16 +109,16 @@ inline void perror (const char *str)
 		NULL 
 	);
     if (str)
-		fprintf (stderr, COL_RED "%s: %s" COL_NORM,str,lpMsgBuf);
+		fprintf (stderr, COL_RED "%s: %s" COL_NORM,str,(char *)lpMsgBuf);
     else
-		fprintf (stderr, COL_RED "%s" COL_NORM,lpMsgBuf);
+		fprintf (stderr, COL_RED "%s" COL_NORM,(char *)lpMsgBuf);
 
     LocalFree(lpMsgBuf);
 }
 
 #define exit(e)		ExitProcess(e)
 
-#endif // _WIN32
+#endif // _WIN32, _WIN64
 
 void sperror (const char *cmd,int err) //,  Scsi_Command *scsi)
 {
@@ -668,7 +671,7 @@ int Scsi_Command::is_reload_needed ()
 	{  return 0;   }
 
 //*
-#elif defined(_WIN32)
+#elif defined(_WIN32) || defined (_WIN64)
 
 Scsi_Command::Scsi_Command()		{ fd=INVALID_HANDLE_VALUE; autoclose=1; filename=NULL; }
 Scsi_Command::Scsi_Command(void*f)	{ fd=f, autoclose=0; filename=NULL; }

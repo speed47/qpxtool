@@ -53,7 +53,7 @@ add_arg(char **args, int *argc, const char *arg)
   return args;
 }
 
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 /* Quote the argument element if necessary, so that it will get
  * reconstructed correctly in the C runtime startup code.  Note that
  * the unquoting algorithm in the C runtime is really weird, and
@@ -134,7 +134,7 @@ void string_append(char* args, char* arg)
 	args[slen+alen] = 0;
 }
 
-int close(HANDLE h) { CloseHandle(h); }
+void close(HANDLE h) { CloseHandle(h); }
 #endif
 
 
@@ -152,7 +152,7 @@ void Mutex::unlock() {
 	pthread_mutex_unlock(&m);
 }
 
-#elif defined (_WIN32)
+#elif defined (_WIN32) || defined (_WIN64)
 
 Mutex::Mutex() { InitializeCriticalSection(&m); }
 Mutex::~Mutex() { DeleteCriticalSection(&m); }
@@ -237,7 +237,7 @@ int createChildProcess(char **argv, pipe_t *rdpipe, pipe_t *wrpipe)
 	}
 	return cpid;
 
-#elif defined (_WIN32)
+#elif defined (_WIN32) || defined (_WIN64)
 	char args[1024] = ""; 
 	char *quoted_arg;
 	SECURITY_ATTRIBUTES sa;
@@ -259,8 +259,8 @@ int createChildProcess(char **argv, pipe_t *rdpipe, pipe_t *wrpipe)
 			return -1;
 		}
 	//	printf("rdpipeH = %d, %d\n", (int)ipiper, (int)ipipew);
-		(*rdpipe)[0] = _open_osfhandle((long)ipiper, _O_BINARY);
-		(*rdpipe)[1] = _open_osfhandle((long)ipipew, _O_BINARY);
+		(*rdpipe)[0] = _open_osfhandle((ULONG_PTR)ipiper, _O_BINARY);
+		(*rdpipe)[1] = _open_osfhandle((ULONG_PTR)ipipew, _O_BINARY);
 		printf("rdpipeF = %d, %d\n", (*rdpipe)[0], (*rdpipe)[1]);
 	}
 
@@ -272,8 +272,8 @@ int createChildProcess(char **argv, pipe_t *rdpipe, pipe_t *wrpipe)
 			return -1;
 		}
 	//	printf("wrpipeH = %d, %d\n", (int)opipew, (int)opipew);
-		(*wrpipe)[0] = _open_osfhandle((long)opiper, _O_BINARY);
-		(*wrpipe)[1] = _open_osfhandle((long)opipew, _O_BINARY);
+		(*wrpipe)[0] = _open_osfhandle((ULONG_PTR)opiper, _O_BINARY);
+		(*wrpipe)[1] = _open_osfhandle((ULONG_PTR)opipew, _O_BINARY);
 		printf("wrpipeF = %d, %d\n", (*wrpipe)[0], (*wrpipe)[1]);
 	}
 
@@ -302,7 +302,7 @@ int createChildProcess(char **argv, pipe_t *rdpipe, pipe_t *wrpipe)
 
 	if (rdpipe) close((*rdpipe)[1]);
 	if (wrpipe) close((*wrpipe)[0]);
-	return (int) pi.hProcess;
+	return (UINT_PTR) pi.hProcess;
 #endif
 }
 

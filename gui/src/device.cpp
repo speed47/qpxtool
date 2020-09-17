@@ -30,10 +30,20 @@
 static int devcnt=0;
 #endif
 
-#if defined(_WIN32)
+#if defined(_WIN32) || defined (_WIN64)
+#define WIN32_LEAN_AND_MEAN
+// defines extra omissions for mingw32 and mingw-w64-32
+#if defined(__MINGW32__)
+#define NOGDI
+#if defined(__MINGW64_VERSION_MAJOR)
+#define NOUSER
+#define NOMCX
+#define NOCRYPT
+#define NOSERVICE
+#define NOIME
+#endif
+#endif
 #include <windows.h>
-//#if !defined(__MINGW32__)
-//#endif
 #endif
 
 void ErrcADD(Errc<int64_t> *tot, const Errc<int>& o) {
@@ -914,7 +924,7 @@ bool device::stop_tests()
 		Q_PID pid = proc->pid();
 #if defined(__unix) || defined(__unix__)
 		kill(pid, SIGINT);
-#elif defined(_WIN32)
+#elif defined(_WIN32) || defined(_WIN64)
 		TerminateProcess(pid, 0);
 #endif
 	} else if (type == device::DevtypeTCP) {

@@ -28,7 +28,7 @@ static const path ppaths[] = {
 	"/usr/local/lib/qpxtool",
 	"/usr/lib64/qpxtool",
 	"/usr/local/lib64/qpxtool",
-#elif defined (_WIN32)
+#elif defined (_WIN32) || defined (_WIN64)
 	"plugins",
 #endif
 	""
@@ -52,7 +52,7 @@ public:
 //	int  plugins_probe();
 	int  plugins_probe(bool test, bool probe_enable);
 	int  plugin_attach_fallback();
-	int  plugin_attach(char* name);
+	int  plugin_attach(const char* name);
 	int  plugin_attach(char* pname, bool probe_enable, bool no_detach, bool silent=1);
 	void plugin_detach();
 //	int  plugin_info();
@@ -100,7 +100,7 @@ private:
 	scan_plugin		*plugin;
 	qpxwriter		*writer;
 
-#if defined (_WIN32)
+#if defined (_WIN32) || defined (_WIN64)
 	HINSTANCE__     *pluginlib;
 #else
 	void			*pluginlib;

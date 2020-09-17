@@ -13,14 +13,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "qpx_scan.h"
+
 #if defined (__unix) || defined (__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <dlfcn.h>
-#elif defined (_WIN32)
-#include <windows.h>
-
-#define dlopen(n,f) LoadLibraryA(n)
-#define dlsym(l,n) 	GetProcAddress(l,n)
-#define dlclose(l)	FreeLibrary(l)
+#elif defined (_WIN32) || defined (_WIN64)
+// Removed include for <windows.h>, since it's already included via
+// <qpx_scan.h> --> <qpx_mmc.h> --> <qpx_transport.h>
+// The aliased functions below reside in:  <libloaderapi.h> in Win32 and mingw-w64, or
+#define dlopen(n,f) LoadLibraryA(n)    //  <winbase.h>      in legacy mingw32.
+#define dlsym(l,n)  GetProcAddress(l,n)  
+#define dlclose(l)  FreeLibrary(l)       
 
 char serr[255];
 
@@ -37,14 +40,12 @@ char* dlerror()
 #include <sys/types.h>
 #include <dirent.h>
 
-
-//#include <qpx_mmc.h>
-#include "qpx_scan.h"
-
+// #include <qpx_scan.h> // <-- moved above to avoid having to include <windows.h> twice
+// #include <qpx_mmc.h> // <-- removed, already called in <qpx_scan.h>
 #include <qpx_writer.h>
 #include <plextor_features.h>
 
-#define FALLBACK_PLUGIN_NAME "C2P"
+const char* FALLBACK_PLUGIN_NAME = "C2P"; // modernization
 
 qscanner::qscanner(drive_info* idev) {
 	dev=idev;
@@ -205,7 +206,7 @@ int qscanner::plugins_probe(bool test, bool probe_enable) {
 				if (!strncmp(dentry->d_name,"libqscan_",9)) {
 					if (!dev->silent) printf("FOUND: %s\n", dentry->d_name);
 					pname = (char*) malloc (strlen(dentry->d_name) + strlen(ppath) +2 );
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 					sprintf(pname, "%s\\%s", ppath, dentry->d_name);
 #else
 					sprintf(pname, "%s/%s", ppath, dentry->d_name);
@@ -235,7 +236,7 @@ int qscanner::plugins_probe(bool test, bool probe_enable) {
 
 int qscanner::plugin_attach_fallback() { return plugin_attach(FALLBACK_PLUGIN_NAME); } 
 
-int qscanner::plugin_attach(char* name) {
+int qscanner::plugin_attach(const char* name) { // modernization
 	char *pname;
 	char *ppath;
 	DIR  *dir;
@@ -254,7 +255,7 @@ int qscanner::plugin_attach(char* name) {
 				if (!strncmp(dentry->d_name,"libqscan_",9)) {
 					if (!dev->silent) printf("FOUND: %s\n", dentry->d_name);
 					pname = (char*) malloc (strlen(dentry->d_name) + strlen(ppath) +2 );
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 					sprintf(pname, "%s\\%s", ppath, dentry->d_name);
 #else
 					sprintf(pname, "%s/%s", ppath, dentry->d_name);
@@ -297,7 +298,7 @@ int qscanner::plugin_attach(char* pname, bool probe_enable, bool no_detach, bool
 		goto plugin_attach_liberr;
 	}
 //	if (!dev->silent) printf("pluginlib = %p\n", pluginlib);
-#ifndef _WIN32
+#if !defined (_WIN32) && !defined (_WIN64)
 	if (dlerror()) {
 		printf("1 dlopen err: %s\n",dlerror());
 		goto plugin_attach_err;
@@ -305,7 +306,7 @@ int qscanner::plugin_attach(char* pname, bool probe_enable, bool no_detach, bool
 #endif
 	if (!dev->silent) printf("plugin lib opened: %s\n",pname);
 	plugin_create = (scan_plugin* (*) (drive_info*)) dlsym(pluginlib, "plugin_create");
-#ifndef _WIN32
+#if !defined (_WIN32) && !defined (_WIN64)
 	if (dlerror()) {
 #else
 	if (!plugin_create) {
@@ -316,7 +317,7 @@ int qscanner::plugin_attach(char* pname, bool probe_enable, bool no_detach, bool
 //	printf("symbol \"plugin_create\" found!\n");
 	//*(void **) (&plugin_destroy) = dlsym(pluginlib, "plugin_destroy");
 	plugin_destroy = (void (*) (scan_plugin*)) dlsym(pluginlib, "plugin_destroy");
-#ifndef _WIN32
+#if !defined (_WIN32) && !defined (_WIN64)
 	if (dlerror()) {
 #else
 	if (!plugin_destroy) {

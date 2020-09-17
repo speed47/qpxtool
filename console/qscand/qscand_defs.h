@@ -21,8 +21,8 @@
 #include <syslog.h>
 #include <netinet/in.h>
 #define DAEMON_EN
-#elif defined (_WIN32)
-#include <winsock2.h>
+//#elif defined (_WIN32) || defined (_WIN64)
+//#include <winsock2.h> // already included in <common_functions.h>
 #endif
 
 

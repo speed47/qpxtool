@@ -16,9 +16,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <qpx_transport.h>
+//#include <qpx_transport.h>    // already included in <qpx_mmc.h>
 #include <qpx_mmc.h>
-#include <common_functions.h>
+//#include <common_functions.h> // already included in <qpx_mmc.h>
+
 #include <colors.h>
 
 #include <qscan_plugin.h>

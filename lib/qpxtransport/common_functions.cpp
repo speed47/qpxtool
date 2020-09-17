@@ -196,7 +196,7 @@ void int2hms(int intt, hms* time){
 	time->s = intt % 60;
 }
 
-#ifndef _WIN32
+#if !defined (_WIN32) && !defined (_WIN64)
 
 int min(int a, int b)
 {

@@ -50,8 +50,9 @@ check_make()
 		x=`make -v 2>/dev/null`
 		if test "$?" -gt 0; then
 			echo "no"
-			echo "Make not found! Can't continue"
-			exit
+			echo "\tMake not found! Can't continue."
+			echo "\tExiting..."
+			exit 1
 		fi
 		MAKE="make"
 	else
@@ -61,13 +62,10 @@ check_make()
 
 
 	echo -n "Checking if we have GNU Make... "
-	if test "$OSL" = "mingw32" ; then
-	    make_t0=`$MAKE -v | tr '[A-Z]' '[a-z]' | grep make | grep ver | cut -d ' ' -f 1`
-	else
-	    make_t0=`$MAKE -v | tr '[A-Z]' '[a-z]' | grep make | cut -d ' ' -f 1`
-	fi
+	make_t0=`make -v | tr '[A-Z]' '[a-z]' | grep make | cut -d ' ' -f 1`
+	make_t1=`$MAKE -v | tr '[A-Z]' '[a-z]' | grep make | grep ver | cut -d ' ' -f 1`
 	
-	if test "$make_t0" = "gnu" ; then
+	if [ $make_t0 = "gnu" ] || [ $make_t1 = "gnu" ]; then
 		GMAKE="yes"
 	else
 		GMAKE="no"
@@ -101,7 +99,6 @@ check_compiler()
 			;;
 	esac
 
-
 	echo -n "Checking C++ compiler... "
 	cxx_name=`$__cxx -v 2>&1 | tail -n 1 | cut -d ' ' -f 1`
 	cxx_ver=`$__cxx -dumpversion 2>&1`
@@ -116,6 +113,7 @@ check_compiler()
 		echo "** No C++ compiler found, can not continue!"
 		exit 1
 	fi
+	
 }
 
 check_libpng()
@@ -151,25 +149,37 @@ check_libpng()
 			lpng_ldflags=""
 		else
 			echo "yes"
-
-			echo -n "Checking png.h usability... "
+			echo -n "Checking zlib.h presence... "
 			echo "
-			#include <png.h>
-			int main(int ac, char** av) {
-			png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);	
-			return 0; }
+			#include <zlib.h>
+			int main(int ac, char** av) { return 0; } 
 			" > $TMPC
-
-
-			$__cc $lpng_iopts $TMPC $lpng_ldflags -o $TMPB 2>&1 1>/dev/null
+			
+			$__cc $TMPC -o $TMPB > /dev/null 2>&1
 			if test "$?" -gt 0; then
-				echo "no"
+				echo "no; please make sure zlib is installed to build with libpng"
 				lpng_iopts=""
 				lpng_ldflags=""
 			else
 				echo "yes"
-				__enable_png=yes
-				LPNG_DEFS="-DUSE_LIBPNG"
+				echo -n "Checking png.h usability... "
+				echo "
+				#include <png.h>
+				int main(int ac, char** av) {
+				png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);	
+				return 0; }
+				" > $TMPC
+
+				$__cc $lpng_iopts $TMPC $lpng_ldflags -o $TMPB 2>&1 1>/dev/null
+				if test "$?" -gt 0; then
+					echo "no"
+					lpng_iopts=""
+					lpng_ldflags=""
+				else
+					echo "yes"
+					__enable_png=yes
+					LPNG_DEFS="-DUSE_LIBPNG"
+				fi
 			fi
 		fi
 	fi
@@ -279,7 +289,7 @@ qt_check_qmake()
 		__qmake=$1
 		;;
 	*)
-		echo "Unknown/unsupported Qt version"
+		printf "\n\tUnknown/unsupported Qt version!"
 		__qmake=""
 		;;
     esac
@@ -295,24 +305,52 @@ qt_check_default()
     done
 }
 
+qt_check_mingw()
+{
+	printf "Checking for compatible MinGW environment for Qt5... "
+	dump=`$__cc -dumpmachine`
+	echo "
+		#include <stdlib.h>
+		int main(int ac, char** av){
+		#ifdef __MINGW64_VERSION_MAJOR 
+		return 0;                                                                      
+		#endif                                                     
+		return 1;}  " > $TMPC
+	$__cc $TMPC -o $TMPB && ./$TMPB
+	if test "$?" -gt 0; then
+		printf "no\n\n\t\tMINGW32 found: $dump, $(uname -m)"
+		printf "\n\tYou are using the original Msys/MinGW32,"
+		printf "\n\twhich isn't up-to-date enough to build the"
+		printf "\n\tQt5-based GUI of QpxTool. Build will be"
+		printf "\n\tconfigured to compile cli and lib only!"
+		printf "\n\tConsider moving to Msys2/MinGW-W64 to build the GUI.\n"
+		return 1
+	fi
+	printf "yes\n\n\t\tMinGW-W64 found: $dump \n\tQt5 won't build with the older mingw32 toolchain.\n"
+	return 0
+}
 
-ckeck_qt5()
+check_qt5()
 {
 	__enable_gui=no
-	echo -n "Checking for Qt5... "
+	printf "Checking for Qt5... "
 	if test "$__qmake" = "" ; then
 		qt_check_default
 	else
 		qt_check_qmake $__qmake
 	fi
-
 	if test "$qt_dir" = "" ; then
-	    echo "no, GUI will not be compiled.
-	If you really have Qt5 and want to build GUI try --qmake=/path/to/qmake"
+		printf "not found"
+	    printf "\n\n\tQt5 was not detected. If you really have Qt5, and want to build"
+		printf "\n\tthe GUI, run configure again with --qmake=/path/to/qmake\n\n"
 	else
-		__enable_gui=yes
-	    echo "$qt_dir ($qt_ver), qmake command: $__qmake"
+	    printf "found!\n\t$qt_dir ($qt_ver),\n\tqmake command: $__qmake\n"
 	fi
+	if test "$OSL" = "mingw" ; then
+		qt_check_mingw
+		if test "$?" -gt 0; then return ; fi
+	fi
+	__enable_gui=yes
 }
 
 create_makefile_top()
@@ -341,9 +379,7 @@ LIBS_THREAD = $OSLIBS_THREAD
 
 LPNG_INC  = $lpng_iopts
 LPNG_LIB  = $lpng_ldflags
-
 " >> Makefile
-
 	echo "CXXFLAGS += -Wall -O2 $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
 	echo "CFLAGS   += -Wall -O2 $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
 
@@ -357,14 +393,12 @@ LPNG_LIB  = $lpng_ldflags
 		echo "QMAKESPEC=macx-g++" >> Makefile
 		echo "export QMAKESPEC" >> Makefile
 	fi
-
 	if test "$GMAKE" = "yes" ; then
 		echo "export PREFIX BINDIR SBINDIR LIBDIR PLUGINDIR INCDIR MANDIR BINSUFF LIBS_HW LIBS_INET LIBS_DL LIBS_THREAD" >> Makefile
 		echo "export LPNG_INC LPNG_LIB" >> Makefile
 		echo "export CXXFLAGS CFLAGS" >> Makefile
 	fi
 
-	
 	echo "
 all: cli gui
 cli: lib console plugins man" >> Makefile
@@ -435,7 +469,7 @@ gui_uninstall:" >> Makefile
 	echo "
 help:
 	@echo \"\"
-	@echo \"Alailable targets:\"
+	@echo \"Available targets:\"
 	@echo \"all           - build all\"
 	@echo \"cli           - build libs and console tools\"
 	@echo \"gui           - build gui only\"
@@ -474,7 +508,7 @@ create_makefile_gui()
 
 	echo "
 all: Makefile.qmake" >> $mf
-if test "$OSL" = "mingw32" ; then
+if test "$OSL" = "mingw" ; then
 	if test "$__enable_debug" = "yes" ; then
 		echo "	\$(MAKE) -f Makefile.qmake debug $@" >> $mf
 	else
@@ -506,7 +540,7 @@ clean: Makefile.qmake
 	rm -f qrc_qpxtool.cpp" >> $mf
 
 	case "$OSL" in
-		"mingw32")
+		"mingw")
 			echo "
 install: Makefile.qmake" >> $mf
 			if test "$__enable_debug" = "yes" ; then
@@ -548,8 +582,8 @@ uninstall:
 
 	echo "
 Makefile.qmake:
-	rm -f Makefile.qmake
-	\$(QMAKE5) LIBS+=-L../lib/lib LIBS+=-lqpxtransport $QDEBUG -o Makefile.qmake" >> $mf	
+	rm -f Makefile.qmake" >> $mf
+	echo -n "	\$(QMAKE5) LIBS+=-L../lib/lib LIBS+=-lqpxtransport $QDEBUG -o Makefile.qmake" >> $mf
 	echo "
 .PHONY: all clean install uninstall" >> $mf
 }
@@ -571,15 +605,14 @@ CXXFLAGS += -I. -I./include -I../include
 LDFLAGS  += -dynamiclib -Wl -install_name \$(LIBDIR)/\$(LIB_SHORT)
 " >> $mf
 			;;
-
-
-		mingw32)
+		mingw)
 			echo "
 LIB_SHORT  = $__libpref\$(LIBN)$__libsuff
 LIB        = \$(LIB_SHORT)
 
-CXXFLAGS += -I. -I./include -I../include
+CXXFLAGS +=  -I. -I./include -I../include
 LDFLAGS  += -shared -Wl,-soname,\$(LIB_SHORT)
+
 " >> $mf
 			;;
 		*)
@@ -594,8 +627,6 @@ LDFLAGS  += -shared -Wl,-soname,\$(LIB_SONAME)
 " >> $mf
 			;;
 	esac
-
-
 echo "
 all: \$(LIB)
 
@@ -604,7 +635,6 @@ all: \$(LIB)
 	mkdir -p ../lib
 	ln -fs ../\$(DIR)/\$(LIB) ../lib/\$(LIB_SHORT)
 " >> $mf
-
 
 	case "$OSL" in
 		darwin)
@@ -628,7 +658,7 @@ uninstall:
 " >> $mf
 
 			;;
-		mingw32)
+		mingw)
 			echo "
 clean:
 	rm -f \$(LIB_SHORT)* \$(OBJS) ../lib/\$(LIB_SHORT) *~ include/*~
@@ -669,23 +699,22 @@ uninstall:
 .PHONY: all clean install uninstall" >> $mf
 }
 
-
 create_makefile_plugin()
 {
 	mf="plugins/Makefile.plugin"
 	echo "* $mf"
 
 	rm -f $mf
-
 	case "$OSL" in
 		darwin)
 			PLUGIN_LDFLAGS=" -dynamiclib -Wl"
+			PLUGIN_LDLIBS="-L../../lib/lib -lqpxtransport -lqpxscan"
 			;;
 		*)
 			PLUGIN_LDFLAGS=" -shared -Wl,-soname,\$(LIB_SONAME)"
+			PLUGIN_LDLIBS="-L../../lib/lib -lqpxtransport -lqpxscan"
 			;;
 	esac
-
 echo "
 SRC  = qscan_plugin   qscan_cmd
 HDRS = qscan_plugin.h
@@ -697,9 +726,9 @@ LIB_SHORT  = lib\$(LIBN)$__libsuff
 LIB_SONAME = \$(LIB_SHORT)
 LIB        = \$(LIB_SHORT)
 
-CPPFLAGS += -I. -I../../lib/include
+CXXFLAGS += -I. -I../../lib/include
 LDFLAGS  += $PLUGIN_LDFLAGS
-LDLIBS   += -L../../lib/lib -lqpxtransport -lqpxscan
+LDLIBS   += $PLUGIN_LDLIBS
 
 all: \$(LIB)
 
@@ -714,6 +743,7 @@ clean:
 	rm -f \$(LIB_SHORT) \$(OBJS) ../lib/\$(LIB_SHORT) *~ include/*~
 
 install: " > $mf
+
 	if test "$__enable_debug" = "no" ; then
 		echo "	strip --strip-unneeded \$(LIB_SHORT)" >> $mf
 	fi
@@ -726,7 +756,6 @@ uninstall:
 
 .PHONY: all clean install uninstall
 " >> $mf
-
 }
 
 show_help()
@@ -747,6 +776,9 @@ show_help()
 	exit
 }
 
+####
+#    Beginning of actual script
+####
 
 #echo "Parsing parameters..."
 for arg in $* ; do
@@ -770,7 +802,6 @@ for arg in $* ; do
 			;;
 	esac
 done
-
 
 echo -n "Checking OS... "
 OS=`uname -s`
@@ -815,20 +846,26 @@ case $OSL in
 		OSLIBS_THREAD="-lpthread"
 		__defprefix="/usr"
 		;;
-	mingw32*)
-		OSL="mingw32"
+	mingw*)
+		OSL="mingw"
 		__cc=gcc
 		__cpp=g++
 		OSLIBS_THREAD=""
 		OSLIBS_INET="-lws2_32"
-		__defprefix="/c/Progra~1/QPxTool"
+		__defprefix="/c/QPxTool"
 		__binsuff=".exe"
 		__libpref=""
 		__libsuff=".dll"
-
+		;;	
+	msys*)
+		printf "\tYou are in the MSYS2 environment, not MINGW32 or MINGW64."
+		printf "\n\tMake sure you invoke the proper environment for a MINGW build."
+		printf "\nExiting...\n"
+		exit 1
 		;;
 	*)
-		echo "OS not supported: $OS"
+		printf "\tYour OS is not supported: $OS\nExiting...\n"
+		exit 1
 		;;
 esac
 
@@ -861,7 +898,7 @@ case "$OSL" in
 		__incdir=$__prefix/include
 		__mandir=$__prefix/share/man
 		;;
-	mingw32*)
+	mingw*)
 		__bindir=$__prefix
 		__sbindir=$__prefix
 		__libdir=$__prefix
@@ -881,6 +918,8 @@ esac
 echo $ARCH
 
 
+## subdirectory overrides
+
 if test "$bindir" != "" ; then
 	__bindir=$bindir
 fi
@@ -889,12 +928,15 @@ if test "$sbindir" != "" ; then
 fi
 if test "$libdir" != "" ; then
 	__libdir=$libdir
-	__plugindir=$__libdir/qpxtool
+	if test "$OSL" = "mingw"; then 
+		__plugindir=$__libdir/plugins
+	else
+		__plugindir=$__libdir/qpxtool
+	fi
 fi
 if test "$mandir" != "" ; then
 	__mandir=$mandir
 fi
-
 
 check_make
 check_compiler
@@ -905,7 +947,7 @@ if test "$__enable_png" = "yes" ; then
 fi
 
 if test "$__enable_gui" = "yes" ; then
-	ckeck_qt5
+	check_qt5
 fi
 
 echo ""

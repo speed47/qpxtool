@@ -19,7 +19,7 @@
 //#include <sys/time.h>
 #include <unistd.h>
 
-#include <qpx_transport.h>
+// removed extraneous include of <qpx_transport.h> (already called in qpx_mmc)
 #include <qpx_mmc.h>
 #include "plextor_features.h"
 

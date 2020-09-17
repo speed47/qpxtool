@@ -45,7 +45,7 @@ int main(int ac, char** av)
 #ifndef QT_NO_DEBUG
 	qDebug("* Loading translator...");
 #endif
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 	if (!translator->load("qpxtool."+locale, "locale")) {
 #else
 	if (!translator->load("qpxtool."+locale, INSTALL_PREFIX"/share/qpxtool/locale")) {

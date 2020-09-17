@@ -13,15 +13,14 @@
 #define __qpxtool_mmc_h
 
 //#include <qpx_const.h>
+//#include "common_functions.h" // <-- already included in "qpx_mmc_defs.h"
+#include "qpx_mmc_defs.h" 
 #include "qpx_transport.h"
-#include "common_functions.h"
 
 //#ifdef HAVE_LIMITS_H
-#include <limits.h>
+// #include <limits.h> // <-- already included in "qpx_mmc_defs.h"
 //#endif
-#include <inttypes.h>
-
-#include "qpx_mmc_defs.h"
+// #include <inttypes.h> // <-- already included in <common_functions.h>
 
 #define bufsz_dev  0x0000FF
 #define bufsz_rd   0x010000

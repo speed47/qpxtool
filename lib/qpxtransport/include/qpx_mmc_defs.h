@@ -15,7 +15,7 @@
 //#ifdef HAVE_LIMITS_H
 #include <limits.h>
 //#endif
-#include <inttypes.h>
+// #include <inttypes.h> <-- // already included in "common_functions.h"
 
 #include "common_functions.h"
 #include "qpx_opcodes.h"
@@ -536,7 +536,7 @@ static const	dev_desc _devtbl[]= {
 		{ "cd\0", 0 },
 #elif (defined (__APPLE__) && defined(__MACH__))
 		{ "disk\0", 0 },
-#elif defined(_WIN32)
+#elif defined(_WIN32) || defined (_WIN64)
 		{ "C:", 0 },
 		{ "D:", 0 },
 		{ "E:", 0 },
@@ -565,7 +565,7 @@ static const	dev_desc _devtbl[]= {
 		{ "", -1 }
 };
 
-#if defined (_WIN32)
+#if defined (_WIN32) || defined (_WIN64)
 #define DEVTBL_DIRECT
 #endif
 

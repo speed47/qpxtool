@@ -5,7 +5,7 @@
 
 #if defined (__unix) || defined (__unix__)
 #include <unistd.h> // read()
-#elif defined (_WIN32)
+#elif defined (_WIN32) || defined (_WIN64)
 #include <conio.h>
 #endif
 
@@ -48,7 +48,7 @@ int keyboard::kb_hit()
         	return 1;
 	}
 	return 0;
-#elif defined (_WIN32)
+#elif defined (_WIN32) || defined (_WIN64)
 	return kbhit();
 #endif
 }
@@ -64,7 +64,7 @@ int keyboard::kb_getch()
 		if (!read(0,&ch,1)) return 0;
 	}
 	return ch;
-#elif defined (_WIN32)
+#elif defined (_WIN32) || defined (_WIN64)
 	if (kbhit())
 		return getch();
 	else

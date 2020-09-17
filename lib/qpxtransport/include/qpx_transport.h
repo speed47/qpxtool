@@ -30,12 +30,27 @@ extern long getmsecs();
 #endif
 
 //*
-#elif defined(_WIN32)
+#elif defined (_WIN32) || defined (__WIN64)
+// omit unnecessary inclusions from <windows.h> on all Win32 build environments
+#define WIN32_LEAN_AND_MEAN
+// defines extra omissions for legacy mingw32 and mingw-w64
+#if defined(__MINGW32__)
+#define NOGDI
+#if defined(__MINGW64_VERSION_MAJOR)
+#define NOUSER
+#define NOMCX
+#define NOCRYPT
+#define NOSERVICE
+#define NOIME
+#endif
+#endif
 
 #include <windows.h>
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #define ssize_t		LONG_PTR
 #define off64_t		__int64
 
@@ -268,17 +283,16 @@ public:
 };
 
 //*
-#elif defined(_WIN32)
-
-#if defined(__MINGW32__)
+#elif defined (_WIN32) || defined (_WIN64)
+// original mingw32/msys put ntddscsi.h in different location
+#if defined (__MINGW32__) && !defined (__MINGW64_VERSION_MAJOR)
 #include <ddk/ntddscsi.h>
-#define FSCTL_LOCK_VOLUME	CTL_CODE(FILE_DEVICE_FILE_SYSTEM,6,METHOD_BUFFERED,FILE_ANY_ACCESS)
-#define FSCTL_UNLOCK_VOLUME	CTL_CODE(FILE_DEVICE_FILE_SYSTEM,7,METHOD_BUFFERED,FILE_ANY_ACCESS)
-#define FSCTL_DISMOUNT_VOLUME	CTL_CODE(FILE_DEVICE_FILE_SYSTEM,8,METHOD_BUFFERED,FILE_ANY_ACCESS)
-#else
-#include <winioctl.h>
+#else  // i686 and x64_64 mingw-w64 work the same as other WIN32 targets
 #include <ntddscsi.h>
 #endif
+// all win32/mingw32 targets now include winioctl, no need to manually define
+// FSCTL_LOCK_VOLUME, FSCTL_UNLOCK_VOLUME, or FSCTL_DISMOUNT_VOLUME anymore
+#include <winioctl.h>
 
 typedef enum {	NONE=SCSI_IOCTL_DATA_UNSPECIFIED,
 				READ=SCSI_IOCTL_DATA_IN,

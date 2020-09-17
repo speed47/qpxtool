@@ -2362,7 +2362,7 @@ int get_performance(drive_info* drive, bool rw, uint8_t type) {
 	uint32_t  len, descn;
 	uint32_t r,w,lba;
 //	int	i;
-	int	j,offs;
+	uint32_t j,offs;
 	drive->cmd[0] = MMC_GET_PERFORMANCE;
 	drive->cmd[1] = (!type) ? (0x04 * rw) : 0x00;
 	drive->cmd[8] = (max_descs >> 8) & 0xFF;
@@ -2691,7 +2691,8 @@ int set_cd_speed(drive_info* drive) {
 	drive->cmd[11] = 0;
 	if ((drive->err=drive->cmd.transport(NONE,NULL,0) )) {
 //		if (drive->err != 0x23A02) drive->capabilities&=(NCAP_SET_CD_SPEED);
-		if (!drive->silent) sperror ("SET_CD_SPEED",drive->err); return (drive->err);
+		if (!drive->silent) sperror ("SET_CD_SPEED",drive->err);
+		return (drive->err);
 	}
 	return 0;
 }
@@ -3119,7 +3120,8 @@ int plextor_px755_get_auth_code(drive_info* dev, unsigned char* auth_code)
 		{ if (!dev->silent) sperror ("PLEXTOR_PX755_GET_AUTH_CODE",dev->err); return dev->err;}
 	if (!dev->silent) {
 		printf("** Get PX755 auth: ");
-		for (int i=0; i<16; i++) printf("0x%02X ",dev->rd_buf[i]&0xFF); printf("\n");
+		for (int i=0; i<16; i++) printf("0x%02X ",dev->rd_buf[i]&0xFF);
+		printf("\n");
 	}
 	return 0;
 }

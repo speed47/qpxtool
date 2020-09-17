@@ -32,9 +32,12 @@ private:
 #define thread_join(id,f)				pthread_join(id, f)
 #define thread_exit(r)					pthread_exit((void*)(r))
 
-#elif defined (_WIN32)
-
-#include <windows.h>
+#elif defined (_WIN32) || defined (_WIN64)
+#if defined(__MINGW64_VERSION_MAJOR)
+#include <windef.h>  // needed in mingw64; implicit in legacy mingw32's <winbase.h>.
+#endif
+#include <winbase.h> // the below threading functions are in or included via <winbase.h>
+#include <winuser.h> // <-- needed for SW_HIDE variable in threads.cpp.
 class Mutex {
 public:
 	Mutex();
@@ -51,9 +54,8 @@ extern int WIN32_thread_join(HANDLE& tid, void **ret);
 
 #define thread_create(id,attr,func,arg)	WIN32_thread_create(id,attr,func,arg)
 #define thread_join(id,f)				WIN32_thread_join(id, f)
-#define thread_exit(r)					ExitThread(r)
-
-extern int close(HANDLE h);
+#define thread_exit(r)					ExitThread(r) 
+extern void close(HANDLE h);
 
 #endif
 

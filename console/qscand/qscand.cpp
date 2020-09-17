@@ -19,9 +19,9 @@
 
 #include <common_functions.h>
 #include <threads.h>
-#include <child.h>
+#include "child.h"
 #include "qscand.h"
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(_WIN64)
 #include <signal.h>
 #endif
 
@@ -36,22 +36,22 @@ bool debug=0;
 
 #if defined (__unix) || defined (__unix__)
 void sigint_handler (int)
-#elif defined (_WIN32)
+#elif defined (_WIN32) || defined (_WIN64)
 BOOL WINAPI sigint_handler (DWORD)
 #endif
 {
 	if (!childl) {
 		if (debug && !daemonized && clients>0)
-			printf("%d: SIGINT. %d client(s) left. Terminating connections...\n", pid, clients);
+			printf("%d: SIGINT. %d client(s) left. Terminating connections...\n", (int)pid, (int)clients);
 //		while (clients) msleep((1 << 8));
 //		if (debug && !daemonized)
 //			printf("%d: SIGINT. Terminating listener...\n", pid);
 	} else if (childl == 1) {
 		if (debug && !daemonized)
-			printf("%d: SIGINT. Terminating client connection...\n", pid);
+			printf("%d: SIGINT. Terminating client connection...\n", (int)pid);
 	}
 	term=1;
-#if defined (_WIN32)
+#if defined (_WIN32) || defined (_WIN64)
 	return 1;
 #endif
 };
@@ -118,7 +118,7 @@ int main (int argc, char **argv)
 	struct sockaddr_in srvaddr;
 	socklen_t srvaddr_len = sizeof(srvaddr);
 	int      cli_idx;
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 	WSADATA WSAdata;
 #endif
 
@@ -192,14 +192,14 @@ int main (int argc, char **argv)
 	}
 	if (!port && !portauto)
 		port = DEFPORT;
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 	if ((errno = WSAStartup(MAKEWORD(1,1), &WSAdata))) {
 		printf("Can't initialize winsock: [%d] %s\n", errno, strerror(errno));
 		return -1;
 	}
 #endif
 	if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
-		printf("%d: Can't create socket. Terminating\n", pid);
+		printf("%d: Can't create socket. Terminating\n", (int)pid);
 		return -1;
 	}
 //	fcntl(listenfd, F_SETFL, fcntl(listenfd, F_GETFL) | O_NONBLOCK);
@@ -210,7 +210,7 @@ int main (int argc, char **argv)
 #if defined (__unix) || defined (__unix__)
 	signal(SIGINT, &sigint_handler);
 //	signal(SIGCHLD, &sigchld_handler);
-#elif defined (_WIN32)
+#elif defined (_WIN32) || defined (_WIN64)
 	SetConsoleCtrlHandler(&sigint_handler, 1);
 #endif
 
@@ -224,28 +224,28 @@ int main (int argc, char **argv)
 	setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on));	
 
 	if (bind( listenfd, (struct sockaddr*) &srvaddr, srvaddr_len)) {
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 		errno = GetLastError();
 #endif
 //	if (errno) {
 		if (errno != EADDRINUSE || !portauto) {
-			printf("%d: Can'n bind() %s:%d: [%d] %s\n", pid, inet_ntoa(srvaddr.sin_addr), ntohs(srvaddr.sin_port), errno, strerror(errno));
+			printf("%d: Can'n bind() %s:%d: [%d] %s\n", (int)pid, inet_ntoa(srvaddr.sin_addr), ntohs(srvaddr.sin_port), errno, strerror(errno));
 			return -1;
 		} else {
-			printf("%d: Can'n bind() %s:%d, trying to autoassig port...\n", pid, inet_ntoa(srvaddr.sin_addr), ntohs(srvaddr.sin_port));
+			printf("%d: Can'n bind() %s:%d, trying to autoassig port...\n", (int)pid, inet_ntoa(srvaddr.sin_addr), ntohs(srvaddr.sin_port));
 			srvaddr.sin_port = 0;
 			if (bind( listenfd, (struct sockaddr*) &srvaddr, srvaddr_len)) {
-				printf("%d: Can'n bind(): %s\n", pid, strerror(errno));
+				printf("%d: Can'n bind(): %s\n", (int)pid, strerror(errno));
 				return -1;
 			}
 		}
 	}
 
 	if (listen(listenfd, LISTENQ)) {
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
 		errno = GetLastError();
 #endif
-		printf("%d: Can'n listen() %s:%d: [%d] %s\n", pid, inet_ntoa(srvaddr.sin_addr), ntohs(srvaddr.sin_port), errno, strerror(errno));
+		printf("%d: Can'n listen() %s:%d: [%d] %s\n", (int)pid, inet_ntoa(srvaddr.sin_addr), ntohs(srvaddr.sin_port), errno, strerror(errno));
 		return -1;
 	}
 //	printf("listenfd: %d\n", listenfd);
@@ -260,7 +260,7 @@ int main (int argc, char **argv)
 		syslog(LOG_DEBUG, "daemonized\n");
 	} else
 #endif
-		printf("%d: Listening %s:%d\n", pid, inet_ntoa(srvaddr.sin_addr), port);
+		printf("%d: Listening %s:%d\n", (int)pid, inet_ntoa(srvaddr.sin_addr), port);
 
 	cmutex = new Mutex();
 	child_list_clear();
@@ -281,7 +281,7 @@ int main (int argc, char **argv)
 	//	printf("Sret = %d, err: %s\n", sret, strerror(errno));
 		if ( sret > 0 ) {
 			if ( FD_ISSET(listenfd, &rd_set) ) {
-// #ifndef _WIN32
+// #if !defined (_WIN32) && !defined (_WIN64)
 				children[cli_idx].arg.connfd = accept(listenfd,(struct sockaddr*) &children[cli_idx].arg.cliaddr, &cliaddr_len);
 /*
 #else
@@ -293,7 +293,7 @@ int main (int argc, char **argv)
 					continue;
 				}
 #if 0
-//#ifdef _WIN32
+// #if defined (_WIN32) || defined (_WIN64)
 			//	children[cli_idx].arg.connfd = _get_osfhandle( tconnfd );
 				children[cli_idx].arg.connfd = _open_osfhandle( tconnfd, _O_RDWR | _O_BINARY | _O_SEQUENTIAL);
 				// write(children[cli_idx].arg.connfd, "012345678\n", 10);
@@ -320,7 +320,7 @@ int main (int argc, char **argv)
 				clients++;
 				cmutex->unlock();	
 				if (debug && !daemonized)
-				printf("%d: Clients: %d\n", pid, clients);
+				printf("%d: Clients: %d\n", (int)pid, clients);
 			/*		for (int i=0; i<CLIENTS_MAX && cpids[i]!=cpid ; )
 					{ if (!cpids[i]) cpids[i]=cpid; else i++; } */
 			} else {
@@ -329,7 +329,7 @@ int main (int argc, char **argv)
 					syslog(LOG_ERR, "Error creating child process\n");
 				else
 #endif
-					printf("%d: Error creating child process\n", pid);
+					printf("%d: Error creating child process\n", (int)pid);
 			}
 		} else {
 			children[cli_idx].arg.used=0;
@@ -337,10 +337,10 @@ int main (int argc, char **argv)
 	}
 
 	if (debug && !daemonized)
-		printf("%d: Closing listen socket...\n",pid);
+		printf("%d: Closing listen socket...\n",(int)pid);
 	close(listenfd);
 
-	printf("%d: Waiting for children: %d remains...\n",pid,clients);
+	printf("%d: Waiting for children: %d remains...\n",(int)pid,clients);
 	for (int i=0; i<CLIENTS_MAX; i++ ) {
 		if (!children[i].arg.used) continue;
 //		printf("waiting for thread %d. used: %d\n", i, children[i].arg.used);
@@ -353,7 +353,8 @@ int main (int argc, char **argv)
 				printf(	"Error waiting for child %d\n", i);
 		}
 	}
-#ifdef _WIN32
+#if defined (_WIN32) || defined (_WIN64)
+
 	WSACleanup();
 #endif
 
@@ -363,7 +364,7 @@ int main (int argc, char **argv)
 		syslog(LOG_INFO, "Listener exit\n");
 	else
 #endif
-		printf("%d: Listener exit\n",pid);
+		printf("%d: Listener exit\n",(int)pid);
 #ifdef DAEMON_EN
 	if (daemonized) closelog();
 #endif

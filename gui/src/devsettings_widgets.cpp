@@ -30,7 +30,11 @@
 #include <QFileDialog>
 #include <QProcess>
 
+#if defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
+#else // in case legacy mingw32 ever works with Qt5, left this here
 #include <unistd.h>
+#endif
+
 #include <textslider.h>
 #include <progresswidget.h>
 #include <tattoowidget.h>

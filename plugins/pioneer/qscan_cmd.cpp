@@ -14,9 +14,11 @@
 
 #include <qscan_plugin.h>
 
-#include <qpx_transport.h>
 //#include <qpx_mmc.h>
+// changed order of these includes to avoid winsock2 warning on mingw64-32
 #include <common_functions.h>
+#include <qpx_transport.h>
+
 
 //#define _PIO_ERRC_DEBUG
 

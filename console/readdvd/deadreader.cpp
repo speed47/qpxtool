@@ -111,7 +111,7 @@ void usage(char* av0) {
 	printf("\t w  - save current sector map and continue\n\n");
 }
 
-#if defined (_WIN32)
+#if defined (_WIN32) || defined (_WIN64)
 BOOL WINAPI sigint_handler (DWORD) {
 	printf("\nSIGINT\n");
 	return true;
@@ -256,7 +256,7 @@ int main(int argc, char** argv)
     map = new smap(n_map, capacity);
     iso = new imgwriter(n_img, map);
 
-#if defined (_WIN32)
+#if defined (_WIN32) || defined (_WIN64)
 	SetConsoleCtrlHandler(&sigint_handler, 1);
 #endif
 

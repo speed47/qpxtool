@@ -1,13 +1,13 @@
 [Desktop Entry]
 Name=QPxTool
-GenericName=CD/DVD media quality checker
-GenericName[ru]=Проверка качества носителей CD/DVD
+GenericName=CD/DVD/BD media quality checker
+GenericName[ru]=Проверка качества носителей CD/DVD/BD
 Type=Application
 Exec=qpxtool
 Icon=qpxtool
-Comment=CD/DVD media quality checker
-Comment[ru]=Проверка качества носителей CD/DVD
+Comment=CD/DVD/BD media quality checker
+Comment[ru]=Проверка качества носителей CD/DVD/BD
 Categories=System;
 StartupNotify=true
 Terminal=false
-Keywords=CD/DVD;quality;test;
+Keywords=CD/DVD/BD;quality;test;

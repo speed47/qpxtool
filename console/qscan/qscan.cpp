@@ -19,13 +19,14 @@
 #include <strings.h>
 #include <signal.h>
 
-#include <qpx_mmc.h>
+// #include <qpx_mmc.h> // <-- already included via <qpx_scan.h>
 #include <qpx_scan.h>
 #include <plextor_features.h>
-
-#ifdef _WIN32
-#include <wincon.h>
-#endif
+// <wincon.h> already included via <qpx_scan.h> --> <qpx_mmc.h> -->
+// 							   <qpx_transport.h> --> <windows.h>
+// #if defined (_WIN32) || defined (_WIN64)
+// #include <wincon.h> 
+// endif
 
 #include "version.h"
 
@@ -81,7 +82,7 @@ void sigusr_handler (int signum) {
 	}
 }
 
-#elif defined (_WIN32)
+#elif defined (_WIN32) || defined (_WIN64)
 BOOL WINAPI sigint_handler (DWORD) {
 	printf("\nSIGINT\n");
 	if (scanner) {
@@ -777,7 +778,7 @@ int main(int argc, char** argv) {
 #ifdef USE_SIGUSR2
 		signal(SIGUSR2, &sigusr_handler);
 #endif
-#elif defined (_WIN32)
+#elif defined (_WIN32) || defined (_WIN64)
 		SetConsoleCtrlHandler(&sigint_handler, 1);
 #endif
 

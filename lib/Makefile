@@ -1,5 +1,5 @@
-all: qpxtransport qpxplextor qpxpioneer qpxyamaha qpxscan
 
+all: qpxtransport qpxplextor qpxpioneer qpxyamaha qpxscan
 
 #build targets
 qpxtransport:
