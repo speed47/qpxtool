@@ -119,7 +119,11 @@ static const drivedesclist drivelist =
 static const drivedesclist blacklist =
 {
 	{ "TEAC    ",  DEV_TEAC, "CD-W552E", 0 },
+/* HL-DT-ST has some compatible drives, such, for example,
+   HL-DT-ST WH16NS58 with firmware 1.V5, so let's probe these
+   drives too.
 	{ "HL-DT-ST",  DEV_LG,   "",		 0 },
+*/
 	{ "TSSTcorp",  DEV_TSST, "",		 0 },
 
 	{ "", 0, "", 0}
