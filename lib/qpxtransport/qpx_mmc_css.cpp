@@ -61,7 +61,7 @@
 #define DVD_DISCKEY_SIZE  2048
 
 // device commands
-int report_key(drive_info* drive, unsigned char key_class, unsigned char key_format, int len, unsigned int lba = 0);
+int report_key(drive_info* drive, unsigned char key_class, unsigned char key_format, int len, uint32_t lba = 0);
 int read_disc_key(drive_info* drive, unsigned char DK[DVD_DISCKEY_SIZE]);
 
 int css_report_agid(drive_info* );
@@ -71,14 +71,14 @@ int css_report_challenge(drive_info* );
 int css_send_challenge(drive_info* );
 int css_report_key1(drive_info* );
 int css_send_key2(drive_info* );
-int css_report_title_key(drive_info* drive, int lba, unsigned char* key);
+int css_report_title_key(drive_info* drive, uint32_t lba, unsigned char* key);
 int css_report_asf(drive_info* );
 
 // some functions from libdvdcss 
 
 //int css_disckey( drive_info* drive);
-//int css_title ( drive_info* drive, int lba );
-int css_titlekey( drive_info* drive, int lba, dvd_key_t p_title_key );
+//int css_title ( drive_info* drive, uint32_t lba );
+int css_titlekey( drive_info* drive, uint32_t lba, dvd_key_t p_title_key );
 int css_unscramble( dvd_key_t p_key, unsigned char *p_sec );
 
 int css_get_bus_key(drive_info* drive);
@@ -128,7 +128,7 @@ int i_success = 0;
  * deprecated dvdcss_title() call. This flag is typically used when seeking
  * in a new title.
  */
-int seek_dvd ( drive_info* drive, int lba, int flags )
+int seek_dvd ( drive_info* drive, uint32_t lba, int flags )
 {
     /* title cracking method is too slow to be used at each seek */
     if( ( ( flags & DVDCSS_SEEK_MPEG )
@@ -169,7 +169,7 @@ int seek_dvd ( drive_info* drive, int lba, int flags )
  *          #DVDCSS_BLOCK_SIZE bytes in \p p_buffer.
  */
 
-int read_dvd(drive_info* drive, unsigned char* data, int lba, int sector_count, int flags)
+int read_dvd(drive_info* drive, unsigned char* data, uint32_t lba, int sector_count, int flags)
 
 //	LIBDVDCSS_EXPORT int dvdcss_read ( dvdcss_t dvdcss, void *p_buffer,
 //                                          int i_blocks,
@@ -310,7 +310,7 @@ int read_disc_key(drive_info* drive, unsigned char DK[DVD_DISCKEY_SIZE])
 	return 0;
 }
 
-int report_key(drive_info* drive, unsigned char key_class, unsigned char key_format, int len, unsigned int lba)
+int report_key(drive_info* drive, unsigned char key_class, unsigned char key_format, int len, uint32_t lba)
 {
 	if (!(drive->rd_capabilities & DEVICE_DVD) || !(drive->capabilities & CAP_DVD_CSS)) return -1;
 
@@ -545,7 +545,7 @@ int css_send_key2(drive_info* drive)
 	return 0;
 }
 
-int css_report_title_key(drive_info* drive, int lba, unsigned char* key)
+int css_report_title_key(drive_info* drive, uint32_t lba, unsigned char* key)
 {
 	if (!(drive->capabilities & CAP_DVD_CSS)) return -1;
 
@@ -1757,7 +1757,7 @@ static int css_AttackPattern( unsigned char const p_sec[ DVDCSS_BLOCK_SIZE ], in
  * This function should only be called by dvdcss->pf_seek and should eventually
  * not be external if possible.
  *****************************************************************************/
-int css_title ( drive_info* drive, int lba)
+int css_title ( drive_info* drive, uint32_t lba)
 {
     dvd_title_t *p_title;
     dvd_title_t *p_newtitle;
@@ -1902,7 +1902,7 @@ int css_title ( drive_info* drive, int lba)
 /*****************************************************************************
  * _dvdcss_titlekey: get title key.
  *****************************************************************************/
-int css_titlekey( drive_info* drive, int lba, dvd_key_t p_title_key )
+int css_titlekey( drive_info* drive, uint32_t lba, dvd_key_t p_title_key )
 {
 //    static unsigned char p_garbage[ DVDCSS_BLOCK_SIZE ];  /* we never read it back */
     unsigned char p_key[ DVD_KEY_SIZE ];

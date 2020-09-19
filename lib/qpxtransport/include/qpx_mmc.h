@@ -49,7 +49,7 @@ typedef struct{
 typedef struct{
 	int	test;
 	int	idx;
-	int32_t	lba;
+	uint32_t	lba;
 	int	block,blocks;
 	float	speed_kb;
 	float	speed_x;
@@ -93,7 +93,7 @@ typedef uint8_t dvd_key_t[DVD_KEY_SIZE];
 
 typedef struct dvd_title_s
 {
-    int                 i_startlb;
+    uint32_t            i_startlb;
     dvd_key_t           p_key;
     struct dvd_title_s *p_next;
 } dvd_title_t;
@@ -427,8 +427,8 @@ extern int get_rpc_state(drive_info* drive);
 extern int read_disc_regions(drive_info* drive);
 
 extern int css_disckey( drive_info* drive);
-extern int css_title ( drive_info* drive, int32_t lba);
-//extern int css_titlekey( drive_info* drive, int lba, dvd_key_t p_title_key );
+extern int css_title ( drive_info* drive, uint32_t lba);
+//extern int css_titlekey( drive_info* drive, uint32_t lba, dvd_key_t p_title_key );
 //extern int css_unscramble( dvd_key_t p_key, uint8_t *p_sec );
 //extern void css_printkey (char *, uint8_t const * );
 
@@ -479,19 +479,19 @@ extern int set_lock(drive_info* drive);
 
 //extern void spinup(drive_info* drive);
 extern void spinup(drive_info* drive, uint8_t secs = 2);
-extern int seek(drive_info* drive, int32_t lba, uint8_t flags = 0);
+extern int seek(drive_info* drive, uint32_t lba, uint8_t flags = 0);
 extern int play_audio_msf(drive_info* drive, msf beg, msf end);
 extern int play_audio(drive_info* drive, int32_t beg, short int len);
-extern int read_cd(drive_info* drive, uint8_t *data, int32_t lba, int sector_count, uint8_t flags, uint8_t FUA = 0);
-extern int read(drive_info* drive, uint8_t *data, int32_t lba, int sector_count, uint8_t FUA = 0);
-extern int read_one_ecc_block(drive_info* drive, uint8_t *data, int32_t lba);
+extern int read_cd(drive_info* drive, uint8_t *data, uint32_t lba, int sector_count, uint8_t flags, uint8_t FUA = 0);
+extern int read(drive_info* drive, uint8_t *data, uint32_t lba, int sector_count, uint8_t FUA = 0);
+extern int read_one_ecc_block(drive_info* drive, uint8_t *data, uint32_t lba);
 extern int get_drive_serial_number(drive_info* drive);
 extern int get_buffer_capacity(drive_info* drive);
 extern int get_wbuffer_capacity(drive_info* drive, uint32_t *btot, uint32_t *bfree);
 extern int read_writer_info(drive_info* drive);
 
-extern int read_dvd(drive_info* drive, uint8_t *data, int32_t lba, int sector_count, int flags = 0);
-extern int seek_dvd( drive_info* drive, int32_t lba, int flags );
+extern int read_dvd(drive_info* drive, uint8_t *data, uint32_t lba, int sector_count, int flags = 0);
+extern int seek_dvd( drive_info* drive, uint32_t lba, int flags );
 
 extern int detect_mm_capabilities(drive_info* drive);
 //extern int detect_check_capabilities(drive_info* drive);

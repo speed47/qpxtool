@@ -750,9 +750,9 @@ void spinup(drive_info* drive, unsigned char secs) {
 	char use_readcd = 0;
 	const int  addt = 25;
 #ifdef SPINUP_REVERSE
-	int32_t lba = drive->media.capacity-1;
+	uint32_t lba = drive->media.capacity-1;
 #else
-	int32_t lba = 0;
+	uint32_t lba = 0;
 #endif
 	int blk = 16;
 	st = getmsecs() + addt;
@@ -2830,7 +2830,7 @@ int play_audio(drive_info* drive, int32_t beg, short int len){
 	return 0;
 }
 
-int seek(drive_info* drive, int32_t lba, unsigned char flags){
+int seek(drive_info* drive, uint32_t lba, unsigned char flags){
 	drive->cmd[0]=MMC_SEEK;
 	drive->cmd[2]=(lba>>24) & 0xFF;
 	drive->cmd[3]=(lba>>16) & 0xFF;
@@ -2844,7 +2844,7 @@ int seek(drive_info* drive, int32_t lba, unsigned char flags){
 }
 
 
-int read_cd(drive_info* drive, unsigned char *data, int32_t lba, int sector_count, unsigned char flags, unsigned char FUA) {
+int read_cd(drive_info* drive, unsigned char *data, uint32_t lba, int sector_count, unsigned char flags, unsigned char FUA) {
 //	int transfer_length = sector_count * 3072;
 
 //	int sect_data = 2352;
@@ -2868,7 +2868,7 @@ int read_cd(drive_info* drive, unsigned char *data, int32_t lba, int sector_coun
 	return 0;
 }
 
-int read(drive_info* drive, unsigned char *data, int32_t lba, int sector_count, unsigned char FUA) {
+int read(drive_info* drive, unsigned char *data, uint32_t lba, int sector_count, unsigned char FUA) {
 //	int transfer_length = sector_count * 3072;
 	int transfer_length = sector_count * 2048;
 	if (sector_count<0) return -1;
@@ -2884,7 +2884,7 @@ int read(drive_info* drive, unsigned char *data, int32_t lba, int sector_count, 
 	return 0;
 }
 
-int read_one_ecc_block(drive_info* drive, unsigned char *data, int32_t lba) {
+int read_one_ecc_block(drive_info* drive, unsigned char *data, uint32_t lba) {
 	drive->cmd[0] = MMC_READ;
 	drive->cmd[2] = (lba>>24) & 0xFF;
 	drive->cmd[3] = (lba>>16) & 0xFF;

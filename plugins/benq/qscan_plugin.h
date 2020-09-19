@@ -46,20 +46,20 @@ public:
     virtual int  check_test(unsigned int test);
     virtual int* get_test_speeds(unsigned int test);
     virtual int  start_test(unsigned int test, long slba, int &speed);
-    virtual int  scan_block(void* data,long* ilba);
+    virtual int  scan_block(void* data,uint32_t* ilba);
     virtual int  end_test();
 
     virtual const char* name() { return plugin_name; };
     virtual const char* desc() { return plugin_desc; };
 
 private:
-	long lba;
+	uint32_t lba;
 	int cmd_check_mode_init();
 	int cmd_check_mode_exit();
 	int cmd_get_result();
 	int cmd_set_speed(unsigned char sidx);
-	int cmd_start_errc(int lba);
-	int cmd_start_fete(int lba);
+	int cmd_start_errc(uint32_t lba);
+	int cmd_start_fete(uint32_t lba);
 
 	int cmd_read_block();
 	int cmd_getdata();

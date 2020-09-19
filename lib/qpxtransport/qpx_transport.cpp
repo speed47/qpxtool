@@ -72,7 +72,7 @@ long getusecs()
 
 #include <stdio.h>
 
-//#ifndef _WIN64 // these are already defined in x64 mingw not x86, needs investigation
+#ifndef _WIN64 // these are already defined in x64 mingw not x86
 #define EINVAL		ERROR_BAD_ARGUMENTS
 #define ENOMEM		ERROR_OUTOFMEMORY
 #define ENODEV		ERROR_BAD_COMMAND
@@ -80,7 +80,7 @@ long getusecs()
 #define ENOSPC		ERROR_DISK_FULL
 #define EIO			ERROR_NOT_SUPPORTED
 #define ENXIO		ERROR_GEN_FAILURE
-//#endif
+#endif
 
 static class _win32_errno {
     public:
@@ -691,10 +691,10 @@ Scsi_Command::~Scsi_Command()
 int	Scsi_Command::associate (const char *file,const struct stat *ref)
 {
 	char dev[32];
-	sprintf(dev,"%.*s\\",sizeof(dev)-2,file);
+	sprintf(dev,"%.*s\\",(int)sizeof(dev)-2,file);
 	if (GetDriveType(dev)!=DRIVE_CDROM)
 		return errno=EINVAL,0;
-	sprintf(dev,"\\\\.\\%.*s",sizeof(dev)-5,file);
+	sprintf(dev,"\\\\.\\%.*s",(int)sizeof(dev)-5,file);
 	fd=CreateFile (dev,GENERIC_WRITE|GENERIC_READ,
 			   FILE_SHARE_READ|FILE_SHARE_WRITE,
 			   NULL,OPEN_EXISTING,0,NULL);
@@ -771,6 +771,7 @@ int 	Scsi_Command::transport(Direction dir,void *buf,size_t sz)
 	return ret;
 }
 
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
 int	Scsi_Command::umount (int f)
 {
 	DWORD junk;
@@ -784,6 +785,7 @@ int	Scsi_Command::umount (int f)
 	}
 	return -1;
 }
+#pragma GCC diagnostic pop
 
 int	Scsi_Command::is_reload_needed ()	{   return 0;   }
 

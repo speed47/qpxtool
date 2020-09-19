@@ -98,7 +98,7 @@ int  scan_tsst::start_test(unsigned int itest, long ilba, int &speed){
 	return r;
 }
 
-int  scan_tsst::scan_block(void *data, long *ilba) {
+int  scan_tsst::scan_block(void *data, uint32_t *ilba) {
 	int r=-1;
 	switch (test) {
 		case CHK_ERRC_CD:

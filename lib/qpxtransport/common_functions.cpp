@@ -182,7 +182,7 @@ uint16_t to16u(unsigned char* c) 	 { return balign16u__internal((char*)c); };
 uint16_t to16u(int16_t c)		 { return (uint16_t)c; }
 uint16_t to16u(uint16_t c)		 { return c; }
 
-void lba2msf(int lba, msf* time){
+void lba2msf(uint32_t lba, msf* time){
 	time->m = lba/4500;
 	time->s = (lba/75)%60;
 	time->f = lba % 75;

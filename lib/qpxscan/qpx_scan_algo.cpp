@@ -26,7 +26,7 @@
 #define USE_FFLUSH
 
 //void qscanner::show_avg(struct timeval s, struct timeval e, long lba)
-void qscanner::show_avg_speed(long lba)
+void qscanner::show_avg_speed(uint32_t lba)
 {
 	double btime;
 	int spdKB;
@@ -130,7 +130,7 @@ int qscanner::run_rd_transfer()
 	bool    use_readcd = 0;
 	int     bsize = -1;
 	int     rsize = -1;
-	long	lba;
+	uint32_t lba;
 //	double	btime;
 	int		err=0;
 	int		br =0;
@@ -195,7 +195,7 @@ int qscanner::run_rd_transfer()
 //	wait_unit_ready(dev, 6);
 	msleep(300);
 	gettimeofday(&s, NULL);
-	printf("Reading blocks: %ld - %ld (%ld MB)\n", lba_sta, lba_end, (lba_end-lba_sta) >> 9);
+	printf("Reading blocks: %d - %d (%d MB)\n", lba_sta, lba_end, (lba_end-lba_sta) >> 9);
 	gettimeofday(&blks, NULL);
 #ifdef USE_FFLUSH
 	fflush(stdout);
@@ -224,7 +224,7 @@ int qscanner::run_rd_transfer()
 			spdX  = spdKB/(float)spd1X;
 			*/
 			calc_cur_speed( br );
-			printf("lba: %7ld    speed: %6.2f X  %6d kB/s\r", lba, spdX, spdKB);
+			printf("lba: %d    speed: %6.2f X  %6d kB/s\r", lba, spdX, spdKB);
 #ifdef USE_FFLUSH
 			fflush(stdout);
 #endif
@@ -342,7 +342,7 @@ int qscanner::run_wr_transfer()
 	int32_t bsize = 0;
 	int32_t wsize = 0;
 	uint32_t ubuft, ubuff, ubufp = 0;
-	int32_t lba;
+	uint32_t lba;
 //	double	btime;
 	int		err=0;
 
@@ -376,7 +376,7 @@ int qscanner::run_wr_transfer()
 	printf("Write buffer capacity: %d kB\n", ubuft >> 10);
 
 	wait_unit_ready(dev, 6);
-	printf("Writing blocks: %ld - %ld (%ld MB)\n", lba_sta, lba_end, (lba_end-lba_sta) >> 9);
+	printf("Writing blocks: %d - %d (%d MB)\n", lba_sta, lba_end, (lba_end-lba_sta) >> 9);
 
 	dev->parms.write_speed_kb = speed * spd1X;
 	set_rw_speeds(dev);
@@ -431,7 +431,7 @@ int qscanner::run_wr_transfer()
 			spdX  = spdKB/(float)spd1X;
 			*/
 			calc_cur_speed(((lba-1)%bsize) + 1);
-			printf("lba: %7d    speed: %6.2f X  %6d kB/s, written: %4ldMB/%4ldMB, Ubuf: %3d%%\r",
+			printf("lba: %7d    speed: %6.2f X  %6d kB/s, written: %4dMB/%4dMB, Ubuf: %3d%%\r",
 					lba, spdX, spdKB, (lba-lba_sta) >> 9, (lba_end-lba_sta) >> 9, ubufp);
 			gettimeofday(&blks, NULL);
 			stat_req=0;
@@ -470,8 +470,8 @@ int qscanner::run_cd_errc()
 {
     cd_errc err, err_tot, err_max;
 	int  errc_data;
-    long lba=lba_sta;
-    long lbao;
+    uint32_t lba=lba_sta;
+    uint32_t lbao;
     if (!attached) return -1;
     if (!(dev->media.type & DISC_CD)) return 1;
     lba=0;
@@ -486,7 +486,7 @@ int qscanner::run_cd_errc()
     spd1X = 150;
     gettimeofday(&s, NULL);
     wait_unit_ready(dev, 6);
-    printf("\nTesting %ld sectors: %ld - %ld\n", lba_end-lba_sta+1, lba_sta, lba_end);
+    printf("\nTesting %d sectors: %d - %d\n", lba_end-lba_sta+1, lba_sta, lba_end);
     printf("         lba |        speed        |  BLER |  E11   E21   E31  |  E12   E22   E32  |  UNCR\n");
     for (; (!stop_req) && lba<lba_end; )
     {
@@ -496,7 +496,7 @@ int qscanner::run_cd_errc()
 			{ printf("\nBlock scan error! terminating...\n"); stop_req=1; }
 		gettimeofday(&blke, NULL);
 		calc_cur_speed(lba-lbao);
-		printf("cur : %6ld | %6.2f X %5d kB/s | %5ld | %5ld %5ld %5ld | %5ld %5ld %5ld | %5ld\r", lba, spdX, spdKB,
+		printf("cur : %6d | %6.2f X %5d kB/s | %5ld | %5ld %5ld %5ld | %5ld %5ld %5ld | %5ld\r", lba, spdX, spdKB,
 				err.bler,
 				err.e11,err.e21,err.e31,
 				err.e12,err.e22,err.e32,
@@ -510,7 +510,7 @@ int qscanner::run_cd_errc()
     plugin->end_test();
     gettimeofday(&e, NULL);
     show_avg_speed(lba);
-    printf("\n%ld sectors tested: %ld - %ld\n", lba-lba_sta, lba_sta, lba-1);
+    printf("\n%d sectors tested: %d - %d\n", lba-lba_sta, lba_sta, lba-1);
     printf("Test summary:\n");
     printf("       BLER |  E11   E21   E31  |  E12   E22   E32  |  UNCR\n");
     printf("tot : %5ld | %5ld %5ld %5ld | %5ld %5ld %5ld | %5ld\n",
@@ -537,8 +537,8 @@ int qscanner::run_cd_errc()
 int qscanner::run_cd_jb()
 {
     cdvd_jb jb, jb_min, jb_max;
-    long lba=lba_sta;
-    long lbao;
+    uint32_t lba=lba_sta;
+    uint32_t lbao;
     if (!attached) return -1;
     if (!(dev->media.type & DISC_CD)) return 1;
 //    seek(dev,lba);
@@ -551,7 +551,7 @@ int qscanner::run_cd_jb()
     spd1X = 150;
     gettimeofday(&s, NULL);
     wait_unit_ready(dev, 6);
-    printf("\nTesting %ld sectors: %ld - %ld\n", lba_end-lba_sta+1, lba_sta, lba_end);
+    printf("\nTesting %d sectors: %d - %d\n", lba_end-lba_sta+1, lba_sta, lba_end);
     printf("         lba |        speed        | Jitter |  Asymm\n");
     for (; (!stop_req) && lba<lba_end; )
     {
@@ -561,7 +561,7 @@ int qscanner::run_cd_jb()
 			{ printf("\nBlock scan error! terminating...\n"); stop_req=1; }
 		gettimeofday(&blke, NULL);
 		calc_cur_speed(lba-lbao);
-		printf("cur : %6ld | %6.2f X %5d kB/s | %6.2f | %6.2f\r", lba, spdX, spdKB, jb.jitter/1000.0, jb.asymm/10.0);
+		printf("cur : %6d | %6.2f X %5d kB/s | %6.2f | %6.2f\r", lba, spdX, spdKB, jb.jitter/1000.0, jb.asymm/10.0);
 		jb_min.EMIN(jb);
 		jb_max.EMAX(jb);
 #ifdef USE_FFLUSH
@@ -571,7 +571,7 @@ int qscanner::run_cd_jb()
     plugin->end_test();
     gettimeofday(&e, NULL);
     show_avg_speed(lba);
-    printf("\n%ld sectors tested: %ld - %ld\n", lba-lba_sta, lba_sta, lba-1);
+    printf("\n%d sectors tested: %d - %d\n", lba-lba_sta, lba_sta, lba-1);
     printf("Test summary:\n");
     printf("               Jitter |  Asymm\n");
     printf("         min : %6.2f | %6.2f\n", jb_min.jitter/100.0, jb_min.asymm/10.0);
@@ -601,9 +601,9 @@ int qscanner::run_dvd_errc()
 {
     dvd_errc err, err_tot, err_max;
     int  errc_data;
-    long lba=lba_sta;
-    long lbas;
-    long lbao;
+    uint32_t lba=lba_sta;
+    uint32_t lbas;
+    uint32_t lbao;
     long pi8=0, pi8_max=0;
     long po8=0, po8_max=0;
     if (!attached) return -1;
@@ -621,7 +621,7 @@ int qscanner::run_dvd_errc()
     gettimeofday(&s, NULL);
     wait_unit_ready(dev, 6);
     lbas = lba;
-    printf("\nTesting %ld sectors: %ld - %ld\n", lba_end-lba_sta+1, lba_sta, lba_end);
+    printf("\nTesting %d sectors: %d - %d\n", lba_end-lba_sta+1, lba_sta, lba_end);
     printf("          lba |        speed        |  PIE   PI8   PIF  |  POE   PO8   POF  |  UNCR\n");
     for (; (!stop_req) && lba<lba_end; )
     {
@@ -639,7 +639,7 @@ int qscanner::run_dvd_errc()
 		if ((lba-lbas) >= 0x80) {
 			if (pi8_max<pi8) pi8_max=pi8;
 			if (po8_max<po8) po8_max=po8;
-	    		printf("cur : %7ld | %6.2f X %5d kB/s | %5ld %5ld %5ld | %5ld %5ld %5ld | %5ld\r",
+	    		printf("cur : %7d | %6.2f X %5d kB/s | %5ld %5ld %5ld | %5ld %5ld %5ld | %5ld\r",
 					lba, spdX, spdKB,
 					err.pie,pi8,err.pif,
 					err.poe,po8,err.pof,
@@ -647,7 +647,7 @@ int qscanner::run_dvd_errc()
 			pi8=0; po8=0;
 			lbas = lba;
 		} else {
-			printf("cur : %7ld | %6.2f X %5d kB/s | %5ld %5ld %5ld | %5ld %5ld %5ld | %5ld\r",
+			printf("cur : %7d | %6.2f X %5d kB/s | %5ld %5ld %5ld | %5ld %5ld %5ld | %5ld\r",
 					lba, spdX, spdKB,
 					err.pie,(long)-1,err.pif,
 					err.poe,(long)-1,err.pof,
@@ -660,7 +660,7 @@ int qscanner::run_dvd_errc()
     plugin->end_test();
     gettimeofday(&e, NULL);
     show_avg_speed(lba);
-    printf("\n%ld sectors tested: %ld - %ld\n", lba-lba_sta, lba_sta, lba-1);
+    printf("\n%d sectors tested: %d - %d\n", lba-lba_sta, lba_sta, lba-1);
     printf("Test summary:\n");
     printf("       PIE   PI8   PIF  |  POE   PO8   POF  |  UNCR\n");
     printf("tot : %5ld %5ld %5ld | %5ld %5ld %5ld | %5ld\n",
@@ -684,8 +684,8 @@ int qscanner::run_dvd_errc()
 int qscanner::run_dvd_jb()
 {
     cdvd_jb jb, jb_min, jb_max;
-    long lba=lba_sta;
-    long lbao;
+    uint32_t lba=lba_sta;
+    uint32_t lbao;
     if (!attached) return -1;
     if (!(dev->media.type & DISC_DVD)) return 1;
 //    seek(dev,lba);
@@ -698,7 +698,7 @@ int qscanner::run_dvd_jb()
     spd1X = 1385;
     gettimeofday(&s, NULL);
     wait_unit_ready(dev, 6);
-    printf("\nTesting %ld sectors: %ld - %ld\n", lba_end-lba_sta+1, lba_sta, lba_end);
+    printf("\nTesting %d sectors: %d - %d\n", lba_end-lba_sta+1, lba_sta, lba_end);
     printf("         lba |        speed        | Jitter |  Asymm\n");
     for (; (!stop_req) && lba<lba_end; )
     {
@@ -708,7 +708,7 @@ int qscanner::run_dvd_jb()
 			{ printf("\nBlock scan error! terminating...\n"); stop_req=1; }
 		gettimeofday(&blke, NULL);
 		calc_cur_speed(lba-lbao);
-		printf("cur : %6ld | %6.2f X %5d kB/s | %6.2f | %6.2f\r", lba, spdX, spdKB, jb.jitter/1000.0, jb.asymm/10.0);
+		printf("cur : %6d | %6.2f X %5d kB/s | %6.2f | %6.2f\r", lba, spdX, spdKB, jb.jitter/1000.0, jb.asymm/10.0);
 		jb_min.EMIN(jb);
 		jb_max.EMAX(jb);
 #ifdef USE_FFLUSH
@@ -718,7 +718,7 @@ int qscanner::run_dvd_jb()
     plugin->end_test();
     gettimeofday(&e, NULL);
     show_avg_speed(lba);
-    printf("\n%ld sectors tested: %ld - %ld\n", lba-lba_sta, lba_sta, lba-1);
+    printf("\n%d sectors tested: %d - %d\n", lba-lba_sta, lba_sta, lba-1);
     printf("Test summary:\n");
     printf("               Jitter |  Asymm\n");
     printf("         min : %6.2f | %6.2f\n", jb_min.jitter/100.0, jb_min.asymm/10.0);
@@ -734,8 +734,8 @@ int qscanner::run_dvd_jb()
 int qscanner::run_fete()
 {
     struct cdvd_ft ft, ft_max, ft_min;
-    long lba=lba_sta;
-    long lbao;
+    uint32_t lba=lba_sta;
+    uint32_t lbao;
 	int retry = MAX_RETRY;
     if (!attached) return -1;
     if (dev->media.type & DISC_CD) {
@@ -760,7 +760,7 @@ int qscanner::run_fete()
     }
     gettimeofday(&s, NULL);
 //    wait_unit_ready(dev, 6);
-    printf("\nTesting %ld sectors: %ld - %ld\n", lba_end-lba_sta+1, lba_sta, lba_end);
+    printf("\nTesting %d sectors: %d - %d\n", lba_end-lba_sta+1, lba_sta, lba_end);
     printf("         lba |        speed        |  FE  |  TE\n");
 	gettimeofday(&blks, NULL);
     for (; (!stop_req) && lba<lba_end; )
@@ -786,7 +786,7 @@ block_retry:
 		ft_max.EMAX(ft);
 		calc_cur_speed(lba-lbao);
 //		 show current data
-		printf("cur : %6ld | %6.2f X %5d kB/s | %4d | %4d\n", lba, spdX, spdKB, ft.fe, ft.te);
+		printf("cur : %6d | %6.2f X %5d kB/s | %4d | %4d\n", lba, spdX, spdKB, ft.fe, ft.te);
 		blks.tv_sec  = blke.tv_sec;
 		blks.tv_usec = blke.tv_usec;
 #ifdef USE_FFLUSH
@@ -796,7 +796,7 @@ block_retry:
     plugin->end_test();
     gettimeofday(&e, NULL);
     show_avg_speed(lba);
-    printf("\n%ld sectors tested: %ld - %ld\n", lba-lba_sta, lba_sta, lba-1);
+    printf("\n%d sectors tested: %d - %d\n", lba-lba_sta, lba_sta, lba-1);
     printf("Test summary:\n");
     printf("       FE  |  TE\n");
 	printf("max : %4d | %4d\n", ft_max.fe, ft_max.te);
@@ -809,7 +809,7 @@ block_retry:
 int qscanner::run_dvd_ta()
 {
 	struct cdvd_ta ta;
-	long   lba;
+	uint32_t lba;
     if (!attached) return -1;
     if (!(dev->media.type & DISC_DVD)) return 1;
 	printf("Running DVD Time Analyser test...\n");
@@ -839,9 +839,9 @@ int qscanner::run_bd_errc()
 {
     bd_errc err, err_tot, err_max;
     int  errc_data;
-    long lba=lba_sta;
-    long lbas;
-    long lbao;
+    uint32_t lba=lba_sta;
+    uint32_t lbas;
+    uint32_t lbao;
     if (!attached) return -1;
     if (!(dev->media.type & DISC_BD)) return 1;
 //    lba=0; slba=0;
@@ -857,7 +857,7 @@ int qscanner::run_bd_errc()
     gettimeofday(&s, NULL);
     wait_unit_ready(dev, 6);
     lbas = lba;
-    printf("\nTesting %ld sectors: %ld - %ld\n", lba_end-lba_sta+1, lba_sta, lba_end);
+    printf("\nTesting %d sectors: %d - %d\n", lba_end-lba_sta+1, lba_sta, lba_end);
     printf("          lba |        speed        |  LDC   BIS  |  UNCR\n");
     for (; (!stop_req) && lba<lba_end; )
     {
@@ -870,7 +870,7 @@ int qscanner::run_bd_errc()
 		gettimeofday(&blke, NULL);
 		calc_cur_speed(lba-lbao);
 //		if (!(lba & 0x7F)) {
-		printf("cur : %7ld | %6.2f X %5d kB/s | %5ld %5ld | %5ld\r",
+		printf("cur : %7d | %6.2f X %5d kB/s | %5ld %5ld | %5ld\r",
 				lba, spdX, spdKB,
 				err.ldc,err.bis,
 				err.uncr);
@@ -881,7 +881,7 @@ int qscanner::run_bd_errc()
     plugin->end_test();
     gettimeofday(&e, NULL);
     show_avg_speed(lba);
-    printf("\n%ld sectors tested: %ld - %ld\n", lba-lba_sta, lba_sta, lba-1);
+    printf("\n%d sectors tested: %d - %d\n", lba-lba_sta, lba_sta, lba-1);
     printf("Test summary:\n");
     printf("       LDC   BIS  |  UNCR\n");
     printf("tot : %5ld %5ld | %5ld\n",

@@ -141,7 +141,7 @@ int  scan_nec::start_test(unsigned int itest, long ilba, int &speed)
 	return r;
 }
 
-int scan_nec::scan_block(void *data, long *ilba)
+int scan_nec::scan_block(void *data, uint32_t *ilba)
 {
 	int r=-1;
 	switch (test) {

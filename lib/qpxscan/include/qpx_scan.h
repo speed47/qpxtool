@@ -67,14 +67,14 @@ public:
 private:
 	bool	stop_req, stat_req;
 	struct	timeval	s,e,blks,blke;
-	long	lba_sta, lba_end;
+	uint32_t        lba_sta, lba_end;
 	int		spd1X;
 	int		spdKB;
 	float   spdX;
 	bool	WT_simul;
 
 	//void	show_avg(struct timeval s, struct timeval e, long lba);
-	void	show_avg_speed(long lba);
+	void	show_avg_speed(uint32_t lba);
 	//void	calc_cur_speed(long sects, int* spdKB, float* spdX);
 	void	calc_cur_speed(long sects);
 

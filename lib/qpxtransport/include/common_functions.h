@@ -41,8 +41,10 @@
 
 #ifndef _SOCKLEN_T
 typedef int socklen_t;
-#define EADDRINUSE		WSAEADDRINUSE
-#define ECONNABORTED	WSAECONNABORTED
+#ifndef _WIN64 // already defined in mingw x86_64
+//#define EADDRINUSE		WSAEADDRINUSE
+//#define ECONNABORTED	WSAECONNABORTED
+#endif
 
 #define SHUT_RD			SD_RECEIVE
 #define SHUT_WR			SD_SEND
@@ -228,7 +230,7 @@ extern uint16_t to16u(uint16_t c_);
 #endif
 
 
-extern void lba2msf(int lba,  msf* time);
+extern void lba2msf(uint32_t lba,  msf* time);
 extern int  msf2lba(msf time);
 extern void int2hms(int intt, hms* time);
 
@@ -250,6 +252,7 @@ extern void int2hms(int intt, hms* time);
 #ifndef min
 #define min(a,b) (((a) < (b)) ? (a) : (b))
 #endif
+#define min_u32 min
 
 extern int inet_aton(const char *cp, struct in_addr *addr);
 
@@ -259,6 +262,7 @@ extern uint32_t min_u32(uint32_t a, uint32_t b);
 extern int min(int a, int b);
 extern int max(int a, int b);
 #endif
+#define min_u32 min
 
 extern void remove_double_spaces(char* str);
 extern void remove_end_spaces(char* str);

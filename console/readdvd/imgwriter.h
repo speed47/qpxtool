@@ -19,7 +19,7 @@ class imgwriter {
 public:
 	imgwriter(char* fn, smap* map);
 	~imgwriter();
-	int	write(int lba, int scnt, int ssz, void* buff);
+	int	write(uint32_t lba, int scnt, int ssz, void* buff);
 //	void	set_file(char* fn);
 //	int	open();
 //	int	close();

@@ -78,7 +78,7 @@ int scan_nec::cmd_bd_errc_init() {
 // **********************
 int scan_nec::cmd_cd_errc_block(cd_errc *data)
 {
-	long tlba;
+	uint32_t tlba;
 	dev->cmd[0] = 0xF3;
 	dev->cmd[1] = 0x03;
 	if ((dev->err=dev->cmd.transport(READ,dev->rd_buf,8))){

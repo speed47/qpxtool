@@ -166,6 +166,7 @@ int WIN32_thread_create(HANDLE *tid, void *attr, void*(*func)(void*), void* arg)
 	else		 return 0;
 };
 
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
 int WIN32_thread_join(HANDLE& tid, void **ret)
 {
 	DWORD	tret;
@@ -178,6 +179,7 @@ int WIN32_thread_join(HANDLE& tid, void **ret)
 	tid = NULL;
 	return 0;
 };
+#pragma GCC diagnostic pop
 
 #endif
 

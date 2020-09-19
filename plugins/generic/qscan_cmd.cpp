@@ -20,7 +20,7 @@
 #include "qscan_plugin.h"
 
 //int scan_generic::cmd_cd_errc_block(cd_errc *data)
-int scan_generic::c2calc(unsigned char* buf, unsigned int lba, unsigned char sects)
+int scan_generic::c2calc(unsigned char* buf, uint32_t lba, unsigned char sects)
 {
 	const unsigned int sect_data = 2352;
 	const unsigned int sect_err  = 294;

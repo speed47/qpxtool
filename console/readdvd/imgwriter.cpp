@@ -41,7 +41,7 @@ imgwriter::~imgwriter() {
 	delete mutex;
 }
 
-int imgwriter::write(int lba, int scnt, int ssz, void* buff) {
+int imgwriter::write(uint32_t lba, int scnt, int ssz, void* buff) {
     int res=0;
 #if defined(HAVE_FSEEKO) && defined(OFFT_64BIT)
 	off_t   offs = ssz*(off_t)lba;
@@ -61,7 +61,7 @@ int imgwriter::write(int lba, int scnt, int ssz, void* buff) {
 		if (fseek(iso, offs, SEEK_SET))
 #endif
 		{
-		    printf("\nseek() failed! Offs: %ld (%08lX)\n", offs, offs);
+		    printf("\nseek() failed! Offs: %lld (%08llX)\n", offs, offs);
 			mutex->unlock();
 		    return 0;
 		}

@@ -94,7 +94,7 @@ int scan_benq::cmd_set_speed(unsigned char sidx)
 	return (cmd_get_result());
 }
 
-int scan_benq::cmd_start_errc(int lba)
+int scan_benq::cmd_start_errc(uint32_t lba)
 {
 	dev->rd_buf[0] = 0xD4;
 	dev->rd_buf[1] = 0x91;
@@ -115,7 +115,7 @@ int scan_benq::cmd_start_errc(int lba)
 	return (cmd_get_result());
 }
 
-int scan_benq::cmd_start_fete(int lba)
+int scan_benq::cmd_start_fete(uint32_t lba)
 {
 	dev->cmd[0] = 0xFD;
 	dev->cmd[1] = 0xFB;
@@ -337,7 +337,8 @@ int scan_benq::cmd_getdata()
 
 int scan_benq::cmd_cd_errc_block(cd_errc *data)
 {
-	int i,m,s,f,plba;
+	int i,m,s,f;
+	uint32_t plba;
 #ifdef _BENQ_DEBUG
 	printf("benq_cx_do_one_interval. LBA=%d\n",lba);
 #endif
@@ -411,7 +412,8 @@ int benq_jitter_CD_do_one_interval(dev_info* dev, int* lba, int* jitter, short i
 
 int scan_benq::cmd_dvd_errc_block(dvd_errc *data)
 {
-	int i,plba;
+	int i;
+	uint32_t plba;
 //	int pif;
 #ifdef _BENQ_DEBUG
 	printf("benq_pie_pif_do_one_interval. LBA=%d\n",lba);

@@ -61,13 +61,13 @@ public:
     virtual int  check_test(unsigned int test);
     virtual int* get_test_speeds(unsigned int test);
     virtual int  start_test(unsigned int test, long slba, int &speed);
-    virtual int  scan_block(void* data,long* ilba);
+    virtual int  scan_block(void* data,uint32_t* ilba);
     virtual int  end_test();
 
     virtual const char* name() { return plugin_name; };
     virtual const char* desc() { return plugin_desc; };
 private:
-	long lba;
+	uint32_t lba;
 	int fete_idx;
 	int fete_rsize;
 /*

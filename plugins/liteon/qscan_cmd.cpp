@@ -381,7 +381,7 @@ int scan_liteon::cmd_cd_fete_block(cdvd_ft *data) {
 
 // current lba redout
 	if (cmd_fete_get_position()) return 1;
-	int tlba = (((dev->rd_buf[0] >> 4) & 0x0F) * 10 + (dev->rd_buf[0] & 0x0F)) * 60 * 75 +
+	uint32_t tlba = (((dev->rd_buf[0] >> 4) & 0x0F) * 10 + (dev->rd_buf[0] & 0x0F)) * 60 * 75 +
 		  (((dev->rd_buf[1] >> 4) & 0x0F) * 10 + (dev->rd_buf[1] & 0x0F)) * 75 +
 		  (((dev->rd_buf[2] >> 4) & 0x0F) * 10 + (dev->rd_buf[2] & 0x0F));
 

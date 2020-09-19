@@ -105,7 +105,7 @@ int  scan_asus::start_test(unsigned int itest, long ilba, int &speed)
 	}
 }
 
-int  scan_asus::scan_block(void *data, long *ilba)
+int  scan_asus::scan_block(void *data, uint32_t *ilba)
 {
 	int r=-1;
 	switch (test) {

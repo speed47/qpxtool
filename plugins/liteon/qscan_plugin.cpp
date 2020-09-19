@@ -124,7 +124,7 @@ int  scan_liteon::start_test(unsigned int itest, long ilba, int &speed)
 	}
 }
 
-int  scan_liteon::scan_block(void *data, long *ilba)
+int  scan_liteon::scan_block(void *data, uint32_t *ilba)
 {
 	int r=-1;
 	switch (test) {

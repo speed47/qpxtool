@@ -267,7 +267,7 @@ public:
     virtual int  errc_data()=0;
     virtual int* get_test_speeds(unsigned int test) { return NULL; };
     virtual int  start_test(unsigned int test, long slba, int &speed)=0;
-    virtual int  scan_block(void* data, long* ilba)=0;
+    virtual int  scan_block(void* data, uint32_t* ilba)=0;
     virtual int  end_test()=0;
 
     virtual const char* name()=0;
