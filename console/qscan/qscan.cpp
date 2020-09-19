@@ -402,9 +402,9 @@ int main(int argc, char** argv) {
 		check_write_modes(dev);
 	}
 	if (flags & FL_INFO) {
-		printf(IDEV "Device Generic capabilities : 0x%016llX\n",dev->capabilities);
-		printf(IDEV "Device Read capabilities    : 0x%016llX\n",dev->rd_capabilities);
-		printf(IDEV "Device Write capabilities   : 0x%016llX\n",dev->wr_capabilities);
+		printf(IDEV "Device Generic capabilities : 0x%016" PRIX64 "\n",dev->capabilities);
+		printf(IDEV "Device Read capabilities    : 0x%016" PRIX64 "\n",dev->rd_capabilities);
+		printf(IDEV "Device Write capabilities   : 0x%016" PRIX64 "\n",dev->wr_capabilities);
 	}
 
 	if (dev->wr_capabilities) {

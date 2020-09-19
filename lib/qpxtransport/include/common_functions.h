@@ -262,7 +262,6 @@ extern uint32_t min_u32(uint32_t a, uint32_t b);
 extern int min(int a, int b);
 extern int max(int a, int b);
 #endif
-#define min_u32 min
 
 extern void remove_double_spaces(char* str);
 extern void remove_end_spaces(char* str);
