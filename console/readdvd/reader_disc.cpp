@@ -569,6 +569,8 @@ exit_reader:
 	printf("%s: exit\n", dev->device);
     parm->running=0;
     parm->result=1;
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
     thread_exit(parm->result);
+#pragma GCC diagnostic pop
 }
 

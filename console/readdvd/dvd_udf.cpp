@@ -1077,11 +1077,12 @@ uint32_t UDFFindFile( udf_t *udf, char *filename,
     token = strtok(tokenline, "/");
     
     while( token != NULL ) {
-      
+      ICB.Length = 0;
       if( !UDFScanDir( udf, File, token, &partition, &ICB,
                        cache_file_info)) {
         return 0;
       }
+      if (!ICB.Length) return 0; // make gcc happy (-Wmaybe-uninitialized)
       if( !UDFMapICB( udf, ICB, &filetype, &partition, &File ) ) {
         return 0;
       }

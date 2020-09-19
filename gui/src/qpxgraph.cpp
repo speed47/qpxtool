@@ -834,7 +834,7 @@ void QPxGraph::drawGrid(QPainter* p, const QSize& s, device *dev, int ttype)
 	float HscaleX;
 	bool  isCD = 0;
 	int	  spdMax;
-	int   GBperLayer;
+	int   GBperLayer = 0;
 //	TestData* data;
 	QFont dfont = p->font();
 	QFont lfont = dfont;

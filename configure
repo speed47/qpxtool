@@ -194,7 +194,7 @@ check_offset64()
 			#include <stdio.h>
 			#include <unistd.h>
 			int main(int ac, char** av) {
-				printf(\"%d\", sizeof(off_t));
+				printf(\"%zu\", sizeof(off_t));
 			return 0; }
 	" > $TMPC
 
@@ -380,8 +380,12 @@ LIBS_THREAD = $OSLIBS_THREAD
 LPNG_INC  = $lpng_iopts
 LPNG_LIB  = $lpng_ldflags
 " >> Makefile
-	echo "CXXFLAGS += -Wall -O2 $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
-	echo "CFLAGS   += -Wall -O2 $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
+	echo "WFLAGS    = -Wall -Werror" >> Makefile
+	echo "WFLAGS   += -Wno-unused-but-set-variable -Wno-format-truncation -Wno-error=cpp" >> Makefile
+	echo "WFLAGS   += -Wno-misleading-indentation -Wno-unused-result -Wno-unused-parameter" >> Makefile
+	echo "WFLAGS   += -Wno-deprecated-copy -Wno-literal-suffix" >> Makefile
+	echo "CXXFLAGS += \$(WFLAGS) -O2 $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
+	echo "CFLAGS   += \$(WFLAGS) -O2 $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
 
 	if test "$__enable_debug" = "yes" ; then
 		echo "# additional debug options" >> Makefile

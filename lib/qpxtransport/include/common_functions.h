@@ -255,6 +255,7 @@ extern int inet_aton(const char *cp, struct in_addr *addr);
 
 #else  // not WIN32
 #define msleep(t) usleep((t) << 10)
+extern uint32_t min_u32(uint32_t a, uint32_t b);
 extern int min(int a, int b);
 extern int max(int a, int b);
 #endif

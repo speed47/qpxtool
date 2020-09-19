@@ -20,8 +20,10 @@
 #include "common_functions.h"
 #include "qpx_opcodes.h"
 
-typedef char	str_vendor[9];
-typedef char	str_dev[16];
+#define STR_VENDOR_SZ 9
+typedef char	str_vendor[STR_VENDOR_SZ];
+#define STR_DEV_SZ 16
+typedef char	str_dev[STR_DEV_SZ];
 
 struct dev_desc {
 	str_dev name;

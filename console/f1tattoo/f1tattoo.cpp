@@ -133,7 +133,7 @@ static int my_png_get_rowbytes(png_structp png_ptr, png_infop info_ptr)
 #endif
 }
 
-bool tattoo_read_png(unsigned char *buf, uint32_t rows, FILE *fp)
+bool tattoo_read_png(unsigned char *buf, int rows, FILE *fp)
 {
 	png_byte	header[8];	// 8 is the maximum size that can be checked
 	png_structp	png_ptr;
@@ -144,7 +144,7 @@ bool tattoo_read_png(unsigned char *buf, uint32_t rows, FILE *fp)
 //	unsigned char *tp = NULL;
 
 //	int width;
-	uint32_t row, col;
+	int      row, col;
 	int      c;
 	int32_t  r,g,b;
 	int num_palette;
@@ -185,7 +185,7 @@ bool tattoo_read_png(unsigned char *buf, uint32_t rows, FILE *fp)
 
 	png_read_info(png_ptr, info_ptr);
 
-	printf("Image size: %ld x %ld\n",
+	printf("Image size: %d x %d\n",
 					my_png_get_image_width(png_ptr, info_ptr),
 					my_png_get_image_height(png_ptr, info_ptr));
 
@@ -246,7 +246,7 @@ bool tattoo_read_png(unsigned char *buf, uint32_t rows, FILE *fp)
 	} else {
 		printf("Palette   : NO\n");
 	}
-	printf("ROW bytes : %ld\n", my_png_get_rowbytes(png_ptr, info_ptr));
+	printf("ROW bytes : %d\n", my_png_get_rowbytes(png_ptr, info_ptr));
 
 
 	raw_row_pointer = buf;
@@ -257,7 +257,7 @@ bool tattoo_read_png(unsigned char *buf, uint32_t rows, FILE *fp)
 			goto err_read_png;
 		}
 		png_read_row(png_ptr, png_row_pointer, NULL);
-		if (my_png_get_image_width(png_ptr, info_ptr) < 3744U)
+		if (my_png_get_image_width(png_ptr, info_ptr) < 3744)
 			memset(raw_row_pointer, 0, 3744);
 
 		switch (my_png_get_color_type(png_ptr, info_ptr)) {

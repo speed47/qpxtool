@@ -427,7 +427,7 @@ void QPxToolMW::selectTab()
 	int idx;
 	QAction *act = (QAction*) sender();
 	idx = act_sblist.indexOf(act);
-	if (act<0) return;
+	if (idx<0) return;
 	mwidget->selectTab(idx);
 }
 

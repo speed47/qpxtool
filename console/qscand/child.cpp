@@ -268,7 +268,7 @@ void child_proc(child_arg_t *arg)
 				linet+=4;
 				len = strlen(linet);
 				if (len<sizeof(device)) {
-					strncpy(device, linet, len-1);
+					strncpy(device, linet, sizeof(device)-1);
 				} else {
 					sprintf(lineo, "QSCAND: too long device name!\n");
 #if defined (_WIN32) || defined (_WIN64)
@@ -281,7 +281,7 @@ void child_proc(child_arg_t *arg)
 				linet+=5;
 				len = strlen(linet);
 				if (len<sizeof(test)) {
-					strncpy(test, linet, len-1);
+					strncpy(test, linet, sizeof(test)-1);
 				} else {
 					sprintf(lineo, "QSCAND: too long test name!\n");
 #if defined (_WIN32) || defined (_WIN64)

@@ -1153,6 +1153,7 @@ void device::qscan_process_info()
 			case threadAScre:
 			case threadDestruct:
 				cdvdcontrol_process_line(qout);
+				break;
 			case threadTattoo:
 			default:
 #ifndef QT_NO_DEBUG

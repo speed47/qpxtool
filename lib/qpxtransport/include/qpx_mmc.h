@@ -144,11 +144,11 @@ typedef	struct {
 	uint8_t		polarity;   // Push-Pull polarity flags per layer for BD (indicates HtL or LtH)
 	uint8_t		layers;		// Layers num (!CD)	
 	int			sectsize;
-	int32_t	capacity;	// Recorded capacity in sectors
+	uint32_t	capacity;	// Recorded capacity in sectors
 	msf		capacity_msf;
-	int32_t	capacity_free;	// Free sectors
+	uint32_t	capacity_free;	// Free sectors
 	msf		capacity_free_msf;
-	int32_t	capacity_total;	// Total sectors
+	uint32_t	capacity_total;	// Total sectors
 	msf		capacity_total_msf;
 	int		spare_psa_total,
 			spare_ssa_total,

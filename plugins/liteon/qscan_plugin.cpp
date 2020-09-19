@@ -108,9 +108,9 @@ int  scan_liteon::start_test(unsigned int itest, long ilba, int &speed)
 		case CHK_FETE:
 			start_stop(dev,1);
 			seek(dev,0);
-			if (r = cmd_fete_init(speed))
-				return -1;
 			r = cmd_fete_init(speed);
+			if (r)
+				return -1;
 			break;
 		default:
 			return -1;

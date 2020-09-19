@@ -987,7 +987,7 @@ int AbstractPreview::page(QPoint point)
 QRect AbstractPreview::pageRect(QPoint point)
 {
     const int count = d->pagesRect.count();
-    int sel = -1;
+    //int sel = -1;
     for(int i = 0; i < count; i++) {
         if(d->pagesRect[i].rect().contains(point)) {
             return d->pagesRect[i].rect();

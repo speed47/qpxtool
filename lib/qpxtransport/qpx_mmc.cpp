@@ -731,7 +731,7 @@ int scanbus(int vendor_mask)
 			while (dentry) {
 				if (!strncmp(dentry->d_name, _devtbl[i].name, dlen) &&
 					(!_devtbl[i].len || (strlen(dentry->d_name) == (size_t) _devtbl[i].len)) ) {
-					sprintf(devstr, "/dev/%s", dentry->d_name);
+					snprintf(devstr, STR_DEV_SZ, "/dev/%s", dentry->d_name);
 					if (!lstat(devstr, &st) && S_ISBLK(st.st_mode) && !probe_drive(devstr, drvcnt)) drvcnt++;
 				}
 				dentry = readdir(dir);
@@ -2384,7 +2384,7 @@ int get_performance(drive_info* drive, bool rw, uint8_t type) {
 
 	if (type == 0x03) for (j=0; j<speed_tbl_size;j++) drive->parms.wr_speed_tbl_kb[j] = -1;
 
-	for (j=0; j<min(descn, (type==0x03) ? speed_tbl_size : descn); j++) {
+	for (j=0; j<min_u32(descn, (type==0x03) ? speed_tbl_size : descn); j++) {
 		offs = 8+j*desc_len;
 //		printf("\t%s descriptor #%02d:", rw ? "Write" : "Read",j);
 
@@ -2952,7 +2952,7 @@ int read_writer_info(drive_info* drive)
 	for (int i=0; i<0x3F; i++) {
 		if (!drive->rd_buf[8+i]) drive->rd_buf[8+i]=0x20;
 	}
-	strncpy(drive->media.writer, (char*)drive->rd_buf+8, 0x3F);
+	strncpy(drive->media.writer, (char*)drive->rd_buf+8, 0x3F-1);
 	remove_double_spaces(drive->media.writer);
 //	remove_end_spaces(drive->media.writer);
 	return 0;

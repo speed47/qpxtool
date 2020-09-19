@@ -478,8 +478,8 @@ int scan_benq::cmd_dvd_fete_block(cdvd_ft *data)
 
 	dev->cmd[6] = 0x05;
 	dev->cmd[7] = sidx;
-	dev->cmd[8]  = (lba >> 16) & 0xFF + 0x03;
-	dev->cmd[9]  = (lba >>  8) & 0xFF;
+	dev->cmd[8]  = ((lba >> 16) & 0xFF) + 0x03;
+	dev->cmd[9]  =  (lba >>  8) & 0xFF;
 	dev->cmd[10] = lba & 0xFF;
 	dev->cmd[11] = 0;
 

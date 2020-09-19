@@ -273,6 +273,7 @@ void ResultsReader::run() {
 						taZone = -1;
 					}
 				}
+				break;
 			case QXmlStreamReader::Invalid:
 				qDebug() << COL_RED << "ResultsReader:  Invalid token @" << xml.characterOffset() << xml.name() << COL_NORM;
 				break;

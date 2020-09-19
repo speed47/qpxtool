@@ -124,7 +124,9 @@ int32_t  to32(uint32_t c)		 { return (int32_t)c; }
 
 uint32_t to32u(char* c)			 { return balign32u__internal(c); };
 uint32_t to32u(unsigned char* c) { return balign32u__internal((char*)c); };
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
 uint32_t to32u(int32_t c)		 { return *(uint32_t*)c; }
+#pragma GCC diagnostic pop
 uint32_t to32u(uint32_t c)		 { return c; }
 
 // 16-bit wide functions
@@ -197,6 +199,13 @@ void int2hms(int intt, hms* time){
 }
 
 #if !defined (_WIN32) && !defined (_WIN64)
+
+uint32_t min_u32(uint32_t a, uint32_t b)
+{
+	if (a<=b)
+		return a;
+	return b;
+}
 
 int min(int a, int b)
 {

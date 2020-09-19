@@ -1767,7 +1767,7 @@ int css_title ( drive_info* drive, int lba)
     int          i_fd, b_cache = 0;
 #endif
 
-    if( ! drive->media.dvdcss.protection == 0x01 )
+    if( ! (drive->media.dvdcss.protection == 0x01) )
     {
         return 0;
     }
