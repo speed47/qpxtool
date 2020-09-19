@@ -447,7 +447,7 @@ void *child_thread(void *argp)
 			ntohs(arg->cliaddr.sin_port));
 	else
 #endif
-		printf("%d: Client connected: %s:%d\n", pid,
+		printf("%" PRIdMAX ": Client connected: %s:%d\n", (intmax_t)pid,
 			inet_ntoa(arg->cliaddr.sin_addr),
 			ntohs(arg->cliaddr.sin_port));
 
@@ -460,11 +460,11 @@ void *child_thread(void *argp)
 			ntohs(arg->cliaddr.sin_port));
 	else
 #endif
-		printf("%d: Client disconnected: %s:%d\n", pid,
+		printf("%" PRIdMAX ": Client disconnected: %s:%d\n", (intmax_t)pid,
 			inet_ntoa(arg->cliaddr.sin_addr),
 			ntohs(arg->cliaddr.sin_port));
 	if (debug && !daemonized)
-		printf("%d: Closing client socket...\n", pid);
+		printf("%" PRIdMAX ": Closing client socket...\n", (intmax_t)pid);
 	shutdown(arg->connfd, SHUT_RDWR);
 	close(arg->connfd);
 
