@@ -92,8 +92,8 @@ void PreviewView::paintPage(QPainter *painter, int page, const QRect& rect)
     qDebug() << "STA: PreviewView::paintPage" << page << " rect: " << rect;
 #endif
 #ifdef DEBUG_PAINT_TIME
-    timeval tb,te;
-    gettimeofday(&tb, NULL);
+    struct timespec tb,te;
+    clock_gettime(CLOCK_MONOTONIC, &tb);
 #endif
     const QSizeF pgSize = doc->pageSize();
     QColor col, bgc;
@@ -118,7 +118,7 @@ void PreviewView::paintPage(QPainter *painter, int page, const QRect& rect)
     painter->restore();
 
 #ifdef DEBUG_PAINT_TIME
-    gettimeofday(&te, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &te);
     qDebug() << QString("Full page time: %1").arg(te.tv_sec - tb.tv_sec + (te.tv_usec - tb.tv_usec)/1000000.0,0,'f',4);
 #endif
 #ifdef PP_DEBUG2

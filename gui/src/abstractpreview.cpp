@@ -864,8 +864,8 @@ void AbstractPreview::paintEvent(QPaintEvent *)
             p->save();
             p->translate(d->ms_left, d->ms_top);
 #ifdef DEBUG_PAINT_TIME
-			timeval tb,te;
-			gettimeofday(&tb, NULL);
+			struct timespec tb,te;
+			clock_gettime(CLOCK_MONOTONIC, &tb);
 #endif
 			for(int ty=ty_sta; ty<ty_end; ty++) {
 				for(int tx=tx_sta; tx<tx_end; tx++) {
@@ -873,7 +873,7 @@ void AbstractPreview::paintEvent(QPaintEvent *)
 				}
 			}
 #ifdef DEBUG_PAINT_TIME
-			gettimeofday(&te, NULL);
+			clock_gettime(CLOCK_MONOTONIC, &te);
 			qDebug() << "Page: " << page << "  " << tx_sta << "." << ty_sta << " - " << tx_end << "." << ty_end
 			<< QString("  time: %1 s").arg(te.tv_sec - tb.tv_sec + (te.tv_usec - tb.tv_usec)/1000000.0,0,'f',4);
 #endif
@@ -1370,9 +1370,9 @@ void AbstractPreview::print(QPrinter *printer)
 void AbstractPreview::printPages(QPrinter *printer)
 {
 #ifdef DEBUG_PRINT_TIME
-		timeval tpb,tpe;
+		struct timespec tpb,tpe;
 #ifdef PRINTER_CHANGE_DEVICE
-		timeval tsb;
+		struct timespec tsb;
 #endif
 #endif
 		int fromPage = printer->fromPage();
@@ -1383,12 +1383,12 @@ void AbstractPreview::printPages(QPrinter *printer)
 
 #ifdef PRINTER_CHANGE_DEVICE
 #ifdef DEBUG_PRINT_TIME
-		gettimeofday(&tsb, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &tsb);
 #endif
 		changeDevice(printer);
 #endif
 #ifdef DEBUG_PRINT_TIME
-		gettimeofday(&tpb, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &tpb);
 #endif
 		QPainter p;
 		p.begin(printer);
@@ -1410,7 +1410,7 @@ void AbstractPreview::printPages(QPrinter *printer)
 		}
 		p.end();
 #ifdef DEBUG_PRINT_TIME
-		gettimeofday(&tpe, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &tpe);
 #endif
 
 #ifdef PRINTER_CHANGE_DEVICE

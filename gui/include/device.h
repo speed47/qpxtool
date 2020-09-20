@@ -489,7 +489,7 @@ devtype		type;
 	TestData	testData;
 	TestSpeeds	tspeeds;
 	bool		WT_simul;
-	timeval		timeSta;
+	struct timespec		timeSta;
 
 	QMutex	   *mutex;
 	QMutex	   *io_mutex;

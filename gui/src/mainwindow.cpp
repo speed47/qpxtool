@@ -1696,7 +1696,7 @@ void QPxToolMW::save_results()
 {
 #ifndef QT_NO_DEBUG
 	qDebug("QPxToolMW::save_results()");
-	timeval tb,te;
+	struct timespec tb,te;
 #endif
 	QString fname;
 	QFile	f;
@@ -1718,7 +1718,7 @@ void QPxToolMW::save_results()
 		return;
 	}
 #ifndef QT_NO_DEBUG
-	gettimeofday(&tb, NULL);
+	clock_gettime(CLOCK_MONOTONIC, &tb);
 #endif
 
 	progress = new ProgressWidget(10,3,this);
@@ -1733,7 +1733,7 @@ void QPxToolMW::save_results()
 		QMessageBox::warning(this, tr("Warning"), tr("Error saving tests data!"));
 #ifndef QT_NO_DEBUG
 	} else {
-		gettimeofday(&te, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &te);
 		double t = (te.tv_sec - tb.tv_sec) + (te.tv_usec - tb.tv_usec)/1000000.0;
 		QMessageBox::information(this, tr("Info"), tr("Tests data saved in %1 sec").arg(t,0,'f',2));
 #endif
@@ -1745,7 +1745,7 @@ void QPxToolMW::save_results_db(device *idev)
 {
 #ifndef QT_NO_DEBUG
 	qDebug("QPxToolMW::save_results_db()");
-	timeval tb,te;
+	struct timespec tb,te;
 #endif
 	QByteArray ba;
 	QSqlQuery	*q = NULL;
@@ -1832,7 +1832,7 @@ void QPxToolMW::save_results_db(device *idev)
 		goto close_db;
 	}
 #ifndef QT_NO_DEBUG
-	gettimeofday(&tb, NULL);
+	clock_gettime(CLOCK_MONOTONIC, &tb);
 #endif
 
 	dev->save(&buf);
@@ -1843,7 +1843,7 @@ void QPxToolMW::save_results_db(device *idev)
 		QMessageBox::warning(this, tr("Warning"), tr("Error saving tests data!"));
 #ifndef QT_NO_DEBUG
 	} else {
-		gettimeofday(&te, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &te);
 		double t = (te.tv_sec - tb.tv_sec) + (te.tv_usec - tb.tv_usec)/1000000.0;
 		QMessageBox::information(this, tr("Info"), tr("Tests data saved in %1 sec").arg(t,0,'f',2));
 #endif
@@ -1902,7 +1902,7 @@ void QPxToolMW::load_results(QString fname)
 {
 #ifndef QT_NO_DEBUG
 	qDebug("QPxToolMW::load_results()");
-	timeval tb,te;
+	struct timespec tb,te;
 #endif
 	QFile	f;
 
@@ -1921,7 +1921,7 @@ void QPxToolMW::load_results(QString fname)
 		return;
 	}
 #ifndef QT_NO_DEBUG
-	gettimeofday(&tb, NULL);
+	clock_gettime(CLOCK_MONOTONIC, &tb);
 #endif
 
 	progress = new ProgressWidget(10,3,this);
@@ -1937,7 +1937,7 @@ void QPxToolMW::load_results(QString fname)
 	} else {
 		c_dev->setCurrentIndex(0);
 #ifndef QT_NO_DEBUG
-		gettimeofday(&te, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &te);
 		double t = (te.tv_sec - tb.tv_sec) + (te.tv_usec - tb.tv_usec)/1000000.0;
 		QMessageBox::information(this, tr("Info"), tr("Tests data loaded in %1 sec").arg(t,0,'f',2));
 #endif
@@ -1950,7 +1950,7 @@ void QPxToolMW::load_results_db()
 {
 #ifndef QT_NO_DEBUG
 	qDebug("QPxToolMW::load_results_db()");
-	timeval tb,te;
+	struct timespec tb,te;
 #endif
 	QByteArray ba;
 	QSqlQuery	*q = NULL;
@@ -1962,7 +1962,7 @@ void QPxToolMW::load_results_db()
 	device *dev = devices[0];
 
 #ifndef QT_NO_DEBUG
-	gettimeofday(&tb, NULL);
+	clock_gettime(CLOCK_MONOTONIC, &tb);
 #endif
 
 	progress = new ProgressWidget(10,3,this);
@@ -2017,7 +2017,7 @@ void QPxToolMW::load_results_db()
 	} else {
 		c_dev->setCurrentIndex(0);
 #ifndef QT_NO_DEBUG
-		gettimeofday(&te, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &te);
 		double t = (te.tv_sec - tb.tv_sec) + (te.tv_usec - tb.tv_usec)/1000000.0;
 		QMessageBox::information(this, tr("Info"), tr("Tests data loaded in %1 sec").arg(t,0,'f',2));
 #endif

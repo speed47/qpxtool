@@ -52,7 +52,7 @@ private:
 	devlist		*devices;
 	QPxSettings	*settings;
 	QString		name;
-	timeval		prevT;	
+	struct timespec		prevT;	
 	
 	QBoxLayout	*layout;
 // Selectors/time

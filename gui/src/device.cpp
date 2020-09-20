@@ -1060,7 +1060,7 @@ bool device::next_test()
 		}
 		QObject::connect(proc, SIGNAL(finished(int, QProcess::ExitStatus)),
 				this, SLOT(qscan_callback_test()));
-		gettimeofday(&timeSta, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &timeSta);
 #ifndef QT_NO_DEBUG
 		qDebug("qscan (local) started");
 #endif
@@ -1095,7 +1095,7 @@ bool device::next_test()
 			sock->write("set simul=" + QString::number(WT_simul).toLatin1() + "\n");
 		sock->write("run\n");
 		sock->write("close\n");
-		gettimeofday(&timeSta, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &timeSta);
 #ifndef QT_NO_DEBUG
 		qDebug("qscan (TCP) started");
 #endif
@@ -1707,7 +1707,7 @@ void device::qscan_callback_test()
 #ifndef QT_NO_DEBUG
 	qDebug("STA: qscan_callback_test()");
 #endif
-	timeval timeEnd;
+	struct timespec timeEnd;
 	int time;
 
 	qscan_process_test();
@@ -1739,8 +1739,8 @@ void device::qscan_callback_test()
 	nprocess = "";
 	emit process_finished();
 
-	gettimeofday(&timeEnd, NULL);
-	time = (int) ((timeEnd.tv_sec - timeSta.tv_sec) + (timeEnd.tv_usec - timeSta.tv_usec)/1000000.0);
+	clock_gettime(CLOCK_MONOTONIC, &timeEnd);
+	time = (int) ((timeEnd.tv_sec - timeSta.tv_sec) + (timeEnd.tv_nsec - timeSta.tv_nsec)/1000000000.0);
 
 	switch(ctest) {
 		case TEST_RT:
@@ -1784,7 +1784,7 @@ void device::qscan_callback_test()
 
 void device::qscan_process_test()
 {
-	timeval timeEnd;
+	struct timespec timeEnd;
 	float time;
 	QString qout;
 	QStringList sl;
@@ -1810,8 +1810,8 @@ void device::qscan_process_test()
 #ifndef QT_NO_DEBUG
 		qDebug() << qout;
 #endif
-		gettimeofday(&timeEnd, NULL);
-		time = (timeEnd.tv_sec - timeSta.tv_sec) + (timeEnd.tv_usec - timeSta.tv_usec)/1000000.0;
+		clock_gettime(CLOCK_MONOTONIC, &timeEnd);
+		time = (timeEnd.tv_sec - timeSta.tv_sec) + (timeEnd.tv_nsec - timeSta.tv_nsec)/1000000000.0;
 		switch(ctest) {
 			case TEST_RT:
 #ifndef DISABLE_INTERNAL_WT
@@ -1847,7 +1847,7 @@ void device::qscan_process_test()
 					}
 			//		qDebug(QString("lba: %1, spdx: %2, spdk: %3").arg(di.lba).arg(di.spdx).arg(di.spdk));
 				} else if (qout.startsWith("Reading blocks") || qout.startsWith("Starting write")) {
-					gettimeofday(&timeSta, NULL);
+					clock_gettime(CLOCK_MONOTONIC, &timeSta);
 				}
 				break;
 #ifdef DISABLE_INTERNAL_WT

@@ -202,8 +202,8 @@ nocache:
 /* Loop over all titles and call dvdcss_title to crack the keys. */
 static int initAllCSSKeys( drive_info *dev )
 {
-  struct timeval all_s, all_e;
-  struct timeval t_s, t_e;
+  struct timespec all_s, all_e;
+  struct timespec t_s, t_e;
   char filename[ MAX_UDF_FILE_NAME_LEN ];
   unsigned int start, len;
   int title;
@@ -223,11 +223,11 @@ static int initAllCSSKeys( drive_info *dev )
 	  printf( "libdvdread: Attempting to retrieve all CSS keys\n" );
   }
 
-  gettimeofday(&all_s, NULL);
+  clock_gettime(CLOCK_MONOTONIC, &all_s);
         
   for( title = 0; title < 100; title++ ) {
 //	stitle=0; st0=0;
-    gettimeofday( &t_s, NULL );
+    clock_gettime(CLOCK_MONOTONIC, &t_s);
     if( title == 0 ) {
       sprintf( filename, "/VIDEO_TS/VIDEO_TS.VOB" );
     } else {
@@ -245,7 +245,7 @@ static int initAllCSSKeys( drive_info *dev )
           printf( "libdvdread: Error cracking CSS key for %s (0x%08x)\n", filename, start);
         }
       }
-      gettimeofday( &t_e, NULL );
+      clock_gettime(CLOCK_MONOTONIC, &t_e);
 	  if (!dev->silent) {
         printf( "libdvdread: Elapsed time %ld\n",  
                  (long int) t_e.tv_sec - t_s.tv_sec );
@@ -256,7 +256,7 @@ static int initAllCSSKeys( drive_info *dev )
     
 //	for (stitle = 1; stitle<9; stitle++) {
 	//	printf("stitle=%d\n", stitle);
-		gettimeofday( &t_s, NULL );
+		clock_gettime(CLOCK_MONOTONIC, &t_s);
 		//sprintf( filename, "/VIDEO_TS/VTS_%02d_%d.VOB", title, stitle );
 		sprintf( filename, "/VIDEO_TS/VTS_%02d_%d.VOB", title, 1 );
 		start = UDFFindFile( &udf, filename, &len );
@@ -271,7 +271,7 @@ static int initAllCSSKeys( drive_info *dev )
 				printf( "libdvdread: Error cracking CSS key for %s (0x%08x)!!\n", filename, start);
 			}
 		}
-		gettimeofday( &t_e, NULL );
+		clock_gettime(CLOCK_MONOTONIC, &t_e);
 		if (!dev->silent) {
 			printf( "libdvdread: Elapsed time %ld\n",  
                (long int) t_e.tv_sec - t_s.tv_sec );
@@ -284,7 +284,7 @@ static int initAllCSSKeys( drive_info *dev )
   if (!dev->silent) {
     printf( "libdvdread: Found %d VTS's\n", title );
   }
-  gettimeofday(&all_e, NULL);
+  clock_gettime(CLOCK_MONOTONIC, &all_e);
   if (!dev->silent) {
     printf( "libdvdread: Elapsed time %ld\n",  
              (long int) all_e.tv_sec - all_s.tv_sec );
@@ -322,7 +322,7 @@ void *read_disc(void* arg) {
 	dvd_title_t *p_title = NULL;
 	uint32_t	title_next = 0xFFFFFFFF;
 
-	struct timeval t_s, t_e;
+	struct timespec t_s, t_e;
 	int32_t    sects1X=75;
     uint32_t  lba = 0;
     int32_t	  scnt=1;
@@ -443,12 +443,12 @@ void *read_disc(void* arg) {
 			descramble);
 	}
 
-	gettimeofday(&t_e,NULL);
+	clock_gettime(CLOCK_MONOTONIC, &t_e);
 	seek(dev,0);
     while (lba < dev->media.capacity) {
 		if (lba == 0xFFFFFFFF) goto exit_reader;
 		t_s.tv_sec  = t_e.tv_sec;
-		t_s.tv_usec = t_e.tv_usec;
+		t_s.tv_nsec = t_e.tv_nsec;
 
 		if (dev->media.type & DISC_CD)  {
 			read(dev, dev->rd_buf, lba, scnt);
@@ -484,11 +484,11 @@ void *read_disc(void* arg) {
 				read(dev, dev->rd_buf, lba, scnt);
 			}
 		}
-		gettimeofday(&t_e,NULL);
+		clock_gettime(CLOCK_MONOTONIC, &t_e);
 
 		printf("%s: %5.2f X, lba %7d / %7d  ( %06x / %06x ) scnt=%d\r",
 				dev->device,
-				((float)scnt/(float)sects1X)/((t_e.tv_sec - t_s.tv_sec) + (t_e.tv_usec - t_s.tv_usec) / 1000000.0),
+				((float)scnt/(float)sects1X)/((t_e.tv_sec - t_s.tv_sec) + (t_e.tv_nsec - t_s.tv_nsec) / 1000000000.0),
 				lba, dev->media.capacity,
 				lba, dev->media.capacity,
 //				map->get_done() * 100 / dev->media.capacity,

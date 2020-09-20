@@ -35,7 +35,7 @@ GraphTab::GraphTab(QPxSettings *iset, devlist *idev, QString iname, int test, QW
 	devices = idev;
 	name    = iname;
 //	prevTvalid = 0;
-	gettimeofday(&prevT, NULL);
+	clock_gettime(CLOCK_MONOTONIC, &prevT);
 	settings->loadScale(name);
 
 	layout = new QHBoxLayout(this);
@@ -99,19 +99,19 @@ void GraphTab::infoToggle() { lw->setVisible(!lw->isVisible()); }
 
 void GraphTab::updateLast(int time, bool *Tvalid, bool force)
 {
-	timeval curT;
+	struct timespec curT;
 	float dt;
-	gettimeofday(&curT, NULL);
+	clock_gettime(CLOCK_MONOTONIC, &curT);
 
 //	if (prevTvalid)
-	dt = curT.tv_sec - prevT.tv_sec + (curT.tv_usec - prevT.tv_usec) / 1000000.0;
+	dt = curT.tv_sec - prevT.tv_sec + (curT.tv_nsec - prevT.tv_nsec) / 1000000000.0;
 //	if (!prevTvalid || dt>0.5) {
 	if (force || dt>0.5) {
 		int s = time % 60;
 		int m = (time - s) / 60;
 		ltime->setText(QString("%1:%2").arg(m).arg(s, 2,10, QChar('0')));	
 
-		gettimeofday(&prevT, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &prevT);
 	//	prevTvalid = 1;
 		if (force) {
 			graph->update();

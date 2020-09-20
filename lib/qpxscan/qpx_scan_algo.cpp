@@ -25,13 +25,13 @@
 
 #define USE_FFLUSH
 
-//void qscanner::show_avg(struct timeval s, struct timeval e, long lba)
+//void qscanner::show_avg(struct timespec s, struct timespec e, long lba)
 void qscanner::show_avg_speed(uint32_t lba)
 {
 	double btime;
 	int spdKB;
 	float spdX;
-	btime = (e.tv_sec - s.tv_sec) + (e.tv_usec - s.tv_usec)/1000000.0;
+	btime = (e.tv_sec - s.tv_sec) + (e.tv_nsec - s.tv_nsec)/1000000000.0;
 	spdKB = (int) (((lba - lba_sta + 1) << 1) / btime);
 	spdX  = spdKB/(float)spd1X;
 	printf("\nTest time: %6.2fs\navg speed: %5.3f X  %5d kB/s\n", btime, spdX, spdKB);
@@ -42,7 +42,7 @@ void qscanner::calc_cur_speed(long sects)
 	double btime;
 //	int spdKB;
 //	float spdX;
-	btime = (blke.tv_sec - blks.tv_sec) + (blke.tv_usec - blks.tv_usec)/1000000.0;
+	btime = (blke.tv_sec - blks.tv_sec) + (blke.tv_nsec - blks.tv_nsec)/1000000000.0;
 	spdKB = (int) ((sects << 1) / btime);
 	spdX  = spdKB/(float)spd1X;
 //	printf("\nTest time: %6.2fs\navg speed: %5.3f X  %5d kB/s\n", btime, spdX, spdKB);	
@@ -54,7 +54,7 @@ int qscanner::readline(int fd, char *buf, int maxlen) {
 	int r;
 	int sret;
 	fd_set rd_set;
-	timeval tv;
+	struct timeval tv;
 
 	FD_ZERO(&rd_set);
 	if (tchar>=0) {
@@ -194,9 +194,9 @@ int qscanner::run_rd_transfer()
 	seek(dev, lba_sta);
 //	wait_unit_ready(dev, 6);
 	msleep(300);
-	gettimeofday(&s, NULL);
+	clock_gettime(CLOCK_MONOTONIC, &s);
 	printf("Reading blocks: %d - %d (%d MB)\n", lba_sta, lba_end, (lba_end-lba_sta) >> 9);
-	gettimeofday(&blks, NULL);
+	clock_gettime(CLOCK_MONOTONIC, &blks);
 #ifdef USE_FFLUSH
 	fflush(stdout);
 #endif
@@ -217,9 +217,9 @@ int qscanner::run_rd_transfer()
 		}
 //		printf("lba=%d +%d\n",lba,rsize);
 		if (lba>lba_sta && (!(lba%bsize) || lba+rsize == lba_end || stat_req)) {
-			gettimeofday(&blke, NULL);
+			clock_gettime(CLOCK_MONOTONIC, &blke);
 			/*
-			btime=(blke.tv_sec - blks.tv_sec) + (blke.tv_usec - blks.tv_usec)/1000000.0;
+			btime=(blke.tv_sec - blks.tv_sec) + (blke.tv_usec - blks.tv_nsec)/1000000000.0;
 			spdKB = (bsize << 1) / btime;
 			spdX  = spdKB/(float)spd1X;
 			*/
@@ -228,12 +228,12 @@ int qscanner::run_rd_transfer()
 #ifdef USE_FFLUSH
 			fflush(stdout);
 #endif
-			gettimeofday(&blks, NULL);
+			clock_gettime(CLOCK_MONOTONIC, &blks);
 			stat_req=0;
 			br=0;
 		}
 	}
-	gettimeofday(&e, NULL);
+	clock_gettime(CLOCK_MONOTONIC, &e);
 	show_avg_speed(lba);
 	return 0;
 }
@@ -407,8 +407,8 @@ int qscanner::run_wr_transfer()
 	printf("Starting write...\n");
 	memset(dev->rd_buf,0,bufsz_rd);
 
-	gettimeofday(&s, NULL);
-	gettimeofday(&blks, NULL);
+	clock_gettime(CLOCK_MONOTONIC, &s);
+	clock_gettime(CLOCK_MONOTONIC, &blks);
 	for (lba=lba_sta; !stop_req && !err && lba<lba_end; lba+=wsize)
 	{
 		if (lba+wsize>=lba_end) wsize = lba_end-lba;
@@ -424,16 +424,16 @@ int qscanner::run_wr_transfer()
 		}
 		if (!(lba%bsize) || lba+wsize == lba_end || stat_req || stop_req || !wsize) {
 			ubufp = (uint32_t) (ubuft ? 100*( 1.0f-ubuff/(float)ubuft) : 0);
-			gettimeofday(&blke, NULL);
+			clock_gettime(CLOCK_MONOTONIC, &blke);
 			/*
-			btime=(blke.tv_sec - blks.tv_sec) + (blke.tv_usec - blks.tv_usec)/1000000.0;
+			btime=(blke.tv_sec - blks.tv_sec) + (blke.tv_nsec - blks.tv_nsec)/1000000000.0;
 			spdKB = (bsize << 1) / btime;
 			spdX  = spdKB/(float)spd1X;
 			*/
 			calc_cur_speed(((lba-1)%bsize) + 1);
 			printf("lba: %7d    speed: %6.2f X  %6d kB/s, written: %4dMB/%4dMB, Ubuf: %3d%%\r",
 					lba, spdX, spdKB, (lba-lba_sta) >> 9, (lba_end-lba_sta) >> 9, ubufp);
-			gettimeofday(&blks, NULL);
+			clock_gettime(CLOCK_MONOTONIC, &blks);
 			stat_req=0;
 #ifdef USE_FFLUSH
 			fflush(stdout);
@@ -441,7 +441,7 @@ int qscanner::run_wr_transfer()
 		}
 	}
 	printf("\n");
-	gettimeofday(&e, NULL);
+	clock_gettime(CLOCK_MONOTONIC, &e);
 	show_avg_speed(lba);
 	writer->close_track();
 
@@ -484,17 +484,17 @@ int qscanner::run_cd_errc()
     printf("Running CD Error Correction test at speed %d...\n", speed);
 
     spd1X = 150;
-    gettimeofday(&s, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &s);
     wait_unit_ready(dev, 6);
     printf("\nTesting %d sectors: %d - %d\n", lba_end-lba_sta+1, lba_sta, lba_end);
     printf("         lba |        speed        |  BLER |  E11   E21   E31  |  E12   E22   E32  |  UNCR\n");
     for (; (!stop_req) && lba<lba_end; )
     {
 		lbao=lba;
-		gettimeofday(&blks, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &blks);
 		if(plugin->scan_block((void*)&err,&lba))
 			{ printf("\nBlock scan error! terminating...\n"); stop_req=1; }
-		gettimeofday(&blke, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &blke);
 		calc_cur_speed(lba-lbao);
 		printf("cur : %6d | %6.2f X %5d kB/s | %5ld | %5ld %5ld %5ld | %5ld %5ld %5ld | %5ld\r", lba, spdX, spdKB,
 				err.bler,
@@ -508,7 +508,7 @@ int qscanner::run_cd_errc()
 #endif
     }
     plugin->end_test();
-    gettimeofday(&e, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &e);
     show_avg_speed(lba);
     printf("\n%d sectors tested: %d - %d\n", lba-lba_sta, lba_sta, lba-1);
     printf("Test summary:\n");
@@ -549,17 +549,17 @@ int qscanner::run_cd_jb()
     printf("Running CD Jitter/Asymm test at speed %d...\n", speed);
 
     spd1X = 150;
-    gettimeofday(&s, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &s);
     wait_unit_ready(dev, 6);
     printf("\nTesting %d sectors: %d - %d\n", lba_end-lba_sta+1, lba_sta, lba_end);
     printf("         lba |        speed        | Jitter |  Asymm\n");
     for (; (!stop_req) && lba<lba_end; )
     {
 		lbao=lba;
-		gettimeofday(&blks, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &blks);
 		if(plugin->scan_block((void*)&jb,&lba))
 			{ printf("\nBlock scan error! terminating...\n"); stop_req=1; }
-		gettimeofday(&blke, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &blke);
 		calc_cur_speed(lba-lbao);
 		printf("cur : %6d | %6.2f X %5d kB/s | %6.2f | %6.2f\r", lba, spdX, spdKB, jb.jitter/1000.0, jb.asymm/10.0);
 		jb_min.EMIN(jb);
@@ -569,7 +569,7 @@ int qscanner::run_cd_jb()
 #endif
 	}
     plugin->end_test();
-    gettimeofday(&e, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &e);
     show_avg_speed(lba);
     printf("\n%d sectors tested: %d - %d\n", lba-lba_sta, lba_sta, lba-1);
     printf("Test summary:\n");
@@ -618,7 +618,7 @@ int qscanner::run_dvd_errc()
     printf("Running DVD Error Correction test at speed %d...\n", speed);
 
     spd1X = 1385;
-    gettimeofday(&s, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &s);
     wait_unit_ready(dev, 6);
     lbas = lba;
     printf("\nTesting %d sectors: %d - %d\n", lba_end-lba_sta+1, lba_sta, lba_end);
@@ -626,14 +626,14 @@ int qscanner::run_dvd_errc()
     for (; (!stop_req) && lba<lba_end; )
     {
 		lbao=lba;
-		gettimeofday(&blks, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &blks);
 		if(plugin->scan_block((void*)&err,&lba))
 			{ printf("\nBlock scan error! terminating...\n"); stop_req=1; }
 		err_tot+=err;
 		err_max.EMAX(err);
 		pi8+=err.pie;
 		po8+=err.poe;
-		gettimeofday(&blke, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &blke);
 		calc_cur_speed(lba-lbao);
 //		if (!(lba & 0x7F)) {
 		if ((lba-lbas) >= 0x80) {
@@ -658,7 +658,7 @@ int qscanner::run_dvd_errc()
 #endif
 	}
     plugin->end_test();
-    gettimeofday(&e, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &e);
     show_avg_speed(lba);
     printf("\n%d sectors tested: %d - %d\n", lba-lba_sta, lba_sta, lba-1);
     printf("Test summary:\n");
@@ -696,17 +696,17 @@ int qscanner::run_dvd_jb()
     printf("Running DVD Jitter/Asymm test at speed %d...\n", speed);
 
     spd1X = 1385;
-    gettimeofday(&s, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &s);
     wait_unit_ready(dev, 6);
     printf("\nTesting %d sectors: %d - %d\n", lba_end-lba_sta+1, lba_sta, lba_end);
     printf("         lba |        speed        | Jitter |  Asymm\n");
     for (; (!stop_req) && lba<lba_end; )
     {
 		lbao=lba;
-		gettimeofday(&blks, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &blks);
 		if(plugin->scan_block((void*)&jb,&lba))
 			{ printf("\nBlock scan error! terminating...\n"); stop_req=1; }
-		gettimeofday(&blke, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &blke);
 		calc_cur_speed(lba-lbao);
 		printf("cur : %6d | %6.2f X %5d kB/s | %6.2f | %6.2f\r", lba, spdX, spdKB, jb.jitter/1000.0, jb.asymm/10.0);
 		jb_min.EMIN(jb);
@@ -716,7 +716,7 @@ int qscanner::run_dvd_jb()
 #endif
 	}
     plugin->end_test();
-    gettimeofday(&e, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &e);
     show_avg_speed(lba);
     printf("\n%d sectors tested: %d - %d\n", lba-lba_sta, lba_sta, lba-1);
     printf("Test summary:\n");
@@ -758,11 +758,11 @@ int qscanner::run_fete()
 		printf("Scan init failed!\n");
     	return 2;
     }
-    gettimeofday(&s, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &s);
 //    wait_unit_ready(dev, 6);
     printf("\nTesting %d sectors: %d - %d\n", lba_end-lba_sta+1, lba_sta, lba_end);
     printf("         lba |        speed        |  FE  |  TE\n");
-	gettimeofday(&blks, NULL);
+	clock_gettime(CLOCK_MONOTONIC, &blks);
     for (; (!stop_req) && lba<lba_end; )
     {
 		lbao=lba;
@@ -782,19 +782,19 @@ block_retry:
 			stop_req=1;
 		}
 		retry = MAX_RETRY;
-		gettimeofday(&blke, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &blke);
 		ft_max.EMAX(ft);
 		calc_cur_speed(lba-lbao);
 //		 show current data
 		printf("cur : %6d | %6.2f X %5d kB/s | %4d | %4d\n", lba, spdX, spdKB, ft.fe, ft.te);
 		blks.tv_sec  = blke.tv_sec;
-		blks.tv_usec = blke.tv_usec;
+		blks.tv_nsec = blke.tv_nsec;
 #ifdef USE_FFLUSH
 		fflush(stdout);
 #endif
 	}
     plugin->end_test();
-    gettimeofday(&e, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &e);
     show_avg_speed(lba);
     printf("\n%d sectors tested: %d - %d\n", lba-lba_sta, lba_sta, lba-1);
     printf("Test summary:\n");
@@ -854,7 +854,7 @@ int qscanner::run_bd_errc()
     printf("Running BD Error Correction test at speed %d...\n", speed);
 
     spd1X = 4500;
-    gettimeofday(&s, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &s);
     wait_unit_ready(dev, 6);
     lbas = lba;
     printf("\nTesting %d sectors: %d - %d\n", lba_end-lba_sta+1, lba_sta, lba_end);
@@ -862,12 +862,12 @@ int qscanner::run_bd_errc()
     for (; (!stop_req) && lba<lba_end; )
     {
 		lbao=lba;
-		gettimeofday(&blks, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &blks);
 		if(plugin->scan_block((void*)&err,&lba))
 			{ printf("\nBlock scan error! terminating...\n"); stop_req=1; }
 		err_tot+=err;
 		err_max.EMAX(err);
-		gettimeofday(&blke, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &blke);
 		calc_cur_speed(lba-lbao);
 //		if (!(lba & 0x7F)) {
 		printf("cur : %7d | %6.2f X %5d kB/s | %5ld %5ld | %5ld\r",
@@ -879,7 +879,7 @@ int qscanner::run_bd_errc()
 #endif
 	}
     plugin->end_test();
-    gettimeofday(&e, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &e);
     show_avg_speed(lba);
     printf("\n%d sectors tested: %d - %d\n", lba-lba_sta, lba_sta, lba-1);
     printf("Test summary:\n");

@@ -35,7 +35,7 @@ tabTA::tabTA(QPxSettings *iset, devlist *idev, QString iname, QWidget *p, Qt::Wi
 	devices = idev;
 	name    = iname;
 //	prevTvalid = 0;
-	gettimeofday(&prevT, NULL);
+	clock_gettime(CLOCK_MONOTONIC, &prevT);
 	settings->loadScale(name);
 
 	layout = new QHBoxLayout(this);

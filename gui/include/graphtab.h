@@ -54,7 +54,7 @@ protected:
 	QWidget		*infow;
 	QPxGraph	*graph;
 	QLabel		*ltime;
-	timeval		prevT;	
+	struct timespec		prevT;	
 
 private:
 	QString		name;
