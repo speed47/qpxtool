@@ -26,15 +26,10 @@ jobs:
       run: nproc && make -j$(nproc)
     - name: check executable
       run: |
-          file gui/release/qpxtool.exe | grep -q 'x86-64, for MS Windows'
+          file gui/release/qpxtool.exe | grep -q 'x86-64'
     - name: prepare dist
       run: ./.github/workflows/make-dist.sh ${{ github.ref }}
       id: dist
-    - name: check executability of dist from cmd.exe
-      shell: cmd
-      run: |
-          cd dist
-          qpxtool.exe -h
     - name: Upload Release Asset
       id: upload-release-asset
       uses: actions/upload-release-asset@v1
@@ -66,15 +61,10 @@ jobs:
       run: nproc && make -j$(nproc)
     - name: check executable
       run: |
-          file gui/release/qpxtool.exe | grep -q '386, for MS Windows'
+          file gui/release/qpxtool.exe | grep -q 'Intel 80386'
     - name: prepare dist
       run: ./.github/workflows/make-dist.sh ${{ github.ref }}
       id: dist
-    - name: check executability of dist from cmd.exe
-      shell: cmd
-      run: |
-          cd dist
-          qpxtool.exe -h
     - name: Upload Release Asset
       id: upload-release-asset
       uses: actions/upload-release-asset@v1

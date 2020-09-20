@@ -247,8 +247,8 @@ static int initAllCSSKeys( drive_info *dev )
       }
       clock_gettime(CLOCK_MONOTONIC, &t_e);
 	  if (!dev->silent) {
-        printf( "libdvdread: Elapsed time %ld\n",  
-                 (long int) t_e.tv_sec - t_s.tv_sec );
+        printf( "libdvdread: Elapsed time %jd\n",
+                 (intmax_t) t_e.tv_sec - t_s.tv_sec );
       }
 	} 
             
@@ -273,8 +273,8 @@ static int initAllCSSKeys( drive_info *dev )
 		}
 		clock_gettime(CLOCK_MONOTONIC, &t_e);
 		if (!dev->silent) {
-			printf( "libdvdread: Elapsed time %ld\n",  
-               (long int) t_e.tv_sec - t_s.tv_sec );
+			printf( "libdvdread: Elapsed time %jd\n",
+               (intmax_t) t_e.tv_sec - t_s.tv_sec );
 		}
 //	}
 //	if( (!st0) && (stitle !=0) && (start == 0 || len == 0) ) break;
@@ -286,8 +286,8 @@ static int initAllCSSKeys( drive_info *dev )
   }
   clock_gettime(CLOCK_MONOTONIC, &all_e);
   if (!dev->silent) {
-    printf( "libdvdread: Elapsed time %ld\n",  
-             (long int) all_e.tv_sec - all_s.tv_sec );
+    printf( "libdvdread: Elapsed time %jd\n",
+             (intmax_t) all_e.tv_sec - all_s.tv_sec );
   }
   FreeUDFCache( &udf, udf.cache);
   if (!dev->silent) {

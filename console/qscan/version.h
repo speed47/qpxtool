@@ -9,5 +9,5 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#define VERSION "0.8.0"
+#define VERSION "0.8.0-pl1"
 
