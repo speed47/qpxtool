@@ -2496,7 +2496,18 @@ int detect_speeds(drive_info *drive)
 				drive->parms.read_speed_dvd = (int) (drive->parms.read_speed_kb / drive->parms.speed_mult);
 				if (prev_spd != drive->parms.read_speed_dvd) {
 //					spd = drive->parms.read_speed_dvd;
+/*
+					We comment the following line to fix a bug where, with some drives,
+					only the max speed is available. This happens because when attempting
+					to set the speed at 1X, then reading the current speed back, to see whether
+					the drive supports it or not, return the max speed on some drives, instead
+					of the closest supported speed of the one we've just attempted to set (1X).
+					Without this line, we'll try each speed in increment of 1, starting from 1X,
+					and only retain the returned speed numbers from the drive. We don't assume
+					that the drive sets the closest supported speed.
+
 					spd = max(spd, drive->parms.read_speed_dvd);
+*/
 					drive->parms.speed_tbl[idx] = drive->parms.read_speed_dvd;
 					drive->parms.speed_tbl_kb[idx] = drive->parms.read_speed_kb;
 					if (!drive->silent) printf(" RD speed:  %dX (%d kB/s)\n",
