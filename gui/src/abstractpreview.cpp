@@ -1416,12 +1416,12 @@ void AbstractPreview::printPages(QPrinter *printer)
 #ifdef PRINTER_CHANGE_DEVICE
 		changeDevice(d->preview);
 #ifdef DEBUG_PRINT_TIME
-		qDebug() << "Setup time: " << QString(" %1 s").arg(tpb.tv_sec - tsb.tv_sec + (tpb.tv_usec - tsb.tv_usec)/1000000.0,0,'f',4);
+		qDebug() << "Setup time: " << QString(" %1 s").arg(tpb.tv_sec - tsb.tv_sec + (tpb.tv_nsec - tsb.tv_nsec)/1000000000.0,0,'f',4);
 #endif
 #endif
 
 #ifdef DEBUG_PRINT_TIME
-		qDebug() << "Pages time: " << QString(" %1 s").arg(tpe.tv_sec - tpb.tv_sec + (tpe.tv_usec - tpb.tv_usec)/1000000.0,0,'f',4);
+		qDebug() << "Pages time: " << QString(" %1 s").arg(tpe.tv_sec - tpb.tv_sec + (tpe.tv_nsec - tpb.tv_nsec)/1000000000.0,0,'f',4);
 #endif
 }
 //--------------------------------------------------------------

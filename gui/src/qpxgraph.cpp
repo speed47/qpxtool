@@ -538,7 +538,7 @@ void QPxGraph::drawErrc(QPainter* p, const QSize& s, device *dev, const QRect&)
 
 #ifndef QT_NO_DEBUG
 	clock_gettime(CLOCK_MONOTONIC, &e);
-	t0 = (e.tv_sec - b.tv_sec) + (e.tv_usec - b.tv_usec)/1000000.0;
+	t0 = (e.tv_sec - b.tv_sec) + (e.tv_nsec - b.tv_nsec)/1000000000.0;
 #endif
 
 	if (showspeed)
@@ -571,7 +571,7 @@ void QPxGraph::drawErrc(QPainter* p, const QSize& s, device *dev, const QRect&)
 
 #ifndef QT_NO_DEBUG
 		clock_gettime(CLOCK_MONOTONIC, &e);
-		t1 = (e.tv_sec - b.tv_sec) + (e.tv_usec - b.tv_usec)/1000000.0;
+		t1 = (e.tv_sec - b.tv_sec) + (e.tv_nsec - b.tv_nsec)/1000000000.0;
 		qDebug() << QString("draw time(sec): %1  ERRC,  %2  Speed")
 			.arg(t0,0,'f',6)
 			.arg(t1,0,'f',6);
@@ -709,7 +709,7 @@ void QPxGraph::drawJB(QPainter* p, const QSize& s, device *dev, const QRect&)
 
 #ifndef QT_NO_DEBUG
 	clock_gettime(CLOCK_MONOTONIC, &e);
-	t0 = (e.tv_sec - b.tv_sec) + (e.tv_usec - b.tv_usec)/1000000.0;
+	t0 = (e.tv_sec - b.tv_sec) + (e.tv_nsec - b.tv_nsec)/1000000000.0;
 	clock_gettime(CLOCK_MONOTONIC, &b);
 #endif
 
@@ -738,7 +738,7 @@ void QPxGraph::drawJB(QPainter* p, const QSize& s, device *dev, const QRect&)
 
 #ifndef QT_NO_DEBUG
 	clock_gettime(CLOCK_MONOTONIC, &e);
-	t1 = (e.tv_sec - b.tv_sec) + (e.tv_usec - b.tv_usec)/1000000.0;
+	t1 = (e.tv_sec - b.tv_sec) + (e.tv_nsec - b.tv_nsec)/1000000000.0;
 	qDebug() << QString("draw time(sec): %1  ERRC,  %2  Speed")
 		.arg(t0,0,'f',6)
 		.arg(t1,0,'f',6);
@@ -1056,7 +1056,7 @@ void QPxGraph::drawGrid(QPainter* p, const QSize& s, device *dev, int ttype)
 
 #ifndef QT_NO_DEBUG
 	clock_gettime(CLOCK_MONOTONIC, &e);
-	t = (e.tv_sec - b.tv_sec) + (e.tv_usec - b.tv_usec)/1000000.0;
+	t = (e.tv_sec - b.tv_sec) + (e.tv_nsec - b.tv_nsec)/1000000000.0;
 	qDebug() << QString("END: QPxGraph::drawGrid(): %1 sec").arg(t,0,'f',6);
 #endif
 }

@@ -1734,7 +1734,7 @@ void QPxToolMW::save_results()
 #ifndef QT_NO_DEBUG
 	} else {
 		clock_gettime(CLOCK_MONOTONIC, &te);
-		double t = (te.tv_sec - tb.tv_sec) + (te.tv_usec - tb.tv_usec)/1000000.0;
+		double t = (te.tv_sec - tb.tv_sec) + (te.tv_nsec - tb.tv_nsec)/1000000000.0;
 		QMessageBox::information(this, tr("Info"), tr("Tests data saved in %1 sec").arg(t,0,'f',2));
 #endif
 	}
@@ -1844,7 +1844,7 @@ void QPxToolMW::save_results_db(device *idev)
 #ifndef QT_NO_DEBUG
 	} else {
 		clock_gettime(CLOCK_MONOTONIC, &te);
-		double t = (te.tv_sec - tb.tv_sec) + (te.tv_usec - tb.tv_usec)/1000000.0;
+		double t = (te.tv_sec - tb.tv_sec) + (te.tv_nsec - tb.tv_nsec)/1000000000.0;
 		QMessageBox::information(this, tr("Info"), tr("Tests data saved in %1 sec").arg(t,0,'f',2));
 #endif
 	}
@@ -1938,7 +1938,7 @@ void QPxToolMW::load_results(QString fname)
 		c_dev->setCurrentIndex(0);
 #ifndef QT_NO_DEBUG
 		clock_gettime(CLOCK_MONOTONIC, &te);
-		double t = (te.tv_sec - tb.tv_sec) + (te.tv_usec - tb.tv_usec)/1000000.0;
+		double t = (te.tv_sec - tb.tv_sec) + (te.tv_nsec - tb.tv_nsec)/1000000000.0;
 		QMessageBox::information(this, tr("Info"), tr("Tests data loaded in %1 sec").arg(t,0,'f',2));
 #endif
 	}
@@ -2018,7 +2018,7 @@ void QPxToolMW::load_results_db()
 		c_dev->setCurrentIndex(0);
 #ifndef QT_NO_DEBUG
 		clock_gettime(CLOCK_MONOTONIC, &te);
-		double t = (te.tv_sec - tb.tv_sec) + (te.tv_usec - tb.tv_usec)/1000000.0;
+		double t = (te.tv_sec - tb.tv_sec) + (te.tv_nsec - tb.tv_nsec)/1000000000.0;
 		QMessageBox::information(this, tr("Info"), tr("Tests data loaded in %1 sec").arg(t,0,'f',2));
 #endif
 	}
