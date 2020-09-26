@@ -505,6 +505,7 @@ create_makefile_gui()
 	fi
 	echo "QTDIR=$qt_dir" >> $mf
 	echo "QMAKE5= $__qmake" >> $mf
+	echo "TAB=\$(shell printf \"%b\" \"\\t\")" >> $mf
 
 	if test "$GMAKE" = "yes" ; then
 	    echo "export QTDIR QMAKE5" >> $mf
@@ -587,7 +588,10 @@ uninstall:
 	echo "
 Makefile.qmake:
 	rm -f Makefile.qmake" >> $mf
-	echo -n "	\$(QMAKE5) LIBS+=-L../lib/lib LIBS+=-lqpxtransport $QDEBUG -o Makefile.qmake" >> $mf
+	echo    "	\$(QMAKE5) LIBS+=-L../lib/lib LIBS+=-lqpxtransport $QDEBUG -o Makefile.qmake" >> $mf
+	echo    "	sed -i -re '/qpxtool.exe: /a #TAB#windres -v qpxtool.rc -O coff -o obj/winres.o' Makefile.qmake.Release Makefile.qmake.Debug" >> $mf
+	echo    "	sed -i -re 's=@object_script.qpxtool=obj/winres.o @object_script.qpxtool=' Makefile.qmake.Release Makefile.qmake.Debug" >> $mf
+	echo -n "	sed -i -re 's/#TAB#/\$(TAB)/' Makefile.qmake.Release Makefile.qmake.Debug" >> $mf
 	echo "
 .PHONY: all clean install uninstall" >> $mf
 }
