@@ -585,13 +585,9 @@ uninstall:
 	esac
 
 	echo "
-obj/winres.o:
-	windres -v qpxtool.rc -O coff -o obj/winres.o
-
 Makefile.qmake:
 	rm -f Makefile.qmake" >> $mf
 	echo -n "	\$(QMAKE5) LIBS+=-L../lib/lib LIBS+=-lqpxtransport $QDEBUG -o Makefile.qmake" >> $mf
-	echo -n "	sed -i -re 's=@object_script.qpxtool=obj/winres.o @object_script.qpxtool=' Makefile.qmake.Release Makefile.qmake.Debug" >> $mf
 	echo "
 .PHONY: all clean install uninstall" >> $mf
 }
