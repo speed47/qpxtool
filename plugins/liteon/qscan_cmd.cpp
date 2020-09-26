@@ -280,7 +280,7 @@ int scan_liteon::cmd_cd_errc_block_new(cd_errc *data)
 	dev->cmd[0] = 0xF3;
 	dev->cmd[1] = 0x0E;
 	dev->cmd[11]= 0x00;
-	if ((dev->err=dev->cmd.transport(READ,dev->rd_buf,10))){
+	if ((dev->err=dev->cmd.transport(READ,dev->rd_buf,0x10))){
 		sperror ("LiteOn_errc_cd_read_block",dev->err); return 1;
 	}
 	lba = dev->rd_buf[1] * 60 * 75 +
@@ -310,7 +310,7 @@ int scan_liteon::cmd_dvd_errc_block(dvd_errc *data)
 	dev->cmd[1] = 0x0E;
 	dev->cmd[8] = 0x10;
 	dev->cmd[11]= 0x00;
-	if ((dev->err=dev->cmd.transport(READ,dev->rd_buf,10))){
+	if ((dev->err=dev->cmd.transport(READ,dev->rd_buf,0x10))){
 		sperror ("LiteOn_errc_dvd_read_block",dev->err); return 1;
 	}
 #if 0
