@@ -1997,6 +1997,13 @@ int read_mediaid_bd(drive_info* drive) {
 	drive->media.disc_size = drive->media.MID_raw[4+11] >> 6;
 	drive->media.polarity = drive->media.MID_raw[4+14];
 
+	// written BD-Rs are detected as BD_ROM, we fix this here
+	if ((drive->media.type & DISC_BD_ROM) && strncmp((const char *)&drive->media.MID_raw[4+8], "BDR", 3) == 0) {
+		if (!drive->silent)
+			printf("BD DI info indicates type BD-R\n");
+		drive->media.type = DISC_BD_R_SEQ;
+	}
+
 	if (drive->media.type & DISC_BD_ROM) {
 		if (!drive->silent)
 			printf(COL_YEL "BD-ROM does not contain media ID" COL_NORM "\n");
