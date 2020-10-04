@@ -13,4 +13,5 @@ This unofficial version adds the following changes from upstream **v0.8.0**:
 - Fix erroneous detection of finalized BD-R as BD-ROM
 - Fix read speed computation under high-speed BD drives (`gettimeofday` resolution was not enough, replaced with `clock_gettime`), closes [#1](https://github.com/speed47/qpxtool/issues/1)
 - Fix some drives having only the maximum read speed available, closes [#2](https://github.com/speed47/qpxtool/issues/2)
+- Add a way to force the old LiteOn scanning way (by setting the `LITEON_FORCE_OLD=1` env var)
 - Fix a few coding errors (thanks to compiler warnings)

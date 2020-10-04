@@ -88,6 +88,12 @@ int scan_liteon::cmd_cd_errc_init_new() {
 }
 
 int scan_liteon::cmd_cd_errc_init() {
+	const char *liteon_force_old = getenv("LITEON_FORCE_OLD");
+	if (liteon_force_old && strcmp(liteon_force_old, "1") == 0) {
+		printf(COL_GRN "LiteOn: forced old CD ERRC commands" COL_NORM "\n");
+		cd_errc_new = false;
+		return cmd_cd_errc_init_old();
+	}
 	cd_errc_new = true;
 	if (cmd_cd_errc_init_new())
 		return cmd_cd_errc_init_old();
