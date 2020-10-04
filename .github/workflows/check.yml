@@ -4,6 +4,29 @@ on: [push, pull_request]
 
 jobs:
 
+  linux64-gui:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: install prerequisites
+      run: |
+          sudo apt-get update
+          sudo apt-get install -y make qt5-default g++ libpng-dev qttools5-dev-tools
+    - name: configure (debug)
+      run: ./configure --enable-debug
+    - name: make (debug)
+      run: nproc && make -j$(nproc)
+    - name: check executable (debug)
+      run: |
+          file gui/qpxtool | grep -q 'x86-64'
+    - name: configure (release)
+      run: make clean && ./configure
+    - name: make (release)
+      run: nproc && make -j$(nproc)
+    - name: check executable (release)
+      run: |
+          file gui/qpxtool | grep -q 'x86-64'
+
   win64-gui:
     runs-on: windows-2016
     defaults:
