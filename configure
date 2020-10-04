@@ -380,7 +380,7 @@ LIBS_THREAD = $OSLIBS_THREAD
 LPNG_INC  = $lpng_iopts
 LPNG_LIB  = $lpng_ldflags
 " >> Makefile
-	echo "WFLAGS    = -Wall -Werror" >> Makefile
+	echo "WFLAGS    = -Wall" >> Makefile
 	echo "WFLAGS   += -Wno-unused-but-set-variable -Wno-format-truncation -Wno-error=cpp" >> Makefile
 	echo "WFLAGS   += -Wno-misleading-indentation -Wno-unused-result -Wno-unused-parameter" >> Makefile
 	echo "WFLAGS   += -Wno-deprecated-copy -Wno-literal-suffix -Wno-deprecated-declarations" >> Makefile
@@ -589,9 +589,9 @@ uninstall:
 Makefile.qmake:
 	rm -f Makefile.qmake" >> $mf
 	echo    "	\$(QMAKE5) LIBS+=-L../lib/lib LIBS+=-lqpxtransport $QDEBUG -o Makefile.qmake" >> $mf
-	echo    "	sed -i -re '/qpxtool.exe: /a #TAB#windres -v qpxtool.rc -O coff -o obj/winres.o' Makefile.qmake.Release Makefile.qmake.Debug" >> $mf
-	echo    "	sed -i -re 's=@object_script.qpxtool=obj/winres.o @object_script.qpxtool=' Makefile.qmake.Release Makefile.qmake.Debug" >> $mf
-	echo -n "	sed -i -re 's/#TAB#/\$(TAB)/' Makefile.qmake.Release Makefile.qmake.Debug" >> $mf
+	echo    "	test -e Makefile.qmake.Release && test -e Makefile.qmake.Debug && sed -i -re '/qpxtool.exe: /a #TAB#windres -v qpxtool.rc -O coff -o obj/winres.o' Makefile.qmake.Release Makefile.qmake.Debug || true" >> $mf
+	echo    "	test -e Makefile.qmake.Release && test -e Makefile.qmake.Debug && sed -i -re 's=@object_script.qpxtool=obj/winres.o @object_script.qpxtool=' Makefile.qmake.Release Makefile.qmake.Debug || true" >> $mf
+	echo -n "	test -e Makefile.qmake.Release && test -e Makefile.qmake.Debug && sed -i -re 's/#TAB#/\$(TAB)/' Makefile.qmake.Release Makefile.qmake.Debug || true" >> $mf
 	echo "
 .PHONY: all clean install uninstall" >> $mf
 }

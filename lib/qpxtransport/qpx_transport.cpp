@@ -28,6 +28,7 @@ const unsigned char scsi_command_size[8] =
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 
 //#include <sys/types.h>
 //#include <sys/stat.h>
