@@ -307,7 +307,7 @@ void QPxGraph::drawGraph(QPainter *p, QSize s, device *dev, int ttype, const QRe
 			HscaleLBA = (1<<19) * 5 * dev->media.ilayers/sg.width();
 			Vscale1X = Vscale * 3;
 		} else if (dev->media.type.startsWith("BD")) {
-			HscaleLBA = (1<<19) * 25 * dev->media.ilayers/sg.width();
+			HscaleLBA = (1<<19) * dev->media.igbpl * dev->media.ilayers/sg.width();
 			Vscale1X = Vscale * 4;
 		}
 
@@ -866,7 +866,7 @@ void QPxGraph::drawGrid(QPainter* p, const QSize& s, device *dev, int ttype)
 		GBperLayer = 5;
 	} else if (dev->media.type.startsWith("BD")) {
 		isCD = 0;
-		GBperLayer = 25;
+		GBperLayer = dev->media.igbpl;
 	}
 
 	if (isCD) {

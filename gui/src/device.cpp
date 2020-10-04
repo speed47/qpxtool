@@ -284,6 +284,8 @@ void device::clearMinfo()
 	media.erasable	= "-";
 	media.layers	= "-";
 	media.ilayers	= 1;
+	media.gbpl	= "-";
+	media.igbpl	= 25;
 	media.prot		= "-";
 	media.regions	= "-";
 	media.creads	= 0;
@@ -1369,6 +1371,11 @@ void device::qscan_process_line(QString& qout)
 				media.ilayers = sl[1].toInt();
 				if (media.ilayers <= 0)
 					media.ilayers = 1; 
+			} else if (sl[0].contains("GB Per Layer", Qt::CaseInsensitive)) {
+				media.gbpl = sl[1];
+				media.igbpl = sl[1].toInt();
+				if (media.igbpl <= 0)
+					media.igbpl = 25;
 			} else if (sl[0].contains("Protection", Qt::CaseInsensitive)) {
 				media.prot = sl[1];
 			} else if (sl[0].contains("Regions", Qt::CaseInsensitive)) {

@@ -278,7 +278,10 @@ void tabMediaInfo::updateData(int xcode)
 	l_type->setText(dev->media.type);
 	l_book->setText(dev->media.category);
 	//l_layers->setNum(dev->media.layers);
-	l_layers->setText(dev->media.layers);
+	if (dev->media.type.startsWith("BD"))
+		l_layers->setText(dev->media.layers + " x " + dev->media.gbpl + " GB");
+	else
+		l_layers->setText(dev->media.layers);
 	l_prot->setText(dev->media.prot);
 	l_regions->setText(dev->media.regions);
 	l_erasable->setText( dev->media.erasable); //? "Yes" : "No");

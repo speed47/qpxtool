@@ -143,6 +143,7 @@ typedef	struct {
 	uint8_t		disc_size;	// indicates 120/80mm disc
 	uint8_t		polarity;   // Push-Pull polarity flags per layer for BD (indicates HtL or LtH)
 	uint8_t		layers;		// Layers num (!CD)	
+	uint8_t		gbpl;		// Gigabytes Per Layer (BD)
 	int			sectsize;
 	uint32_t	capacity;	// Recorded capacity in sectors
 	msf		capacity_msf;
