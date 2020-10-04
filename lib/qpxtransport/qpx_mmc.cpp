@@ -1997,6 +1997,13 @@ int read_mediaid_bd(drive_info* drive) {
 	drive->media.disc_size = drive->media.MID_raw[4+11] >> 6;
 	drive->media.polarity = drive->media.MID_raw[4+14];
 
+	// written BD-Rs are detected as BD_ROM, we fix this here
+	if ((drive->media.type & DISC_BD_ROM) && strncmp((const char *)&drive->media.MID_raw[4+8], "BDR", 3) == 0) {
+		if (!drive->silent)
+			printf("BD DI info indicates type BD-R\n");
+		drive->media.type = DISC_BD_R_SEQ;
+	}
+
 	if (drive->media.type & DISC_BD_ROM) {
 		if (!drive->silent)
 			printf(COL_YEL "BD-ROM does not contain media ID" COL_NORM "\n");
@@ -2316,13 +2323,28 @@ int determine_disc_type(drive_info* drive) {
 		} else if (drive->media.type & DISC_BD) {
  			drive->rd_buf[4]=0;
 			drive->cmd[0] = MMC_READ_DVD_STRUCTURE;
-			drive->cmd[7] = 0;//0x11; //dvd_dash;
+			drive->cmd[1] = 1; // media type = BD
 			drive->cmd[9] = 36;
 			drive->cmd[11] = 0;
 			if ((drive->err=drive->cmd.transport(READ,drive->rd_buf,36))) 
 				if (!drive->silent) sperror ("READ_DVD_STRUCTURE",drive->err);
 			drive->media.book_type = 0;
-			drive->media.layers = 1 + ((drive->rd_buf[6] & 0x60) >> 5);
+
+			drive->media.layers = (drive->rd_buf[16] & 0xF0) >> 4;
+
+			switch (drive->rd_buf[17] & 0x0F) {
+				case 0:
+				case 1: drive->media.gbpl = 25; break;
+				case 2: drive->media.gbpl = 27; break;
+//				case 3: /* unknown */
+				case 4: drive->media.gbpl = 32; break; /* seen on a BDXL QL */
+				case 5: drive->media.gbpl = 33; break;
+				default:
+					/* unknown, default to 25 */
+					printf("WARNING: Unknown layer size (%d), defaulting to 25GB, which is probably wrong!\n", drive->rd_buf[17] & 0x0F);
+					drive->media.gbpl = 25;
+			}
+
 			read_mediaid_bd(drive);
 			if (!drive->silent) printf("** MID: '%s'\n",drive->media.MID);
 		}

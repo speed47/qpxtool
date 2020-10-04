@@ -629,6 +629,8 @@ int main(int argc, char** argv) {
 			}
 		}
 		printf(IMEDIA "Layers        : %d\n", dev->media.layers);
+		if (dev->media.type & DISC_BD)
+			printf(IMEDIA "GB Per Layer  : %d\n", dev->media.gbpl);
 	
 		if ( dev->media.type & (DISC_DVD) ) {
 //			read_disc_regions(drive);

@@ -345,6 +345,8 @@ struct MediaInfo {
 	QString		mid;
 	QString		layers;
 	int			ilayers;
+	QString			gbpl;
+	int			igbpl;
 	QString		prot;
 	QString		regions;
 
