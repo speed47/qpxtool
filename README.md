@@ -15,3 +15,18 @@ This unofficial version adds the following changes from upstream **v0.8.0**:
 - Fix some drives having only the maximum read speed available, closes [#2](https://github.com/speed47/qpxtool/issues/2)
 - Add a way to force the old LiteOn scanning way (by setting the `LITEON_FORCE_OLD=1` env var)
 - Fix a few coding errors (thanks to compiler warnings)
+
+# Screenshots
+
+Error correction scan of a DVD-R:
+![dvdr_errc](https://user-images.githubusercontent.com/218502/95659864-594ed980-0b24-11eb-987c-b7657e40c5aa.PNG)
+![dvdr_errc_detailed](https://user-images.githubusercontent.com/218502/95659868-5b189d00-0b24-11eb-8beb-724ee8b5f5c9.PNG)
+
+Read speed scan of a two-layer BD-ROM:
+![bdr_dl_speed](https://user-images.githubusercontent.com/218502/95659865-59e77000-0b24-11eb-8dee-7425cf57a35d.PNG)
+
+Error correction scan of a two-layer BD-ROM:
+![bdr_dl_errc_detailed](https://user-images.githubusercontent.com/218502/95659866-5a800680-0b24-11eb-9897-7362fee8d9c6.PNG)
+![bdr_dl_errc](https://user-images.githubusercontent.com/218502/95659867-5a800680-0b24-11eb-9648-1bd475631b26.PNG)
+
+
