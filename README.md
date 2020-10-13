@@ -18,7 +18,7 @@ This unofficial version adds the following changes from upstream **v0.8.0**:
 
 # Screenshots
 
-## Read speed andd error correction scan of a two-layer BD-ROM:
+## Read speed and error correction scan of a two-layer BD-ROM:
 ![bdr_dl_speed](https://user-images.githubusercontent.com/218502/95659865-59e77000-0b24-11eb-8dee-7425cf57a35d.PNG)
 ![bdr_dl_errc](https://user-images.githubusercontent.com/218502/95659867-5a800680-0b24-11eb-9648-1bd475631b26.PNG)
 ![bdr_dl_errc_detailed](https://user-images.githubusercontent.com/218502/95659866-5a800680-0b24-11eb-9897-7362fee8d9c6.PNG)
