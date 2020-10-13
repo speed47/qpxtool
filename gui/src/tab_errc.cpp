@@ -159,9 +159,9 @@ void tabERRC::updateAll()
 		pl_e1->setText("BIS");
 		show_e2 = false;
 	} else {
-		pl_e0->setText("BLER/PI8");
-		pl_e1->setText("E22/PIF");
-		pl_e2->setText("E32/POF");
+		pl_e0->setText("BLER/PI8/LDC");
+		pl_e1->setText("E22/PIF/BIS");
+		pl_e2->setText("E32/POF/---");
 	}
 	pl_e2->setVisible(show_e2);
 	l_e2t->setVisible(show_e2);
@@ -219,37 +219,37 @@ void tabERRC::updateSummary(device *dev)
 		return;
 	}
 	if (dev->media.type.startsWith("CD")) {
-		l_e0t->setText( QString::number(dev->testData.errcTOT.cd.bler) );
-		l_e0m->setNum( dev->testData.errcMAX.cd.bler );
-		l_e0a->setText( QString::number(dev->testData.errcAVG.cd.bler, 'f', 2) );
+		l_e0t->setText( "Total: " + QString::number(dev->testData.errcTOT.cd.bler) );
+		l_e0m->setText( "Max: "   + QString::number(dev->testData.errcMAX.cd.bler) );
+		l_e0a->setText( "Avg: "   + QString::number(dev->testData.errcAVG.cd.bler, 'f', 2) );
 
-		l_e1t->setText( QString::number(dev->testData.errcTOT.cd.e22) );
-		l_e1m->setNum( dev->testData.errcMAX.cd.e22 );
-		l_e1a->setText( QString::number(dev->testData.errcAVG.cd.e22, 'f', 2) );
+		l_e1t->setText( "Total: " + QString::number(dev->testData.errcTOT.cd.e22) );
+		l_e1m->setText( "Max: "   + QString::number(dev->testData.errcMAX.cd.e22) );
+		l_e1a->setText( "Avg: "   + QString::number(dev->testData.errcAVG.cd.e22, 'f', 2) );
 
-		l_e2t->setText( QString::number(dev->testData.errcTOT.cd.e32) );
-		l_e2m->setNum( dev->testData.errcMAX.cd.e32 );
-		l_e2a->setText( QString::number(dev->testData.errcAVG.cd.e32, 'f', 2) );
+		l_e2t->setText( "Total: " + QString::number(dev->testData.errcTOT.cd.e32) );
+		l_e2m->setText( "Max: "   + QString::number(dev->testData.errcMAX.cd.e32) );
+		l_e2a->setText( "Avg: "   + QString::number(dev->testData.errcAVG.cd.e32, 'f', 2) );
 	} else if (dev->media.type.startsWith("DVD")) {
-		l_e0t->setText( QString::number(dev->testData.errcTOT.dvd.pi8) );
-		l_e0m->setNum( dev->testData.errcMAX.dvd.pi8 );
-		l_e0a->setText( QString::number(dev->testData.errcAVG.dvd.pi8, 'f', 2) );
+		l_e0t->setText( "Total: " + QString::number(dev->testData.errcTOT.dvd.pi8) );
+		l_e0m->setText( "Max: "   + QString::number(dev->testData.errcMAX.dvd.pi8) );
+		l_e0a->setText( "Avg: "   + QString::number(dev->testData.errcAVG.dvd.pi8, 'f', 2) );
 
-		l_e1t->setText( QString::number(dev->testData.errcTOT.dvd.pif) );
-		l_e1m->setNum( dev->testData.errcMAX.dvd.pif );
-		l_e1a->setText( QString::number(dev->testData.errcAVG.dvd.pif, 'f', 2) );
+		l_e1t->setText( "Total: " + QString::number(dev->testData.errcTOT.dvd.pif) );
+		l_e1m->setText( "Max: "   + QString::number(dev->testData.errcMAX.dvd.pif) );
+		l_e1a->setText( "Avg: "   + QString::number(dev->testData.errcAVG.dvd.pif, 'f', 2) );
 
-		l_e2t->setText( QString::number(dev->testData.errcTOT.dvd.pof) );
-		l_e2m->setNum( dev->testData.errcMAX.dvd.pof );
-		l_e2a->setText( QString::number(dev->testData.errcAVG.dvd.pof, 'f', 2) );
+		l_e2t->setText( "Total: " + QString::number(dev->testData.errcTOT.dvd.pof) );
+		l_e2m->setText( "Max: "   + QString::number(dev->testData.errcMAX.dvd.pof) );
+		l_e2a->setText( "Avg: "   + QString::number(dev->testData.errcAVG.dvd.pof, 'f', 2) );
 	} else if (dev->media.type.startsWith("BD")) {
-		l_e0t->setText( QString::number(dev->testData.errcTOT.bd.ldc) );
-		l_e0m->setNum( dev->testData.errcMAX.bd.ldc );
-		l_e0a->setText( QString::number(dev->testData.errcAVG.bd.ldc, 'f', 2) );
+		l_e0t->setText( "Total: " + QString::number(dev->testData.errcTOT.bd.ldc) );
+		l_e0m->setText( "Max: "   + QString::number(dev->testData.errcMAX.bd.ldc) );
+		l_e0a->setText( "Avg: "   + QString::number(dev->testData.errcAVG.bd.ldc, 'f', 2) );
 
-		l_e1t->setText( QString::number(dev->testData.errcTOT.bd.bis) );
-		l_e1m->setNum( dev->testData.errcMAX.bd.bis );
-		l_e1a->setText( QString::number(dev->testData.errcAVG.bd.bis, 'f', 2) );
+		l_e1t->setText( "Total: " + QString::number(dev->testData.errcTOT.bd.bis) );
+		l_e1m->setText( "Max: "   + QString::number(dev->testData.errcMAX.bd.bis) );
+		l_e1a->setText( "Avg: "   + QString::number(dev->testData.errcAVG.bd.bis, 'f', 2) );
 	}
 }
 
