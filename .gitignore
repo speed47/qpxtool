@@ -4,6 +4,7 @@ Makefile
 */*/*.o
 */.qmake.stash
 */*/lib*.so*
+build*
 gui/locale/*.qm
 gui/moc/
 gui/qrc_*.cpp
