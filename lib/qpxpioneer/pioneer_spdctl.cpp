@@ -62,13 +62,11 @@ int pioneer_set_spdlim(drive_info* drive, bool limit, bool save)
 
 int pioneer_set_peakpower(drive_info* drive, bool en, bool save)
 {
-	// never implemented
-	return drive->err; // added return to avoid compiler function-type warning
+    return 0;
 }
 
 int pioneer_set_pureread(drive_info* drive, char pr)
 {
-	// never implemented
-	return drive->err; // added return to avoid compiler function-type warning
+    return 0;
 }
 
