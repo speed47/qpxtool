@@ -51,7 +51,7 @@ void plugin_destroy(scan_plugin* iplugin)
 }
 
 scan_plextor::scan_plextor(drive_info* idev)
-    : scan_plugin()
+    : scan_plugin(), lba(0), fete_idx(0), fete_rsize(0)
 {
 	dev = idev;
 	if (!dev->silent) printf("scan_plextor()\n");

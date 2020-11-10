@@ -340,7 +340,7 @@ int scan_benq::cmd_cd_errc_block(cd_errc *data)
 	int i,m,s,f;
 	uint32_t plba;
 #ifdef _BENQ_DEBUG
-	printf("benq_cx_do_one_interval. LBA=%d\n",lba);
+	printf("benq_cx_do_one_interval. LBA=%ld\n",lba);
 #endif
 	int found=0;
 	int cnt=128;
@@ -416,7 +416,7 @@ int scan_benq::cmd_dvd_errc_block(dvd_errc *data)
 	uint32_t plba;
 //	int pif;
 #ifdef _BENQ_DEBUG
-	printf("benq_pie_pif_do_one_interval. LBA=%d\n",lba);
+	printf("benq_pie_pif_do_one_interval. LBA=%ld\n",lba);
 #endif
 	int found=0;
 	int cnt=256;

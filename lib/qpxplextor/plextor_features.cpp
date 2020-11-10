@@ -708,7 +708,7 @@ int plextor_set_testwrite_dvdplus(drive_info* drive)
 
 int plextor_plexeraser(drive_info* drive)
 {
-	long i;
+	long i = 0;
 	printf("Destucting disc [mode=%02X]... \n",drive->plextor.plexeraser);
 //	return 0;
 	drive->cmd[0] = PLEXTOR_PLEXERASER;

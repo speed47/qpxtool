@@ -209,7 +209,7 @@ int yamaha_f1_do_tattoo(drive_info* drive, unsigned char *iimage, uint32_t bsize
 	if (iimage) {
 //		image = (tattoo_row*) iimage;
 		if (bsize != tattoo_size) {
-			printf("yamaha_f1_do_tattoo(): RAW image size must be exactly %d bytes (3744x%d)\n",
+			printf("yamaha_f1_do_tattoo(): RAW image size must be exactly %u bytes (3744x%d)\n",
 					tattoo_size,drive->yamaha.tattoo_rows);
 			return 1;
 		}

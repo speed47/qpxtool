@@ -1112,7 +1112,7 @@ int test_dma_speed(drive_info* drive, long msecs)
 	drive->silent--;
 
 	uint32_t buf_size  = read_echo_buffer_size(drive);
-	printf("Echo buffer size: %d\n", buf_size);
+	printf("Echo buffer size: %u\n", buf_size);
 
 	buf_size = 4096;
 
@@ -1140,7 +1140,7 @@ int test_dma_speed(drive_info* drive, long msecs)
 		cnt++;
 	}
 	speed = (buf_size * cnt / msecs);
-	printf("DMA speed: %6ld kB/s (%d buffers of %d bytes in %ld msecs)\n", speed, cnt, buf_size, msecs);
+	printf("DMA speed: %6ld kB/s (%d buffers of %u bytes in %ld msecs)\n", speed, cnt, buf_size, msecs);
 	drive->silent++;
 	return 0;
 }

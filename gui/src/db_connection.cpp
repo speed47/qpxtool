@@ -47,7 +47,7 @@ DBParams::DBParams(QString idriver,
 	conn_name = "";
 };
 
-bool SqlProbeConnection(const DBParams& par, QString CONNECTION)
+bool SqlProbeConnection(const DBParams& par, const QString& CONNECTION)
 {
 	QSqlDatabase Sql_DB;
     QString r;
@@ -59,7 +59,7 @@ bool SqlProbeConnection(const DBParams& par, QString CONNECTION)
     }
 }
 
-bool SqlOpenConnection(const DBParams& par, QString CONNECTION)
+bool SqlOpenConnection(const DBParams& par, const QString& CONNECTION)
 {
 #ifndef QT_NO_DEBUG
     qDebug("Connect...");
@@ -89,7 +89,7 @@ bool SqlOpenConnection(const DBParams& par, QString CONNECTION)
     return 1;
 }
 
-void SqlCloseConnection(QString CONNECTION)
+void SqlCloseConnection(const QString& CONNECTION)
 {
 #ifndef QT_NO_DEBUG
     qDebug( "Disconnecting..." );

@@ -22,7 +22,7 @@ void plugin_destroy(scan_plugin* iplugin){
 }
 
 scan_generic::scan_generic(drive_info* idev)
-    : scan_plugin()
+    : scan_plugin(), lba(0)
 {
 	dev = idev;
 	if (!dev->silent) printf("scan_generic()\n");
