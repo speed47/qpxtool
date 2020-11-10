@@ -157,7 +157,7 @@ int scan_plextor::cmd_fete_init()
 	dev->cmd[3] = 0x01;
 #ifdef _debug_fete
 #ifdef FETE_START_LBA
-	printf("scan_plextor::cmd_fete_init: lba %d - %d\n", lba, dev->media.capacity_total-1);
+	printf("scan_plextor::cmd_fete_init: lba %ld - %d\n", lba, dev->media.capacity_total-1);
 #else
 	printf("scan_plextor::cmd_fete_init: lba %d - %d\n", 0, dev->media.capacity_total-1);
 #endif

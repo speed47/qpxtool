@@ -24,7 +24,7 @@ void plugin_destroy(scan_plugin* iplugin)
 }
 
 scan_benqrom::scan_benqrom(drive_info* idev)
-    : scan_plugin()
+    : scan_plugin(), lba(0), cnt(0), _c1{}, _c2{}, _lba(0), _pie{}, _pif{}
 {
 	dev = idev;
 	if (!dev->silent) printf("scan_benqrom()\n");

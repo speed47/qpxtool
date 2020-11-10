@@ -185,12 +185,12 @@ bool tattoo_read_png(unsigned char *buf, int rows, FILE *fp)
 
 	png_read_info(png_ptr, info_ptr);
 
-	printf("Image size: %d x %d\n",
-					my_png_get_image_width(png_ptr, info_ptr),
-					my_png_get_image_height(png_ptr, info_ptr));
+	printf("Image size: %ld x %ld\n",
+		long(my_png_get_image_width(png_ptr, info_ptr)),
+		long(my_png_get_image_height(png_ptr, info_ptr)));
 
 	if (my_png_get_image_width(png_ptr, info_ptr) != 3744U || my_png_get_image_height(png_ptr, info_ptr) != rows ) {
-		printf("Image should be 3744 x %d", rows);
+		printf("Image should be 3744 x %ld", long(rows));
 		return 1;
 	}
 
@@ -246,7 +246,7 @@ bool tattoo_read_png(unsigned char *buf, int rows, FILE *fp)
 	} else {
 		printf("Palette   : NO\n");
 	}
-	printf("ROW bytes : %d\n", my_png_get_rowbytes(png_ptr, info_ptr));
+	printf("ROW bytes : %ld\n", long(my_png_get_rowbytes(png_ptr, info_ptr)));
 
 
 	raw_row_pointer = buf;

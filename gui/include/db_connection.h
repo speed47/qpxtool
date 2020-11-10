@@ -40,9 +40,9 @@ public:
 	QString conn_name;
 };
 
-bool SqlProbeConnection(const DBParams& par, QString CONNECTION="test connection");
-bool SqlOpenConnection (const DBParams& par, QString CONNECTION="test connection");
-void SqlCloseConnection(QString CONNECTION="test connection");
+bool SqlProbeConnection(const DBParams& par, const QString& CONNECTION="test connection");
+bool SqlOpenConnection (const DBParams& par, const QString& CONNECTION="test connection");
+void SqlCloseConnection(const QString& CONNECTION="test connection");
 
 #endif // _DB_CONNECTION_H
 

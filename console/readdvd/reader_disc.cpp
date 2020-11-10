@@ -238,7 +238,7 @@ static int initAllCSSKeys( drive_info *dev )
       /* Perform CSS key cracking for this title. */
 //	  st0=1;
 	  if (!dev->silent) {
-        printf( "libdvdread: Get key for %s at 0x%08x, len %10d\n", filename, start, len );
+        printf( "libdvdread: Get key for %s at 0x%08x, len %10u\n", filename, start, len );
       }
       if( css_title( dev, (int)start ) < 0 ) {
 	    if (!dev->silent) {
@@ -264,7 +264,7 @@ static int initAllCSSKeys( drive_info *dev )
             
 		/* Perform CSS key cracking for this title. */
 		if (!dev->silent) {
-			printf( "libdvdread: Get key for %s at 0x%08x, len %10d\n", filename, start, len );
+			printf( "libdvdread: Get key for %s at 0x%08x, len %10u\n", filename, start, len );
 		}
 		if( css_title( dev, (int)start ) < 0 ) {
 			if (!dev->silent) {
@@ -486,7 +486,7 @@ void *read_disc(void* arg) {
 		}
 		clock_gettime(CLOCK_MONOTONIC, &t_e);
 
-		printf("%s: %5.2f X, lba %7d / %7d  ( %06x / %06x ) scnt=%d\r",
+		printf("%s: %5.2f X, lba %7u / %7d  ( %06x / %06x ) scnt=%d\r",
 				dev->device,
 				((float)scnt/(float)sects1X)/((t_e.tv_sec - t_s.tv_sec) + (t_e.tv_nsec - t_s.tv_nsec) / 1000000000.0),
 				lba, dev->media.capacity,

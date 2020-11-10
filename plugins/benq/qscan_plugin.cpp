@@ -45,7 +45,7 @@ void plugin_destroy(scan_plugin* iplugin)
 }
 
 scan_benq::scan_benq(drive_info* idev)
-    : scan_plugin()
+    : scan_plugin(), lba(0), sidx(0)
 {
 	dev = idev;
 	if (!dev->silent) printf("scan_benq()\n");

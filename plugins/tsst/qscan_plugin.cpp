@@ -22,7 +22,7 @@ void plugin_destroy(scan_plugin* iplugin){
 }
 
 scan_tsst::scan_tsst(drive_info* idev)
-    : scan_plugin()
+    : scan_plugin(), lba(0)
 {
 	dev = idev;
 	if (!dev->silent) printf("scan_tsst()\n");

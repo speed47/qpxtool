@@ -328,7 +328,7 @@ int qscanner::run_wr_transfer()
 #endif
 		}
 	}
-	printf("readline: %d\n", n);
+	printf("readline: %ld\n", n);
 	close(pipefd[0]);
 	return 0;
 }
@@ -373,7 +373,7 @@ int qscanner::run_wr_transfer()
 //	lba_end = 4096;
 
 	get_wbuffer_capacity(dev,&ubuft,&ubuff);
-	printf("Write buffer capacity: %d kB\n", ubuft >> 10);
+	printf("Write buffer capacity: %u kB\n", ubuft >> 10);
 
 	wait_unit_ready(dev, 6);
 	printf("Writing blocks: %d - %d (%d MB)\n", lba_sta, lba_end, (lba_end-lba_sta) >> 9);

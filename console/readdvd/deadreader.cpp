@@ -25,7 +25,7 @@ int init_drives(drive_info** dev, char** dev_n) {
     printf("Initialising drives...\n");
     int i=0;
     int n=0;
-    while ((dev_n[i]) && (i<MAX_THREADS)) {
+    while ((i<MAX_THREADS) && (dev_n[i])) {
 		dev[n]=new drive_info(dev_n[i]);
 		if (!inquiry(dev[n])) {
 		    dev[n]->silent++;

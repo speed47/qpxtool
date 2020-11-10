@@ -22,7 +22,7 @@ void plugin_destroy(scan_plugin* iplugin){
 }
 
 scan_liteon::scan_liteon(drive_info* idev)
-	: scan_plugin()
+	: scan_plugin(), lba(0), cd_errc_new(false)
 {
 	dev = idev;
 	if (!dev->silent) printf("scan_liteon()\n");

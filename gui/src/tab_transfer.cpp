@@ -173,7 +173,7 @@ void tabTransfer::updateSummary(device* dev, float time)
 		avg_x  = (float)avg_kb / 150.0;
 
 #ifndef QT_NO_DEBUG
-	printf("avg: %d KB, %.2f X, %d KB/X\n", avg_kb, avg_x, dev->media.spd1X);
+	printf("avg: %u KB, %.2f X, %d KB/X\n", avg_kb, avg_x, dev->media.spd1X);
 #endif
 
 	l_avg_x->setText( QString::number( avg_x, 'f', 2) + " X");
