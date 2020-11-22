@@ -1,33 +1,22 @@
-#! /bin/bash
+#!/bin/bash
 set -e
 set -x
 
 github_ref="$1"
 
-if [ -n "$GITHUB_EVENT_PATH" ] && [ -f "$GITHUB_EVENT_PATH" ]; then
-    if command -v jq >/dev/null; then
-        upload_url=$(jq -r '.release.upload_url' < $GITHUB_EVENT_PATH)
-        echo "Upload URL is $upload_url"
-        echo "::set-output name=upload_url::$upload_url"
-    fi
-else
-    echo "This should only be run from GitHub Actions"
-    exit 1
-fi
-
 case "$MSYSTEM" in
-    MINGW64) os=win64; exe=.exe;;
-    MINGW32) os=win32; exe=.exe;;
-    *)       os=linux64; exe='';;
+    MINGW64) os=win64;;
+    MINGW32) os=win32;;
+    *)       os=unknown;;
 esac
 
 if [ ! -e "gui/release/qpxtool.exe" ] && [ -e "gui/debug/qpxtool.exe" ]; then
-	flavor=debug
+    flavor=debug
 else
-	flavor=release
+    flavor=release
 fi
 
-archive=qpxtool-$(echo "$github_ref" | grep -Eo '[^/]+$')-$os-$flavor.zip
+archive=qpxtool-$(echo "$github_ref" | grep -Eo '[^/]+$')-$os-portable-$flavor.zip
 echo "Archive name is $archive"
 echo "::set-output name=archive::$archive"
 

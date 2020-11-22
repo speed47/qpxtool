@@ -1,0 +1,6 @@
+#!/bin/sh
+DIR="$(readlink -f "$(dirname "$0")")"
+export GTK_PATH="$DIR/usr/lib/gtk-2.0"
+export LD_LIBRARY_PATH="$DIR/usr/lib64"
+export PATH="$DIR/usr/bin:$PATH"
+exec "$DIR/usr/bin/qpxtool" "$@"
