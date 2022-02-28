@@ -32,7 +32,7 @@ lpng_iopts=""
 lpng_ldflags=""
 LPNG_DEFS=""
 PLUGIN_DEFS=""
-DEFS=""
+DEFS="-std=c++11 -D_USE_MATH_DEFINES"
 
 qt_ver=""
 qt_dir=""

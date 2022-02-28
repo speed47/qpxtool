@@ -24,7 +24,7 @@ public:
 //	int	open();
 //	int	close();
 	imgwriter(const imgwriter &in) = delete;
-	imgwriter(imgwriter &&in) = delete;
+	imgwriter(imgwriter &in) = delete;
 	imgwriter& operator=(const imgwriter &in) = delete;
 
 private:
