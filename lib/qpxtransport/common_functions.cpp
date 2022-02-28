@@ -200,27 +200,6 @@ void int2hms(int intt, hms* time){
 
 #if !defined (_WIN32) && !defined (_WIN64)
 
-uint32_t min_u32(uint32_t a, uint32_t b)
-{
-	if (a<=b)
-		return a;
-	return b;
-}
-
-int min(int a, int b)
-{
-	if (a<=b)
-		return a;
-	return b;
-}
-
-int max(int a, int b)
-{
-	if (a>b)
-		return a;
-	return b;
-}
-
 #else
 
 int inet_aton(const char *cp, struct in_addr *addr)

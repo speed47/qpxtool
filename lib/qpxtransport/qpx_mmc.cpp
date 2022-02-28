@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <algorithm>
 
 #include <unistd.h>
 //#include <sys/time.h>
@@ -1508,7 +1509,7 @@ int read_atip(drive_info* drive) {
 	drive->media.ATIP_size = size;
 	if (!drive->silent) {
 		printf("ATIP (%d bytes):\n",size);
-		for (i=0; i<(min(size, 4)); i++) printf(" %3d (%02X)",drive->media.ATIP[i],drive->media.ATIP[i]);
+		for (i=0; i<(std::min(size, 4)); i++) printf(" %3d (%02X)",drive->media.ATIP[i],drive->media.ATIP[i]);
 		if (size > 4) for (i=0; i<(size-4); i++) {
 			if (!(i % 8)) printf("\n");
 			else if (!(i % 4)) printf("      ");
@@ -1548,7 +1549,7 @@ int read_toc(drive_info* drive) {
 
 	if (!drive->silent) {
 		printf("TOC (%d bytes):\n",size);
-		for (i=0; i<(min(size, 4)); i++) printf(" %3d (%02X)",drive->rd_buf[i] & 0xFF,drive->rd_buf[i] & 0xFF);
+		for (i=0; i<(std::min(size, 4)); i++) printf(" %3d (%02X)",drive->rd_buf[i] & 0xFF,drive->rd_buf[i] & 0xFF);
 		if (size > 4) for (i=0; i<(size-4); i++) {
 			if (!(i % 8)) printf("\n");
 			else if (!(i % 4)) printf("      ");
@@ -2406,7 +2407,7 @@ int get_performance(drive_info* drive, bool rw, uint8_t type) {
 
 	if (type == 0x03) for (j=0; j<speed_tbl_size;j++) drive->parms.wr_speed_tbl_kb[j] = -1;
 
-	for (j=0; j<min_u32(descn, (type==0x03) ? speed_tbl_size : descn); j++) {
+	for (j=0; j<std::min(descn, (type==0x03) ? speed_tbl_size : descn); j++) {
 		offs = 8+j*desc_len;
 //		printf("\t%s descriptor #%02d:", rw ? "Write" : "Read",j);
 
@@ -2438,7 +2439,7 @@ int get_performance(drive_info* drive, bool rw, uint8_t type) {
 //			printf("LBA %d: \tW %dkB/s   R %dkB/s\n", lba, w, r);
 
 			drive->parms.wr_speed_tbl_kb[j] = ntoh32(drive->rd_buf+offs);
-			drive->parms.max_write_speed_kb = max(drive->parms.max_write_speed_kb, drive->parms.wr_speed_tbl_kb[j]);
+			drive->parms.max_write_speed_kb = std::max(drive->parms.max_write_speed_kb, drive->parms.wr_speed_tbl_kb[j]);
 		}
 	}
 	return 0;
@@ -2528,7 +2529,7 @@ int detect_speeds(drive_info *drive)
 					and only retain the returned speed numbers from the drive. We don't assume
 					that the drive sets the closest supported speed.
 
-					spd = max(spd, drive->parms.read_speed_dvd);
+					spd = std::max(spd, drive->parms.read_speed_dvd);
 */
 					drive->parms.speed_tbl[idx] = drive->parms.read_speed_dvd;
 					drive->parms.speed_tbl_kb[idx] = drive->parms.read_speed_kb;
@@ -2568,7 +2569,7 @@ int detect_speeds(drive_info *drive)
 				drive->parms.read_speed_cd = (int) (drive->parms.read_speed_kb / drive->parms.speed_mult);
 				if (prev_spd != drive->parms.read_speed_cd) {
 //					spd = drive->parms.read_speed_cd;
-					spd = max(spd, drive->parms.read_speed_cd);
+					spd = std::max(spd, drive->parms.read_speed_cd);
 					drive->parms.speed_tbl[idx] = drive->parms.read_speed_cd;
 					drive->parms.speed_tbl_kb[idx] = drive->parms.read_speed_kb;
 					if (!drive->silent) printf(" RD speed:  %dX (%5d kB/s)\n",
@@ -2636,7 +2637,7 @@ int get_write_speed_tbl(drive_info* drive) {
 //		printf("== Write speeds: %d\n",spdcnt);
 		for (i=0; (i<spdcnt) && (i<speed_tbl_size); i++) {
 			drive->parms.wr_speed_tbl_kb[i] = ntoh16(drive->rd_buf+offs+32+i*4+2);
-			drive->parms.max_write_speed_kb = max(drive->parms.max_write_speed_kb, drive->parms.wr_speed_tbl_kb[i]);
+			drive->parms.max_write_speed_kb = std::max(drive->parms.max_write_speed_kb, drive->parms.wr_speed_tbl_kb[i]);
 //			printf("  Speed #%02d: %d kB/s\n",i,drive->parms.wr_speed_tbl_kb[i]);
 		}
 	}
