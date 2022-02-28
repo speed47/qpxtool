@@ -246,21 +246,10 @@ extern void int2hms(int intt, hms* time);
 #define msleep(t) Sleep(t)
 #define sleep(t)  Sleep((t) << 10)
 
-#ifndef max
-#define max(a,b) (((a) > (b)) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-#define min_u32 min
-
 extern int inet_aton(const char *cp, struct in_addr *addr);
 
 #else  // not WIN32
 #define msleep(t) usleep((t) << 10)
-extern uint32_t min_u32(uint32_t a, uint32_t b);
-extern int min(int a, int b);
-extern int max(int a, int b);
 #endif
 
 extern void remove_double_spaces(char* str);

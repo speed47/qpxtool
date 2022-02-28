@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <algorithm>
 
 #include <qscan_plugin.h>
 
@@ -182,10 +183,10 @@ int scan_pioneer::cmd_dvd_errc_getdata(dvd_errc *data)
 #endif
 
 	if (dev->dev_ID < PIO_DVR_111) {
-		data->pie = max( 0, (ntoh16(dev->rd_buf+13) - ntoh16(dev->rd_buf+5)) / 10);
+		data->pie = std::max( 0, (ntoh16(dev->rd_buf+13) - ntoh16(dev->rd_buf+5)) / 10);
 		data->pif = ntoh16(dev->rd_buf+13) / 200;
 	} else {
-		data->pie = max( 0, (ntoh16(dev->rd_buf+13) - ntoh16(dev->rd_buf+5)));
+		data->pie = std::max( 0, (ntoh16(dev->rd_buf+13) - ntoh16(dev->rd_buf+5)));
 		data->pif = ntoh16(dev->rd_buf+13) / 20;
 	}
 //	data->pi8=data->pie;
@@ -211,7 +212,7 @@ int scan_pioneer::cmd_dvd_errc_block(dvd_errc *data)
 	const char interval = 1;
 	r = cmd_dvd_errc_read(interval);
 	if (!r) r = cmd_dvd_errc_getdata(data);
-//	*pie = max( 0, (ntoh16(dev->rd_buf+13) - 1.5 * ntoh16(dev->rd_buf+5)) / 40);
+//	*pie = std::max( 0, (ntoh16(dev->rd_buf+13) - 1.5 * ntoh16(dev->rd_buf+5)) / 40);
 	lba+= 16*interval;
 	return r;
 }

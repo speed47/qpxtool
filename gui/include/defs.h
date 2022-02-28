@@ -32,8 +32,6 @@
 #ifndef msleep
 #define msleep(t) usleep((t) << 10)
 #endif
-extern int min(int a, int b);
-extern int max(int a, int b);
 
 #endif
 
