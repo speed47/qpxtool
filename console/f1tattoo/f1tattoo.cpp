@@ -155,29 +155,29 @@ bool tattoo_read_png(unsigned char *buf, int rows, FILE *fp)
 	if (fread(header, 1, 8, fp) < 8) {
 		printf("Error reading PNG header\n");
 		fclose(fp);	
-		return 1;
+		return 0;
 	}
 	if (png_sig_cmp(header, 0, 8)) {
 		printf("File not recognized as a PNG\n");
 		fclose(fp);
-		return 1;
+		return 0;
 	}
 	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);	
 	if (!png_ptr) {
 		printf("png_create_read_struct failed!\n");
 		fclose(fp);
-		return 1;
+		return 0;
 	}
 	info_ptr = png_create_info_struct(png_ptr);
 	if (!info_ptr) {
 		printf("png_create_info_struct failed!\n");
 		fclose(fp);
-		return 1;
+		return 0;
 	}
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		printf("png_jmpbuf failed!\n");
 		fclose(fp);
-		return 1;
+		return 0;
 	}
 
 	png_init_io(png_ptr, fp);
@@ -191,7 +191,7 @@ bool tattoo_read_png(unsigned char *buf, int rows, FILE *fp)
 
 	if (my_png_get_image_width(png_ptr, info_ptr) != 3744U || my_png_get_image_height(png_ptr, info_ptr) != rows ) {
 		printf("Image should be 3744 x %ld", long(rows));
-		return 1;
+		return 0;
 	}
 
 //	width = info_ptr->width;
@@ -337,7 +337,7 @@ void usage(char* bin) {
 	printf("\t-s, --supported              show features supported by drive\n");
 	printf("\t--tattoo-raw <tattoo_file>   burn selected RAW image as DiscT@2\n");
 	printf("\t--tattoo-png <tattoo_file>   burn selected PNG image as DiscT@2\n");
-#ifdef USE_LIBPNG
+#ifndef USE_LIBPNG
 	printf("\t                             WARNING: f1tattoo compiled without libpng\n");
 #endif
 	printf("\t--tattoo-test                burn tattoo test image\n");
