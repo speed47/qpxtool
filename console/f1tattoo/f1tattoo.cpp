@@ -325,7 +325,7 @@ err_read_png:
 #endif
 
 void usage(char* bin) {
-	fprintf (stderr,"\nusage: %s [-d device] [optinos]\n",bin);
+	fprintf (stderr,"\nusage: %s [-d device] [options]\n",bin);
 #ifdef USE_LIBPNG
 	printf("PNG support: YES\n");
 #else
