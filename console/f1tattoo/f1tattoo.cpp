@@ -468,7 +468,7 @@ int main(int argc, char* argv[])
 			printf("%s: writing T@2 test image...\n", device);
 			yamaha_f1_do_tattoo(drive, NULL, 0);
 		} else {
-			tattoof = fopen(tattoofn, "r");
+			tattoof = fopen(tattoofn, "rb");
 			if (!tattoof) {
 				printf("Can't open tattoo file: %s", tattoofn);
 			} else {
