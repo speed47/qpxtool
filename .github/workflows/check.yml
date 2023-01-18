@@ -11,7 +11,7 @@ jobs:
     - name: install prerequisites
       run: |
           sudo apt-get update
-          sudo apt-get install -y make qt5-default g++ libpng-dev qttools5-dev-tools
+          sudo apt-get install -y make qtbase5-dev g++ libpng-dev qttools5-dev-tools
     - name: configure (debug)
       run: ./configure --enable-debug
     - name: make (debug)
@@ -28,7 +28,7 @@ jobs:
           file gui/qpxtool | grep -q 'x86-64'
 
   win64-gui:
-    runs-on: windows-2016
+    runs-on: windows-2019
     defaults:
       run:
         shell: msys2 {0}
@@ -57,7 +57,7 @@ jobs:
           file gui/release/qpxtool.exe | grep -q 'x86-64'
 
   win32-gui:
-    runs-on: windows-2016
+    runs-on: windows-2019
     defaults:
       run:
         shell: msys2 {0}
