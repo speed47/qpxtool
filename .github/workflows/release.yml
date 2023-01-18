@@ -7,7 +7,7 @@ on:
 jobs:
 
   win64-gui:
-    runs-on: windows-2016
+    runs-on: windows-2019
     defaults:
       run:
         shell: msys2 {0}
@@ -49,7 +49,7 @@ jobs:
         asset_content_type: application/zip
 
   win32-gui:
-    runs-on: windows-2016
+    runs-on: windows-2019
     defaults:
       run:
         shell: msys2 {0}
@@ -91,7 +91,7 @@ jobs:
         asset_content_type: application/zip
 
   linux64-appimage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
     - name: docker
@@ -99,7 +99,7 @@ jobs:
         mkdir /tmp/dist
         docker run --device /dev/fuse --privileged --name uu -d -v $PWD:/code -v /tmp/dist:/dist ubuntu:14.04 sleep 900
     - name: install prerequisites
-      run: docker exec uu sh -c 'apt-get update && apt-get install -y libfuse2 libglib2.0-0 qt5-default binutils g++ file qttools5-dev-tools make libpng12-dev gtk2-engines-pixbuf gtk2-engines pkg-config gnome-themes-standard libgtk2.0-dev'
+      run: docker exec uu sh -c 'apt-get update && apt-get install -y libfuse2 libglib2.0-0 qtbase5-dev binutils g++ file qttools5-dev-tools make libpng12-dev gtk2-engines-pixbuf gtk2-engines pkg-config gnome-themes-standard libgtk2.0-dev'
     - name: copy gtk libs
       run: docker exec uu sh -c 'install -d /dist/usr/lib/gtk-2.0 && cp -va $(pkg-config --variable=libdir gtk+-2.0)/gtk-2.0/$(pkg-config --variable=gtk_binary_version gtk+-2.0)/* /dist/usr/lib/gtk-2.0'
     - name: configure
