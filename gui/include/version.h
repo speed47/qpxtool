@@ -13,7 +13,7 @@
 #ifndef _QPX_VERSION_H
 #define _QPX_VERSION_H
 
-#define VERSION "0.8.1-pl1"
+#define VERSION "0.8.1-pl2"
 
 #endif
 
