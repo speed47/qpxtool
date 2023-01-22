@@ -18,7 +18,7 @@ fi
 
 archive=qpxtool-$(echo "$github_ref" | grep -Eo '[^/]+$')-$os-portable-$flavor.zip
 echo "Archive name is $archive"
-echo "::set-output name=archive::$archive"
+[ -n "$GITHUB_OUTPUT" ] && echo "archive=$archive" >> $GITHUB_OUTPUT
 
 mkdir dist
 for i in $(ntldd -R gui/$flavor/qpxtool.exe  | awk '/mingw/ {print $3}' | tr \\\\ / | grep -Eo '[^/]+$'); do cp -va $MINGW_PREFIX/bin/$i dist/; done
