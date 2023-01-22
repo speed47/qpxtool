@@ -7,7 +7,9 @@ jobs:
   linux64-gui:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
     - name: install prerequisites
       run: |
           sudo apt-get update
@@ -40,7 +42,9 @@ jobs:
         install: git make pkg-config mingw-w64-x86_64-gcc mingw-w64-x86_64-qt5
     - run: git config --global core.autocrlf input
       shell: bash
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
     - name: configure (debug)
       run: ./configure --enable-debug
     - name: make (debug)
@@ -69,7 +73,9 @@ jobs:
         install: git make pkg-config mingw-w64-i686-gcc mingw-w64-i686-qt5
     - run: git config --global core.autocrlf input
       shell: bash
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
     - name: configure (debug)
       run: ./configure --enable-debug
     - name: make (debug)
