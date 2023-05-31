@@ -2939,7 +2939,7 @@ int get_drive_serial_number(drive_info* drive) {
 	get_configuration(drive, FEATURE_LOGICAL_UNIT_SERIAL_NUMBER, &data_length, NULL);
 	if (drive->err) return -1;
 	length = drive->rd_buf[11]; drive->rd_buf[12+length]=0;
-	if (data_length>8) strncpy(drive->serial, (char*)drive->rd_buf+12, 16);
+	if (data_length>8) strncpy(drive->serial, (char*)drive->rd_buf+12, 32);
 	else drive->serial[0]=0;
 	return 0;
 }

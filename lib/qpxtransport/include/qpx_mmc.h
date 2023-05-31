@@ -350,7 +350,7 @@ public:
 	char		dev[17];	// model string
 	uint32_t	dev_ID;		// model ID
 	char		fw[5];		// FirmWare
-	char		serial[17];	// drive serial#
+	char		serial[33];	// drive serial#, longest seen in the wild: 23(+1)
 	char		TLA[5];		// TLA# - only rof Plextor PX-712, PX-716
 	uint16_t	ver_id[8];
 
