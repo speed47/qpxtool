@@ -33,7 +33,7 @@ smap::smap(char* fn, unsigned int sects) {
 smap::~smap() {
 	save();
 	delete mutex;
-    delete arr;
+    free(arr);
 }
 
 mape smap::get(unsigned int sector) {
