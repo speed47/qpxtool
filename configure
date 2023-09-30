@@ -548,6 +548,7 @@ clean: Makefile.qmake
 		"mingw")
 			echo "
 install: Makefile.qmake" >> $mf
+			echo "	mkdir -p \$(DESTDIR)\$(BINDIR)" >> $mf
 			if test "$__enable_debug" = "yes" ; then
 				echo "	install -m 755 debug/qpxtool.exe \$(DESTDIR)\$(BINDIR)" >> $mf
 			else
@@ -564,6 +565,7 @@ uninstall:
 			echo "
 install: Makefile.qmake" >> $mf
 
+			echo "	mkdir -p \$(DESTDIR)\$(BINDIR)" >> $mf
 			if test "$OSL" = "darwin" ; then
 				echo "	install -m 755 qpxtool.app/Contents/MacOS/qpxtool \$(DESTDIR)\$(BINDIR)/qpxtool" >> $mf
 			else
