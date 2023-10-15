@@ -98,13 +98,13 @@ jobs:
     - name: install prerequisites
       run: docker exec uu sh -c 'apt-get update && apt-get install -y libfuse2 libglib2.0-0 qt5-default qtbase5-dev binutils g++ file qttools5-dev-tools make libpng12-dev gtk2-engines-pixbuf gtk2-engines pkg-config gnome-themes-standard libgtk2.0-dev'
     - name: copy gtk libs
-      run: docker exec uu sh -c 'install -d /dist/usr/lib/gtk-2.0 && cp -va $(pkg-config --variable=libdir gtk+-2.0)/gtk-2.0/$(pkg-config --variable=gtk_binary_version gtk+-2.0)/* /dist/usr/lib/gtk-2.0'
+      run: docker exec --user $UID uu sh -c 'install -d /dist/usr/lib/gtk-2.0 && cp -va $(pkg-config --variable=libdir gtk+-2.0)/gtk-2.0/$(pkg-config --variable=gtk_binary_version gtk+-2.0)/* /dist/usr/lib/gtk-2.0'
     - name: configure
-      run: docker exec uu sh -c 'cd /code && ./configure --prefix=/usr'
+      run: docker exec --user $UID uu sh -c 'cd /code && ./configure --prefix=/usr'
     - name: make
-      run: docker exec uu sh -c 'make -C /code -j2'
+      run: docker exec --user $UID uu sh -c 'make -C /code -j2'
     - name: make install
-      run: docker exec uu sh -c "make -C /code install DESTDIR=/dist"
+      run: docker exec --user $UID uu sh -c "make -C /code install DESTDIR=/dist"
     - name: get linuxdeploy
       run: |
         wget -q https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
