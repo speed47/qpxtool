@@ -24,6 +24,7 @@ typedef char path[128];
 
 static const path ppaths[] = {
 #if defined (__unix) || defined (__unix__) || (defined(__APPLE__) && defined(__MACH__))
+	"./usr/lib64/qpxtool", // for AppImage builds
 	"/usr/lib/qpxtool",
 	"/usr/local/lib/qpxtool",
 	"/usr/lib64/qpxtool",
