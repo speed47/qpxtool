@@ -114,9 +114,12 @@ jobs:
     - name: get appimage name
       id: dist
       run: |
-        archive=$(find /tmp/dist -type f -name "QPx*.AppImage")
-        echo "archive=$archive" >> $GITHUB_OUTPUT
-        echo "appimage is <$archive>"
+        archiveold=$(find /tmp/dist -type f -name "QPx*.AppImage")
+        tagname=$(echo "${{ github.ref }}" | grep -Eo '[^/]+$')
+        archivenew=$(echo "$archiveold" | sed -re "s/QPxTool-/QPxTool-$tagname-/")
+        mv -v "$archiveold" "$archivenew"
+        echo "archive=$archivenew" >> $GITHUB_OUTPUT
+        echo "appimage is <$archivenew>"
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
