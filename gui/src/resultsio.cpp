@@ -85,10 +85,13 @@ void ResultsReader::run() {
 									ErrcADD(&dev->testData.errcTOT, d_errc);
 									ErrcMAX(&dev->testData.errcMAX, d_errc);
 									if (dev->media.type.startsWith("CD")) {
+										// /75: This converts the number of errors into a more standard "number of errors per second" metric, as 75 is the number of frames (sectors) that are read in 1 second in 1x speed
 										CDErrcAVG(&dev->testData.errcAVG,  &dev->testData.errcTOT, d_errc.cd.lba/75);
 									} else if (dev->media.type.startsWith("DVD")) {
+										// >>4: DVD ECC blocks are 32 KiB aka 16 (2^4) sectors
 										DVDErrcAVG(&dev->testData.errcAVG, &dev->testData.errcTOT, d_errc.dvd.lba >> 4);
 									} else if (dev->media.type.startsWith("BD")) {
+										// >>5: BD ECC blocks are 64 KiB aka 32 (2^5) sectors
 										BDErrcAVG(&dev->testData.errcAVG, &dev->testData.errcTOT, d_errc.bd.lba >> 5);
 									}
 #endif
