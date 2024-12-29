@@ -29,6 +29,7 @@ jobs:
       run: nproc && make -j$(nproc)
     - name: check executable (debug)
       run: |
+          file gui/debug/qpxtool.exe
           file gui/debug/qpxtool.exe | grep -q 'x86-64'
     - name: configure (release)
       run: make clean && ./configure
@@ -36,6 +37,7 @@ jobs:
       run: nproc && make -j$(nproc)
     - name: check executable (release)
       run: |
+          file gui/release/qpxtool.exe
           file gui/release/qpxtool.exe | grep -q 'x86-64'
     - name: prepare dist
       run: ./.github/workflows/make-dist.sh ${{ github.ref }}
@@ -56,7 +58,7 @@ jobs:
       with:
         msystem: MINGW32
         update: false
-        install: git make pkg-config mingw-w64-i686-gcc mingw-w64-i686-ntldd-git mingw-w64-i686-qt5 mingw-w64-i686-jq zip
+        install: git make pkg-config mingw32/mingw-w64-i686-gcc mingw32/mingw-w64-i686-ntldd mingw32/mingw-w64-i686-qt5-base mingw32/mingw-w64-i686-qt5-tools mingw32/mingw-w64-i686-jq zip
     - run: git config --global core.autocrlf input
       shell: bash
     - uses: actions/checkout@v4
@@ -68,14 +70,16 @@ jobs:
       run: nproc && make -j$(nproc)
     - name: check executable (debug)
       run: |
-          file gui/debug/qpxtool.exe | grep -q 'Intel 80386'
+          file gui/debug/qpxtool.exe
+          file gui/debug/qpxtool.exe | grep -Eq 'Intel (80|i)386'
     - name: configure (release)
       run: make clean && ./configure
     - name: make (release)
       run: nproc && make -j$(nproc)
     - name: check executable (release)
       run: |
-          file gui/release/qpxtool.exe | grep -q 'Intel 80386'
+          file gui/release/qpxtool.exe
+          file gui/release/qpxtool.exe | grep -Eq 'Intel (80|i)386'
     - name: prepare dist
       run: ./.github/workflows/make-dist.sh ${{ github.ref }}
       id: dist
