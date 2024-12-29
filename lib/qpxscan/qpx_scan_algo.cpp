@@ -671,6 +671,8 @@ int qscanner::run_dvd_errc()
 		err_max.pie,pi8_max,err_max.pif,
 		err_max.poe,po8_max,err_max.pof,
 		err_max.uncr);
+    // >>4: DVD ECC blocks are 32 KiB aka 16 (2^4) sectors
+    // >>7: PI8/PO8 are the mean number of PIE/POE errors over 8 (2^3) ECC blocks, and 4+3==7
     printf("avg : %5.2f %5.2f %5.2f | %5.2f %5.2f %5.2f | %5.2f\n",
 		err_tot.pie/(float)(lba>>4),err_tot.pie/(float)(lba>>7),err_tot.pif/(float)(lba>>4),
 		err_tot.poe/(float)(lba>>4),err_tot.poe/(float)(lba>>7),err_tot.pof/(float)(lba>>4),
@@ -890,9 +892,10 @@ int qscanner::run_bd_errc()
     printf("max : %5ld %5ld | %5ld\n",
 		err_max.ldc,err_max.bis,
 		err_max.uncr);
+    // >>5: BD ECC blocks are 64 KiB aka 32 (2^5) sectors
     printf("avg : %5.2f %5.2f | %5.2f\n",
-		err_tot.ldc/(float)(lba>>4),err_tot.bis/(float)(lba>>4),
-		err_tot.uncr/(float)(lba>>4));
+		err_tot.ldc/(float)(lba>>5),err_tot.bis/(float)(lba>>5),
+		err_tot.uncr/(float)(lba>>5));
 #ifdef USE_FFLUSH
 	fflush(stdout);
 #endif
