@@ -210,7 +210,7 @@ void ResultsReader::run() {
 							dev->media.ilayers  = dev->media.layers.toInt();
 							dev->media.dstate   = attr.value("dstate").toString();
 							dev->media.sstate   = attr.value("sstate").toString();
-							if (attr.hasAttribute("gbpl") {
+							if (attr.hasAttribute("gbpl")) {
 								dev->media.gbpl  = attr.value("gbpl").toString();
 								dev->media.igbpl = dev->media.gbpl.toInt();
 							}
