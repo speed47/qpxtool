@@ -1955,7 +1955,7 @@ void device::qscan_process_test()
 
 						ErrcADD(&testData.errcTOT, di);
 						ErrcMAX(&testData.errcMAX, di);
-						DVDErrcAVG(&testData.errcAVG, &testData.errcTOT, di.dvd.lba >> 4);
+						DVDErrcAVG(&testData.errcAVG, &testData.errcTOT, di.dvd.lba >> 5);
 						testData.errc.append(di);
 						testData.errc_time = time;
 						emit block_ERRC();
