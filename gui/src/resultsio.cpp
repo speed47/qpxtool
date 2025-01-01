@@ -200,16 +200,20 @@ void ResultsReader::run() {
 							dev->media.wspeedsd = attr.value("wspeedsd").toString().split(" ", QString::SkipEmptyParts);
 							dev->media.wspeedsm = attr.value("wspeedsm").toString().split(" ", QString::SkipEmptyParts);
 						} else if (xml.name() == "misc") {
-							dev->media.writer  = attr.value("writer").toString();
-							dev->media.prot    = attr.value("protection").toString();
-							dev->media.regions = attr.value("regions").toString();
-							dev->media.grec    = attr.value("gigarec").toString().toDouble();
-							dev->media.spd1X   = attr.value("spd1X").toString().toInt();
-							dev->media.layers  = attr.value("layers").toString();
-							dev->media.erasable= attr.value("erasable").toString();
-							dev->media.ilayers = dev->media.layers.toInt();
-							dev->media.dstate  = attr.value("dstate").toString();
-							dev->media.sstate  = attr.value("sstate").toString();
+							dev->media.writer   = attr.value("writer").toString();
+							dev->media.prot     = attr.value("protection").toString();
+							dev->media.regions  = attr.value("regions").toString();
+							dev->media.grec     = attr.value("gigarec").toString().toDouble();
+							dev->media.spd1X    = attr.value("spd1X").toString().toInt();
+							dev->media.layers   = attr.value("layers").toString();
+							dev->media.erasable = attr.value("erasable").toString();
+							dev->media.ilayers  = dev->media.layers.toInt();
+							dev->media.dstate   = attr.value("dstate").toString();
+							dev->media.sstate   = attr.value("sstate").toString();
+							if (attr.hasAttribute("gbpl") {
+								dev->media.gbpl  = attr.value("gbpl").toString();
+								dev->media.igbpl = dev->media.gbpl.toInt();
+							}
 						}
 					} else if (isTests) {
 						attr = xml.attributes();
@@ -404,6 +408,9 @@ void ResultsWriter::run() {
 
 	xml.writeAttribute("dstate", dev->media.dstate);
 	xml.writeAttribute("sstate", dev->media.sstate);
+
+	xml.writeAttribute("gbpl", QString::number(dev->media.igbpl));
+	
 	xml.writeEndElement(); // misc
 	xml.writeEndElement(); // media
 // test speeds
