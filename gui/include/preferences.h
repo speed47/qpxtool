@@ -28,7 +28,7 @@ class QPxPreferences : public QDialog {
 	Q_OBJECT
 
 public:
-	QPxPreferences(QPxSettings *iset, QWidget *p=0, Qt::WindowFlags f=0);
+	QPxPreferences(QPxSettings *iset, QWidget *p=0, Qt::WindowFlags f=Qt::WindowFlags{});
 	virtual ~QPxPreferences();
 
 public slots:

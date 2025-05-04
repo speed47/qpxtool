@@ -137,11 +137,11 @@ void DbReportSelection::winit()
 	setMinimumWidth(400);
 
 	layout = new QVBoxLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 
 	layout_l = new QHBoxLayout();
-	layout_l->setMargin(0);
+	layout_l->setContentsMargins(0, 0, 0, 0);
 	layout_l->setSpacing(3);
 	layout->addLayout(layout_l);
 // search filter
@@ -188,7 +188,7 @@ void DbReportSelection::winit()
 
 // buttons
 	layout_pb = new QHBoxLayout();
-	layout_pb->setMargin(0);
+	layout_pb->setContentsMargins(0, 0, 0, 0);
 	layout_pb->setSpacing(3);
 	layout->addLayout(layout_pb);
 

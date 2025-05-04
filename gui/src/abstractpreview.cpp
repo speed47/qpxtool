@@ -450,8 +450,8 @@ void AbstractPreviewPrivate::setPageDefaults()
     mm_bottom = DEFAULT_MARGIN_BOTTOM;
     recalcMarginsFromMM();
 
-    printer->setPaperSize(QPrinter::A4);
-    printer->setPageMargins(mm_left, mm_top, mm_right, mm_bottom, QPrinter::Millimeter);
+    printer->setPageSize(QPageSize(QPageSize::A4));
+    printer->setPageMargins(QMarginsF(mm_left, mm_top, mm_right, mm_bottom), QPageLayout::Millimeter);
 #ifdef PRINTER_USE_FULLPAGE
     printer->setFullPage(true);
 #else
@@ -474,8 +474,13 @@ void AbstractPreviewPrivate::setup()
 //    if(pageSizeMM.width() -  ((qreal)(int)pageSize.width()) > 0.0)  pageSize.setWidth ((int)pageSize.width() + 1);
 //    if(pageSizeMM.height() - ((qreal)(int)pageSize.height()) > 0.0) pageSize.setHeight((int)pageSize.height() + 1);
 
-    printer->getPageMargins(&mm_left, &mm_top, &mm_right, &mm_bottom, QPrinter::Millimeter);
-	recalcMarginsFromMM();
+    QMarginsF margins = printer->pageLayout().margins(QPageLayout::Millimeter);
+    mm_left   = margins.left();
+    mm_top    = margins.top();
+    mm_right  = margins.right();
+    mm_bottom = margins.bottom();
+
+    recalcMarginsFromMM();
 
 #if (PRINTER_USE_FULLPAGE == 1) || (QT_VERSION < 0x040500)
 	pageSizeMM = QSize(
@@ -1158,7 +1163,7 @@ void AbstractPreview::wheelEvent(QWheelEvent * event)
         return;
     }
 
-    if (event->delta() > 0) scaleIn();
+    if (event->angleDelta().y() > 0) scaleIn();
     else scaleOut();
 }
 //--------------------------------------------------------------

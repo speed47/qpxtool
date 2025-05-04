@@ -40,7 +40,7 @@ class device;
 class tabDevInfo : public QWidget {
 	Q_OBJECT
 public:
-	tabDevInfo(QPxSettings *iset, devlist *idev, QWidget *p=0, Qt::WindowFlags fl = 0);
+	tabDevInfo(QPxSettings *iset, devlist *idev, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags{});
 	~tabDevInfo();
 
 public slots:

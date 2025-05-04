@@ -14,6 +14,7 @@
 
 #include <QProcess>
 #include <QTcpSocket>
+#include <QRegularExpression>
 
 #include <QDebug>
 
@@ -97,7 +98,7 @@ void QPxIODevice::splitInput()
 /*
 #endif
 */
-		while ((bi = buf.indexOf(QRegExp("[\n\r]"),0)) >=0 ) {
+		while ((bi = buf.indexOf(QRegularExpression("[\n\r]"),0)) >=0 ) {
 			if (bi>0) {
 				lines << buf.left(bi);
 				buf.remove(0,bi);

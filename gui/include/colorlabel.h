@@ -18,7 +18,7 @@
 class ColorLabel : public QWidget
 {
 public:
-	ColorLabel(QColor icol, QString itext, bool ieditable, QWidget *p=0, Qt::WindowFlags f=0);
+	ColorLabel(QColor icol, QString itext, bool ieditable, QWidget *p=0, Qt::WindowFlags f=Qt::WindowFlags{});
 	~ColorLabel();
 	inline QColor color() { return col; };
 	inline void setColor(QColor c) { col = c; update(); };

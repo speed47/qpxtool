@@ -28,7 +28,7 @@ class prefCommon : public QWidget
 	Q_OBJECT
 
 public:
-	prefCommon(QPxSettings *iset, QWidget *p=0, Qt::WindowFlags fl=0);
+	prefCommon(QPxSettings *iset, QWidget *p=0, Qt::WindowFlags fl=Qt::WindowFlags{});
 	~prefCommon();
 
 private:

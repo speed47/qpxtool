@@ -36,7 +36,7 @@ class tabTA : public QWidget
 {
 	Q_OBJECT
 public:
-	tabTA(QPxSettings *iset, devlist *idev, QString iname, QWidget *p=0, Qt::WindowFlags fl = 0);
+	tabTA(QPxSettings *iset, devlist *idev, QString iname, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags{});
 	~tabTA();
 	void drawGraph(QImage& img, device *dev, int ttype, int eflags=0);
 

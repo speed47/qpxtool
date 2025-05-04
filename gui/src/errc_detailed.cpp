@@ -80,10 +80,10 @@ ErrcDetailedDialog::ErrcDetailedDialog(QPxSettings *iset, devlist *idev, QWidget
 	setWindowTitle("QPxTool - " + tr("Detailed Error Correction"));
 
 	layout = new QGridLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 	layout_top = new QGridLayout();
-	layout_top->setMargin(0);
+	layout_top->setContentsMargins(0, 0, 0, 0);
 	layout_top->setSpacing(3);
 	layout->addLayout(layout_top, 0, 0, 1, 3);
 
@@ -106,7 +106,7 @@ ErrcDetailedDialog::ErrcDetailedDialog(QPxSettings *iset, devlist *idev, QWidget
 	}
 
 	layout_summary = new QGridLayout();
-	layout_summary->setMargin(0);
+	layout_summary->setContentsMargins(0, 0, 0, 0);
 	layout_summary->setHorizontalSpacing(3);
 	layout_summary->setVerticalSpacing(1);
 	layout_top->addLayout(layout_summary, 0, 0);

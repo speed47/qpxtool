@@ -5,7 +5,8 @@ TMPB=tmpb
 
 GMAKE="no"
 MAKE="make"
-QMAKE5_NAMES="qmake qmake5 qmake-qt5 qmake-5"
+QMAKE6_NAMES="qmake qmake6 qmake-qt6 qmake-6"
+LRELEASE="/usr/lib/qt6/bin/lrelease"
 OSDEFS=""
 OSLIBS=""
 OSLIBS_HW=""
@@ -32,7 +33,7 @@ lpng_iopts=""
 lpng_ldflags=""
 LPNG_DEFS=""
 PLUGIN_DEFS=""
-DEFS="-std=c++11 -D_USE_MATH_DEFINES"
+DEFS="-std=c++17 -D_USE_MATH_DEFINES"
 
 qt_ver=""
 qt_dir=""
@@ -285,7 +286,7 @@ qt_check_qmake()
 	"not found")
 		__qmake=""
 		;;
-	5.*)
+	6.*)
 		__qmake=$1
 		;;
 	*)
@@ -297,8 +298,8 @@ qt_check_qmake()
 
 qt_check_default()
 {
-    for qmake5 in $QMAKE5_NAMES ; do
-	qt_check_qmake $qmake5
+    for qmake6 in $QMAKE6_NAMES ; do
+	qt_check_qmake $qmake6
 	if test "$qt_dir" != "" ; then
 	    return
 	fi
@@ -307,7 +308,7 @@ qt_check_default()
 
 qt_check_mingw()
 {
-	printf "Checking for compatible MinGW environment for Qt5... "
+	printf "Checking for compatible MinGW environment for Qt6... "
 	dump=`$__cc -dumpmachine`
 	echo "
 		#include <stdlib.h>
@@ -321,19 +322,19 @@ qt_check_mingw()
 		printf "no\n\n\t\tMINGW32 found: $dump, $(uname -m)"
 		printf "\n\tYou are using the original Msys/MinGW32,"
 		printf "\n\twhich isn't up-to-date enough to build the"
-		printf "\n\tQt5-based GUI of QpxTool. Build will be"
+		printf "\n\tQt6-based GUI of QpxTool. Build will be"
 		printf "\n\tconfigured to compile cli and lib only!"
 		printf "\n\tConsider moving to Msys2/MinGW-W64 to build the GUI.\n"
 		return 1
 	fi
-	printf "yes\n\n\t\tMinGW-W64 found: $dump \n\tQt5 won't build with the older mingw32 toolchain.\n"
+	printf "yes\n\n\t\tMinGW-W64 found: $dump \n\tQt6 won't build with the older mingw32 toolchain.\n"
 	return 0
 }
 
-check_qt5()
+check_qt6()
 {
 	__enable_gui=no
-	printf "Checking for Qt5... "
+	printf "Checking for Qt6... "
 	if test "$__qmake" = "" ; then
 		qt_check_default
 	else
@@ -341,7 +342,7 @@ check_qt5()
 	fi
 	if test "$qt_dir" = "" ; then
 		printf "not found"
-	    printf "\n\n\tQt5 was not detected. If you really have Qt5, and want to build"
+	    printf "\n\n\tQt6 was not detected. If you really have Qt6, and want to build"
 		printf "\n\tthe GUI, run configure again with --qmake=/path/to/qmake\n\n"
 	else
 	    printf "found!\n\t$qt_dir ($qt_ver),\n\tqmake command: $__qmake\n"
@@ -380,10 +381,10 @@ LIBS_THREAD = $OSLIBS_THREAD
 LPNG_INC  = $lpng_iopts
 LPNG_LIB  = $lpng_ldflags
 " >> Makefile
-	echo "WFLAGS    = -Wall" >> Makefile
-	echo "WFLAGS   += -Wno-unused-but-set-variable -Wno-format-truncation -Wno-error=cpp" >> Makefile
-	echo "WFLAGS   += -Wno-misleading-indentation -Wno-unused-result -Wno-unused-parameter" >> Makefile
-	echo "WFLAGS   += -Wno-deprecated-copy -Wno-literal-suffix -Wno-deprecated-declarations" >> Makefile
+	echo "WFLAGS    = -Wall -Werror -Wno-error=cpp" >> Makefile
+	echo "WFLAGS   += -Wno-unused-but-set-variable" >> Makefile
+	echo "WFLAGS   += -Wmisleading-indentation -Wno-unused-result -Wno-unused-parameter" >> Makefile
+	echo "WFLAGS   += -Wno-deprecated-copy -Wno-literal-suffix" >> Makefile
 	echo "CXXFLAGS += \$(WFLAGS) -O2 $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
 	echo "CFLAGS   += \$(WFLAGS) -O2 $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
 
@@ -499,16 +500,16 @@ create_makefile_gui()
 	rm -f $mf
 
 	if test "$OSL" = "netbsd" ; then
-		qt_dir="/usr/pkg/qt5"
+		qt_dir="/usr/pkg/qt6"
 		echo "QTDIR=$qt_dir" >> $mf
 		echo "LDFLAGS+=-Wl,-R/usr/X11R7/lib" >> $mf
 	fi
 	echo "QTDIR=$qt_dir" >> $mf
-	echo "QMAKE5= $__qmake" >> $mf
+	echo "QMAKE6= $__qmake" >> $mf
 	echo "TAB=\$(shell printf \"%b\" \"\\t\")" >> $mf
 
 	if test "$GMAKE" = "yes" ; then
-	    echo "export QTDIR QMAKE5" >> $mf
+	    echo "export QTDIR QMAKE6" >> $mf
 	fi
 
 	echo "
@@ -530,7 +531,7 @@ else
 		fi
 	fi
 fi
-	echo "	lrelease -verbose qpxtool.pro" >> $mf
+	echo "	$LRELEASE -verbose qpxtool.pro" >> $mf
 
 	echo "
 clean: Makefile.qmake
@@ -590,7 +591,7 @@ uninstall:
 	echo "
 Makefile.qmake:
 	rm -f Makefile.qmake" >> $mf
-	echo    "	\$(QMAKE5) LIBS+=-L../lib/lib LIBS+=-lqpxtransport $QDEBUG -o Makefile.qmake" >> $mf
+	echo    "	\$(QMAKE6) LIBS+=-L../lib/lib LIBS+=-lqpxtransport $QDEBUG -o Makefile.qmake" >> $mf
 	echo    "	test -e Makefile.qmake.Release && test -e Makefile.qmake.Debug && sed -i -re '/qpxtool.exe: /a #TAB#windres -v qpxtool.rc -O coff -o obj/winres.o' Makefile.qmake.Release Makefile.qmake.Debug || true" >> $mf
 	echo    "	test -e Makefile.qmake.Release && test -e Makefile.qmake.Debug && sed -i -re 's=@object_script.qpxtool=obj/winres.o @object_script.qpxtool=' Makefile.qmake.Release Makefile.qmake.Debug || true" >> $mf
 	echo -n "	test -e Makefile.qmake.Release && test -e Makefile.qmake.Debug && sed -i -re 's/#TAB#/\$(TAB)/' Makefile.qmake.Release Makefile.qmake.Debug || true" >> $mf
@@ -775,8 +776,8 @@ show_help()
 	echo "--sbindir=SBINDIR       set path to install system binaries"
 	echo "--libdir=LIBDIR         set path to install libraries"
 	echo "--mandir=MANDIR         set path to install mans"
-	echo "--qmake=QMAKE_COMMAND   set QT5 qmake command"
-	echo "                        default is to check following: $QMAKE5_NAMES"
+	echo "--qmake=QMAKE_COMMAND   set QT6 qmake command"
+	echo "                        default is to check following: $QMAKE6_NAMES"
 	echo "--disable-png           disable PNG support in f1tattoo (auto)"
 	echo "--disable-gui           don't compile GUI"
 	echo "--enable-debug          build debug version"
@@ -957,7 +958,7 @@ if test "$__enable_png" = "yes" ; then
 fi
 
 if test "$__enable_gui" = "yes" ; then
-	check_qt5
+	check_qt6
 fi
 
 echo ""

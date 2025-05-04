@@ -26,7 +26,7 @@ tabJB::tabJB(QPxSettings *iset, devlist *idev, QString iname, QWidget *p, Qt::Wi
 	qDebug("STA: tabJB()");
 #endif
 	layout_info = new QVBoxLayout(infow);
-	layout_info->setMargin(0);
+	layout_info->setContentsMargins(0, 0, 0, 0);
 	layout_info->setSpacing(3);
 
 #ifdef __LEGEND_SHOW_SPEED

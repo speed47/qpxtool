@@ -27,7 +27,7 @@ tabTransfer::tabTransfer(QPxSettings *iset, devlist *idev, QString iname, bool i
 #endif
 	rw = irw;
 	layout_info = new QVBoxLayout(infow);
-	layout_info->setMargin(0);
+	layout_info->setContentsMargins(0, 0, 0, 0);
 	layout_info->setSpacing(3);
 
 	pl_sta = new QLabel(tr("Start"), infow);

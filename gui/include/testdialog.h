@@ -34,7 +34,7 @@ class TestDialog : public QDialog
 	Q_OBJECT
 
 public:
-	TestDialog(QPxSettings *iset, device *idev, QWidget *p, Qt::WindowFlags f=0);
+	TestDialog(QPxSettings *iset, device *idev, QWidget *p, Qt::WindowFlags f=Qt::WindowFlags{});
 	~TestDialog();
 	device* getDevice();
 

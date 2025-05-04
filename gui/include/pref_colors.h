@@ -28,7 +28,7 @@ class prefColors : public QWidget
 {
 	Q_OBJECT
 public:
-	prefColors(QPxSettings *iset, QWidget *p=0, Qt::WindowFlags fl=0);
+	prefColors(QPxSettings *iset, QWidget *p=0, Qt::WindowFlags fl=Qt::WindowFlags{});
 	~prefColors();
 
 private slots:

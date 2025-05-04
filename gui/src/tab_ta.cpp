@@ -39,16 +39,16 @@ tabTA::tabTA(QPxSettings *iset, devlist *idev, QString iname, QWidget *p, Qt::Wi
 	settings->loadScale(name);
 
 	layout = new QHBoxLayout(this);
-	layout->setMargin(0);
+	layout->setContentsMargins(0, 0, 0, 0);
 	layout->setSpacing(3);
 
 	layoutl = new QVBoxLayout();
-	layoutl->setMargin(0);
+	layoutl->setContentsMargins(0, 0, 0, 0);
 	layoutl->setSpacing(3);
 	layout->addLayout(layoutl);
 
 	layoutg = new QVBoxLayout();
-	layoutg->setMargin(0);
+	layoutg->setContentsMargins(0, 0, 0, 0);
 	layoutg->setSpacing(3);
 	layout->addLayout(layoutg);
 
@@ -100,7 +100,7 @@ tabTA::tabTA(QPxSettings *iset, devlist *idev, QString iname, QWidget *p, Qt::Wi
 	layoutl->addWidget(grp_time);
 	
 	layoutt = new QVBoxLayout(grp_time);
-	layoutt->setMargin(3);
+	layoutt->setContentsMargins(3, 3, 3, 3);
 	layoutt->setSpacing(0);
 
 	ltime = new QLabel("0:00", grp_time);
@@ -121,11 +121,17 @@ tabTA::tabTA(QPxSettings *iset, devlist *idev, QString iname, QWidget *p, Qt::Wi
 	graphLand->setModeTA(1);
 	layoutg->addWidget(graphLand);
 
-	connect(grp_layer, SIGNAL(buttonClicked(int)), graphPit,  SLOT(setLayerTA(int)));
-	connect(grp_layer, SIGNAL(buttonClicked(int)), graphLand, SLOT(setLayerTA(int)));
-	
-	connect(grp_zone , SIGNAL(buttonClicked(int)), graphPit,  SLOT(setZoneTA(int)));
-	connect(grp_zone , SIGNAL(buttonClicked(int)), graphLand, SLOT(setZoneTA(int)));
+	connect(grp_layer, &QButtonGroup::buttonClicked, this, [this](QAbstractButton* btn) {
+		int layer = grp_layer->id(btn);
+		graphPit->setLayerTA(layer);
+		graphLand->setLayerTA(layer);
+	});
+
+	connect(grp_zone, &QButtonGroup::buttonClicked, this, [this](QAbstractButton* btn) {
+		int zone = grp_zone->id(btn);
+		graphPit->setZoneTA(zone);
+		graphLand->setZoneTA(zone);
+	});
 
 	clear();
 #ifndef QT_NO_DEBUG

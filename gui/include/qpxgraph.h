@@ -29,7 +29,7 @@ class QPxGraph : public QWidget
 {
 	Q_OBJECT
 public:
-	QPxGraph(QPxSettings *iset, devlist *idev, QString iname, int ttype, QWidget *p=0, Qt::WindowFlags fl = 0);
+	QPxGraph(QPxSettings *iset, devlist *idev, QString iname, int ttype, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags{});
 	~QPxGraph();
 //	void	setDataNames(QStringList dn);
 //	void	setZeroPos(float);

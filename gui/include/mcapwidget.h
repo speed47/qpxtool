@@ -17,7 +17,7 @@ class MediaCapWidget : public QWidget
 	Q_OBJECT
 public:
 //	MediaCapWidget(QWidget *p, Qt::WindowFlags f) : QWidget(p,f) {};
-	MediaCapWidget(QString itext, bool tri, quint64 df, QWidget *p, Qt::WindowFlags f=0);
+	MediaCapWidget(QString itext, bool tri, quint64 df, QWidget *p, Qt::WindowFlags f=Qt::WindowFlags{});
 	~MediaCapWidget();
 	void setText(QString itext);
 	inline quint64 flag() { return cf; };

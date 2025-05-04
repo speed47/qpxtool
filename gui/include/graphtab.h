@@ -31,7 +31,7 @@ class GraphTab : public QWidget
 {
 	Q_OBJECT
 public:
-	GraphTab(QPxSettings *iset, devlist *idev, QString iname, int test, QWidget *p=0, Qt::WindowFlags fl = 0);
+	GraphTab(QPxSettings *iset, devlist *idev, QString iname, int test, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags{});
 	~GraphTab();
 	void drawGraph(QImage& img, device *dev, int ttype, int eflags=0);
 

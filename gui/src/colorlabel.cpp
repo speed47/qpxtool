@@ -33,11 +33,11 @@ void ColorLabel::mousePressEvent(QMouseEvent* e)
 {
 	if (!editable) return;
 #ifndef QT_NO_DEBUG
-	qDebug() << "x: " << e->x() << " y: " << e->y();
+	qDebug() << "x: " << e->position().x() << " y: " << e->position().y();
 #endif
 //	if (e->x() < height() && e->x() > 1 && e->y() > 1 && e->y() < height()) {
-	if (e->button() == Qt::LeftButton && e->x() < (height()+2)) {
-		col = QColorDialog::getRgba(col.rgba(), NULL, this);
+	if (e->button() == Qt::LeftButton && e->position().x() < (height()+2)) {
+		col = QColorDialog::getColor(col, this);
 		update();
 	}
 }
@@ -57,7 +57,7 @@ void ColorLabel::paintEvent(QPaintEvent*)
 	p.fillRect(rect.adjusted(1,1,-1,-1), QBrush(col) );
 
 	p.setPen( QPen(QColor(Qt::black), 2));
-	p.drawRoundRect(rect, 20, 20);
+	p.drawRoundedRect(rect, 2.5, 2.5);
 
 	p.drawText(trect, Qt::AlignLeft | Qt::AlignVCenter, text);
 	//p.drawRect(rect);

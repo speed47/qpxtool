@@ -27,7 +27,7 @@ class tabTransfer : public GraphTab
 	Q_OBJECT
 public:
 	tabTransfer(QPxSettings *iset, devlist *idev, QString iname, bool irw,
-			QWidget *p=0, Qt::WindowFlags fl = 0);
+			QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags{});
 	~tabTransfer();
 
 public slots:

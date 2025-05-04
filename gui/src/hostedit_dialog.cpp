@@ -23,7 +23,7 @@ hostEditDialog::hostEditDialog(QString host, int port, QWidget* p, Qt::WindowFla
 	setWindowTitle(tr("Add host"));
 
 	layout = new QGridLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 
 	l_host = new QLabel(tr("Host:"), this);

@@ -29,7 +29,7 @@ class ErrcDetailedDialog : public QDialog
 	Q_OBJECT
 
 public:
-	ErrcDetailedDialog(QPxSettings *iset, devlist *idev, QWidget *p=0, Qt::WindowFlags fl = 0);
+	ErrcDetailedDialog(QPxSettings *iset, devlist *idev, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags{});
 	~ErrcDetailedDialog();
 	void updateAll();
 	void updateGraphs(device *idev = NULL);

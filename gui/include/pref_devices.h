@@ -26,7 +26,7 @@ class prefDevices : public QWidget
 {
 	Q_OBJECT
 public:
-	prefDevices(QPxSettings *iset, QWidget *p=0, Qt::WindowFlags f=0);
+	prefDevices(QPxSettings *iset, QWidget *p=0, Qt::WindowFlags f=Qt::WindowFlags{});
 	virtual ~prefDevices();
 
 protected:

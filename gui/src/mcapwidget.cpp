@@ -38,7 +38,7 @@ void MediaCapWidget::setText(QString itext)
 
 QSize MediaCapWidget::sizeHint() const
 {
-	return QSize( MAX_ICON_SIZE + 20 + fontMetrics().width(text), MAX_ICON_SIZE+2);
+	return QSize( MAX_ICON_SIZE + 20 + fontMetrics().horizontalAdvance(text), MAX_ICON_SIZE+2);
 }
 
 void MediaCapWidget::setR(quint64 r) {

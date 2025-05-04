@@ -80,11 +80,11 @@ device* TestDialog::getDevice()
 void TestDialog::winit()
 {
 	layout = new QGridLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(6);
 /*
 	layout_dev = new QHBoxLayout();
-	layout_dev->setMargin(3);
+	layout_dev->setContentsMargins(3, 3, 3, 3);
 	layout_dev->setSpacing(3);
 	layout->addLayout(layout_dev, 0,0,1,4);
 */	
@@ -118,7 +118,7 @@ void TestDialog::winit()
 	grp_tests = new QGroupBox(this);
 	layout->addWidget(grp_tests, 3,0, 1,2);
 	layout_tests = new QGridLayout(grp_tests);
-	layout_tests->setMargin(3);
+	layout_tests->setContentsMargins(3, 3, 3, 3);
 	layout_tests->setSpacing(3);
 //	grp_tests->setLayout(layout_tests);
 
@@ -190,7 +190,7 @@ void TestDialog::winit()
 	grp_media = new QGroupBox(tr("Media summary:"),this);
 	layout->addWidget(grp_media, 1,2, 1,2);
 	layout_media = new QHBoxLayout(grp_media);
-	layout_media->setMargin(3);
+	layout_media->setContentsMargins(3, 3, 3, 3);
 	layout_media->setSpacing(3);
 //	grp_media->setLayout(layout_media);
 
@@ -199,7 +199,7 @@ void TestDialog::winit()
 	layout->setRowStretch(1,10);
 */
 	layout_butt = new QHBoxLayout;
-	layout_butt->setMargin(0);
+	layout_butt->setContentsMargins(0, 0, 0, 0);
 	layout_butt->setSpacing(3);
 	layout->addLayout(layout_butt, 4, 0, 1, 2);
 
@@ -379,13 +379,13 @@ void TestDialog::saveData()
 		(ck_TA->isChecked() ?   TEST_TA : 0);
 	dev->WT_simul	  = noSimul ? 0 : ck_WT_simul->isChecked();
 
-	dev->tspeeds.rt   = (int) spd_RT->currentText().remove(QRegExp("[Xx]")).toFloat();
-	dev->tspeeds.wt   = (int) spd_WT->currentText().remove(QRegExp("[Xx]")).toFloat();
-	dev->tspeeds.errc = (int) spd_ERRC->currentText().remove(QRegExp("[Xx]")).toFloat();
-	dev->tspeeds.jb   = (int) spd_JB->currentText().remove(QRegExp("[Xx]")).toFloat();
-	dev->tspeeds.ft   = (int) spd_FT->currentText().remove(QRegExp("[Xx]")).toFloat();
+	dev->tspeeds.rt   = (int) spd_RT->currentText().remove(QRegularExpression("[Xx]")).toFloat();
+	dev->tspeeds.wt   = (int) spd_WT->currentText().remove(QRegularExpression("[Xx]")).toFloat();
+	dev->tspeeds.errc = (int) spd_ERRC->currentText().remove(QRegularExpression("[Xx]")).toFloat();
+	dev->tspeeds.jb   = (int) spd_JB->currentText().remove(QRegularExpression("[Xx]")).toFloat();
+	dev->tspeeds.ft   = (int) spd_FT->currentText().remove(QRegularExpression("[Xx]")).toFloat();
 	dev->plugin  = (cb_plugin->currentIndex() ? cb_plugin->currentText() : "");
-//	dev->tspeeds.ta   = (int) spd_TA->currentText().remove(QRegExp("[Xx]")).toFloat();
+//	dev->tspeeds.ta   = (int) spd_TA->currentText().remove(QRegularExpression("[Xx]")).toFloat();
 #ifndef QT_NO_DEBUG
 	qDebug() << "spd RT  : " << dev->tspeeds.rt;
 	qDebug() << "spd WT  : " << dev->tspeeds.wt;

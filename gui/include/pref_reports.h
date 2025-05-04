@@ -33,7 +33,7 @@ class prefReports : public QWidget
 	Q_OBJECT
 
 public:
-	prefReports(QPxSettings *iset, QWidget *p=0, Qt::WindowFlags fl=0);
+	prefReports(QPxSettings *iset, QWidget *p=0, Qt::WindowFlags fl=Qt::WindowFlags{});
 	~prefReports();
 
 private slots:

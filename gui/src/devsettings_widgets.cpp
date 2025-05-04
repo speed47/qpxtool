@@ -52,7 +52,7 @@ devctlCommon::devctlCommon(device* idev, QWidget* p)
 {
 	dev = idev;
 	layout = new QGridLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 
 	ck_prec = new QCheckBox("PoweRec",this);
@@ -130,7 +130,7 @@ devctlGigarec::devctlGigarec(device* idev, QWidget* p)
 
 	dev = idev;
 	layout = new QVBoxLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 
 	setCheckable(true);
@@ -220,7 +220,7 @@ devctlVarirecBase::devctlVarirecBase(device* idev, QString title, QWidget* p)
 {
 	dev = idev;
 	layout = new QVBoxLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 
 	setCheckable(true);
@@ -244,7 +244,7 @@ devctlVarirecBase::devctlVarirecBase(device* idev, QString title, QWidget* p)
 	layout->addWidget(pwr);
 
 	layouts = new QHBoxLayout();
-	layouts->setMargin(3);
+	layouts->setContentsMargins(3, 3, 3, 3);
 	layouts->setSpacing(3);
 	layout->addLayout(layouts);
 
@@ -344,7 +344,7 @@ devctlVarirec::devctlVarirec(device* idev, QWidget* p)
 	:QWidget(p)
 {
 	layout = new QVBoxLayout(this);
-	layout->setMargin(0);
+	layout->setContentsMargins(0, 0, 0, 0);
 	layout->setSpacing(3);
 
 	vrec_cd = new devctlVarirecCD(idev, this);
@@ -367,7 +367,7 @@ devctlSecurec::devctlSecurec(device* idev, QWidget* p)
 	dev = idev;
 
 	layout = new QGridLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 
 	l_pwd[0] = new QLabel(tr("Password"),this);
@@ -514,12 +514,12 @@ devctlSilent::devctlSilent(device* idev, QWidget* p)
 
 // Layouts
 	layoutm = new QVBoxLayout(this);
-	layoutm->setMargin(0);
+	layoutm->setContentsMargins(0, 0, 0, 0);
 	layoutm->setSpacing(3);
 	layoutm->addWidget(cw);
 
 	layout = new QGridLayout(cw);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 
 	layout->addWidget(h_speed, 0,0,1,4);
@@ -552,7 +552,7 @@ devctlSilent::devctlSilent(device* idev, QWidget* p)
 	layout->setRowStretch(10,10);
 
 	layoutb = new QHBoxLayout();
-	layoutb->setMargin(0);
+	layoutb->setContentsMargins(0, 0, 0, 0);
 	layoutb->setSpacing(3);
 	layoutm->addLayout(layoutb);
 
@@ -631,7 +631,7 @@ devctlAutostrategy::devctlAutostrategy(device* idev, QWidget* p)
 	dev = idev;
 	setEnabled(dev->features.supported & FEATURE_AS);
 	layout = new QGridLayout(this);
-	layout->setMargin(0);
+	layout->setContentsMargins(0, 0, 0, 0);
 	layout->setSpacing(3);
 
 // AS mode selection
@@ -639,7 +639,7 @@ devctlAutostrategy::devctlAutostrategy(device* idev, QWidget* p)
 	layout->addWidget(box_as);
 
 	layout_as = new QGridLayout(box_as);
-	layout_as->setMargin(3);
+	layout_as->setContentsMargins(3, 3, 3, 3);
 	layout_as->setSpacing(3);
 
 	rb_as_off = new QRadioButton("Off", box_as);
@@ -672,7 +672,7 @@ devctlAutostrategy::devctlAutostrategy(device* idev, QWidget* p)
 	layout->addWidget(box_mqck);
 
 	layout_mqck = new QGridLayout(box_mqck);
-	layout_mqck->setMargin(3);
+	layout_mqck->setContentsMargins(3, 3, 3, 3);
 	layout_mqck->setSpacing(3);
 
 	rb_mqck_q = new QRadioButton(tr("Quick"), box_mqck);
@@ -701,7 +701,10 @@ devctlAutostrategy::devctlAutostrategy(device* idev, QWidget* p)
 
 //	layout->setRowStretch(2,4);
 
-	connect(grp_mode, SIGNAL(buttonClicked(int)), this, SLOT(set_mode(int)));
+	connect(grp_mode, &QButtonGroup::buttonClicked, this, [this](QAbstractButton *btn) {
+		int id = grp_mode->id(btn);
+		this->set_mode(id);
+	});
 	connect(pb_asdb,  SIGNAL(clicked()), this, SLOT(asdb()));
 	connect(pb_mqck,  SIGNAL(clicked()), this, SLOT(run_mqck()));
 }
@@ -729,7 +732,7 @@ void devctlAutostrategy::run_mqck()
 	lmqck_res->setText( "" );
 	dev->features.as_action = AS_ACTION_MQCK;
 	dev->features.as_act_mode = rb_mqck_a->isChecked() ? ASMQCK_ADV : 0;
-	dev->features.as_mqckspd = bmqck_spd->currentText().remove(QRegExp(".[0-9][Xx]")).toInt();
+	dev->features.as_mqckspd = bmqck_spd->currentText().remove(QRegularExpression(".[0-9][Xx]")).toInt();
 	dev->features.as_mqckres = "";
 	if (!dev->startMqck()) {
 		QMessageBox::warning(this, "MQCK error", tr("Can't run cdvdcontrol!") );
@@ -769,13 +772,13 @@ devctlAutostrategyDB::devctlAutostrategyDB(device* idev, QWidget* p)
 	pb_clear = new QPushButton(QIcon(":images/edit-clear.png"),tr("Clear"), this);
 
 	layout = new QVBoxLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 	layout->addWidget(tree,10);
 
 	layoutb = new QHBoxLayout();
 	layout->addLayout(layoutb);
-	layoutb->setMargin(0);
+	layoutb->setContentsMargins(0, 0, 0, 0);
 	layoutb->setSpacing(3);
 	layoutb->addWidget(pb_act,1);
 	layoutb->addWidget(pb_deact,1);
@@ -794,7 +797,7 @@ devctlAutostrategyDB::devctlAutostrategyDB(device* idev, QWidget* p)
 	ascre_start = new QPushButton(tr("Create"), box_ascre);
 
 	layout_ascre = new QGridLayout(box_ascre);
-	layout_ascre->setMargin(0);
+	layout_ascre->setContentsMargins(0, 0, 0, 0);
 	layout_ascre->setSpacing(3);
 	layout_ascre->addWidget(grp_ascre_mode, 0,0,1,2);
 	layout_ascre->addWidget(grp_ascre_act,  0,2,1,2);
@@ -805,7 +808,7 @@ devctlAutostrategyDB::devctlAutostrategyDB(device* idev, QWidget* p)
 	rb_ascre_full    = new QRadioButton(tr("Full"), grp_ascre_mode);
 	rb_ascre_quick->setChecked(true);
 	layout_crem = new QVBoxLayout(grp_ascre_mode);
-	layout_crem->setMargin(3);
+	layout_crem->setContentsMargins(3, 3, 3, 3);
 	layout_crem->setSpacing(3);
 	layout_crem->addWidget(rb_ascre_quick);
 	layout_crem->addWidget(rb_ascre_full);
@@ -814,7 +817,7 @@ devctlAutostrategyDB::devctlAutostrategyDB(device* idev, QWidget* p)
 	rb_ascre_replace = new QRadioButton(tr("Replace"), grp_ascre_act);
 	rb_ascre_add->setChecked(true);
 	layout_crea = new QVBoxLayout(grp_ascre_act);
-	layout_crea->setMargin(3);
+	layout_crea->setContentsMargins(3, 3, 3, 3);
 	layout_crea->setSpacing(3);
 	layout_crea->addWidget(rb_ascre_add);
 	layout_crea->addWidget(rb_ascre_replace);
@@ -1004,7 +1007,7 @@ devctlDestruct::devctlDestruct(device* idev, QWidget* p)
 	rb_quick->setChecked(true);
 
 	layout = new QGridLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 	layout->addWidget(rb_quick, 0,0,1,3);
 	layout->addWidget(pl_quick, 1,1,1,2);
@@ -1052,14 +1055,14 @@ devctlPioquiet::devctlPioquiet(device* idev, QWidget* p)
 	setEnabled( dev->features.supported & FEATURE_PIOQUIET );
 
 	layout = new QGridLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 
 	box_mode = new QGroupBox(tr("Profile"),this);
 	layout->addWidget(box_mode,0,0,1,3);
 
 	layoutm = new QVBoxLayout(box_mode);
-	layoutm->setMargin(3);
+	layoutm->setContentsMargins(3, 3, 3, 3);
 	layoutm->setSpacing(3);
 
 	rb_quiet = new QRadioButton(tr("Quiet"), box_mode);
@@ -1117,7 +1120,7 @@ devctlF1Tattoo::devctlF1Tattoo(device* idev, QWidget* p)
 	setEnabled(dev->features.supported & FEATURE_F1TATTOO);
 	
 	layout = new QGridLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 
 	tw = new TattooWidget(this);
@@ -1128,7 +1131,7 @@ devctlF1Tattoo::devctlF1Tattoo(device* idev, QWidget* p)
 	tw->setRadius(r0,r1);
 
 	layoutb = new QHBoxLayout();
-	layoutb->setMargin(0);
+	layoutb->setContentsMargins(0, 0, 0, 0);
 	layoutb->setSpacing(3);
 	layout->addLayout(layoutb,1,0,1,2);
 
@@ -1157,7 +1160,7 @@ void devctlF1Tattoo::loadImage()
 {
 
 	QString fn = QFileDialog::getOpenFileName(this, tr("Select T@2 image..."));
-	if (fn == QString::null) return;
+	if (fn == QString()) return;
 
 	if (!srcimg.load(fn)) {
 		QMessageBox::warning(this, tr("Error"), tr("Can't load image: ") + fn);
@@ -1185,7 +1188,7 @@ void devctlF1Tattoo::burn()
 	qDebug() << "T@2 image size: " << img.width() << "x" << img.height();
 
 	QStringList env = QProcess::systemEnvironment();
-	int hidx = env.indexOf(QRegExp("HOME=(.*)"));
+	int hidx = env.indexOf(QRegularExpression("HOME=(.*)"));
 	if (hidx>=0) {
 		tfn = env[hidx].remove(0,5);
 	} else {

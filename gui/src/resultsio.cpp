@@ -51,12 +51,12 @@ void ResultsReader::run() {
 		switch (xml.readNext()) {
 			case QXmlStreamReader::StartElement:
 				name = xml.name().toString();
-				if (xml.name() == "qpxdata") {
+				if (xml.name() == QStringLiteral("qpxdata")) {
 					dataFound = 1;
 					isQpxData = 1;
 				}
 				if (isQpxData) {
-					if (test && (xml.name() == "d")) {
+					if (test && (xml.name() == QStringLiteral("d"))) {
 						data = xml.readElementText().split(",");
 						switch (test) {
 							case TEST_RT:
@@ -146,7 +146,7 @@ void ResultsReader::run() {
 					} else if (isDevice) {
 					// device information
 						attr = xml.attributes();
-						if (xml.name() == "identify") {
+						if (xml.name() == QStringLiteral("identify")) {
 //							dev->type = attr.value("type").toInt();
 							dev->path = attr.value("path").toString();
 							dev->host = attr.value("host").toString();
@@ -158,19 +158,19 @@ void ResultsReader::run() {
 							dev->sn   = attr.value("sn").toString();
 							dev->fw   = attr.value("fw").toString();
 							dev->tla  = attr.value("tla").toString();
-						} else if (xml.name() == "info") {
+						} else if (xml.name() == QStringLiteral("info")) {
 							dev->buf    = attr.value("buf").toString();
 							dev->iface  = attr.value("iface").toString();
 							dev->loader = attr.value("loader").toString();
 							dev->cap    = attr.value("cap").toString().toULongLong(NULL, 16);
 							dev->cap_rd = attr.value("cap_rd").toString().toULongLong(NULL, 16);
 							dev->cap_wr = attr.value("cap_wr").toString().toULongLong(NULL, 16);
-						} else if (xml.name() == "rpc") {
+						} else if (xml.name() == QStringLiteral("rpc")) {
 							dev->rpc_phase = attr.value("phase").toString().toInt();
 							dev->rpc_reg   = attr.value("region").toString().toInt();
 							dev->rpc_ch    = attr.value("changes").toString().toInt();
 							dev->rpc_rst   = attr.value("resets").toString().toInt();
-						} else if (xml.name() == "lifetime") {
+						} else if (xml.name() == QStringLiteral("lifetime")) {
 							dev->life_dn = attr.value("count").toString().toInt(); 
 							dev->life_cr = attr.value("cd_rd").toString();
 							dev->life_cw = attr.value("cd_wr").toString();
@@ -180,12 +180,12 @@ void ResultsReader::run() {
 					} else if (isMedia) {
 					// media information
 						attr = xml.attributes();
-						if (xml.name() == "identify") {
+						if (xml.name() == QStringLiteral("identify")) {
 							dev->media.type  = attr.value("type").toString();
 							dev->media.category = attr.value("category").toString();
 							dev->media.mid   = attr.value("mid").toString();
 							dev->media.label = attr.value("label").toString();
-						} else if (xml.name() == "capacity") {
+						} else if (xml.name() == QStringLiteral("capacity")) {
 							dev->media.creads = attr.value("read").toString().toInt();
 							dev->media.cfrees = attr.value("free").toString().toInt();
 							dev->media.ctots  = attr.value("tot").toString().toInt();
@@ -195,21 +195,21 @@ void ResultsReader::run() {
 							dev->media.creadmsf = attr.value("read_msf").toString();
 							dev->media.cfreemsf = attr.value("free_msf").toString();
 							dev->media.ctotmsf  = attr.value("tot_msf").toString();
-						} else if (xml.name() == "speeds") {
-							dev->media.rspeeds  = attr.value("rspeeds" ).toString().split(" ", QString::SkipEmptyParts);
-							dev->media.wspeedsd = attr.value("wspeedsd").toString().split(" ", QString::SkipEmptyParts);
-							dev->media.wspeedsm = attr.value("wspeedsm").toString().split(" ", QString::SkipEmptyParts);
-						} else if (xml.name() == "misc") {
-							dev->media.writer   = attr.value("writer").toString();
-							dev->media.prot     = attr.value("protection").toString();
-							dev->media.regions  = attr.value("regions").toString();
-							dev->media.grec     = attr.value("gigarec").toString().toDouble();
-							dev->media.spd1X    = attr.value("spd1X").toString().toInt();
-							dev->media.layers   = attr.value("layers").toString();
-							dev->media.erasable = attr.value("erasable").toString();
-							dev->media.ilayers  = dev->media.layers.toInt();
-							dev->media.dstate   = attr.value("dstate").toString();
-							dev->media.sstate   = attr.value("sstate").toString();
+						} else if (xml.name() == QStringLiteral("speeds")) {
+							dev->media.rspeeds  = attr.value("rspeeds" ).toString().split(" ", Qt::SkipEmptyParts);
+							dev->media.wspeedsd = attr.value("wspeedsd").toString().split(" ", Qt::SkipEmptyParts);
+							dev->media.wspeedsm = attr.value("wspeedsm").toString().split(" ", Qt::SkipEmptyParts);
+						} else if (xml.name() == QStringLiteral("misc")) {
+							dev->media.writer  = attr.value("writer").toString();
+							dev->media.prot    = attr.value("protection").toString();
+							dev->media.regions = attr.value("regions").toString();
+							dev->media.grec    = attr.value("gigarec").toString().toDouble();
+							dev->media.spd1X   = attr.value("spd1X").toString().toInt();
+							dev->media.layers  = attr.value("layers").toString();
+							dev->media.erasable= attr.value("erasable").toString();
+							dev->media.ilayers = dev->media.layers.toInt();
+							dev->media.dstate  = attr.value("dstate").toString();
+							dev->media.sstate  = attr.value("sstate").toString();
 							if (attr.hasAttribute("gbpl")) {
 								dev->media.gbpl  = attr.value("gbpl").toString();
 								dev->media.igbpl = dev->media.gbpl.toInt();
@@ -217,66 +217,66 @@ void ResultsReader::run() {
 						}
 					} else if (isTests) {
 						attr = xml.attributes();
-						if (xml.name() == "rt") {
+						if (xml.name() == QStringLiteral("rt")) {
 							test = TEST_RT;
 							dev->tspeeds.rt = attr.value("speed").toString().toInt();
 							dev->testData.rt_time = attr.value("time").toString().toDouble();
-						} else if (xml.name() == "wt") {
+						} else if (xml.name() == QStringLiteral("wt")) {
 							test = TEST_WT;
 							dev->tspeeds.wt = attr.value("speed").toString().toInt();
 							dev->testData.wt_time = attr.value("time").toString().toDouble();
-						} else if (xml.name() == "errc") {
+						} else if (xml.name() == QStringLiteral("errc")) {
 							test = TEST_ERRC;
 							dev->tspeeds.errc = attr.value("speed").toString().toInt();
 							dev->testData.errc_time = attr.value("time").toString().toDouble();
 							dev->media.tdata_errc = attr.value("data").toString().toInt();
-						} else if (xml.name() == "jb") {
+						} else if (xml.name() == QStringLiteral("jb")) {
 							test = TEST_JB;
 							dev->tspeeds.jb = attr.value("speed").toString().toInt();
 							dev->testData.jb_time = attr.value("time").toString().toDouble();
-						} else if (xml.name() == "ft") {
+						} else if (xml.name() == QStringLiteral("ft")) {
 							test = TEST_FT;
 							dev->tspeeds.ft = attr.value("speed").toString().toInt();
 							dev->testData.ft_time = attr.value("time").toString().toDouble();
-						} else if (xml.name() == "ta") {
+						} else if (xml.name() == QStringLiteral("ta")) {
 							test = TEST_TA;
 						//	dev->tspeeds.ta = attr.value("speed").toString().toInt();
 							dev->testData.ta_time = attr.value("time").toString().toDouble();
-						} else if ((test == TEST_TA) && (xml.name() == "zone")) {
+						} else if ((test == TEST_TA) && (xml.name() == QStringLiteral("zone"))) {
 							taZone = attr.value("idx").toString().toInt();
 						}
-					} else if (xml.name() == "device") {
+					} else if (xml.name() == QStringLiteral("device")) {
 						isDevice = 1;
-					} else if (xml.name() == "media") {
+					} else if (xml.name() == QStringLiteral("media")) {
 						isMedia = 1;
-					} else if (xml.name() == "tests") {
+					} else if (xml.name() == QStringLiteral("tests")) {
 						isTests = 1;
 					}
 				}
 				break;
 			case QXmlStreamReader::EndElement:
-				if (isQpxData && xml.name() == "qpxdata") {
+				if (isQpxData && xml.name() == QStringLiteral("qpxdata")) {
 					isQpxData = 0;
-				} else if (isDevice && xml.name() == "device") {
+				} else if (isDevice && xml.name() == QStringLiteral("device")) {
 					isDevice = 0;
-				} else if (isMedia && xml.name() == "media") {
+				} else if (isMedia && xml.name() == QStringLiteral("media")) {
 					isMedia = 0;
-				} else if (isTests && xml.name() == "tests") {
+				} else if (isTests && xml.name() == QStringLiteral("tests")) {
 					isTests = 0;
 				} else if (isTests) {
-					if (test == TEST_RT && xml.name() == "rt") {
+					if (test == TEST_RT && xml.name() == QStringLiteral("rt")) {
 						test = 0;
-					} else if (test == TEST_WT && xml.name() == "wt") {
+					} else if (test == TEST_WT && xml.name() == QStringLiteral("wt")) {
 						test = 0;
-					} else if (test == TEST_ERRC && xml.name() == "errc") {
+					} else if (test == TEST_ERRC && xml.name() == QStringLiteral("errc")) {
 						test = 0;
-					} else if (test == TEST_JB && xml.name() == "jb") {
+					} else if (test == TEST_JB && xml.name() == QStringLiteral("jb")) {
 						test = 0;
-					} else if (test == TEST_FT && xml.name() == "ft") {
+					} else if (test == TEST_FT && xml.name() == QStringLiteral("ft")) {
 						test = 0;
-					} else if (test == TEST_TA && xml.name() == "ta") {
+					} else if (test == TEST_TA && xml.name() == QStringLiteral("ta")) {
 						test = 0;
-					} else if (test == TEST_TA && xml.name() == "zone") {
+					} else if (test == TEST_TA && xml.name() == QStringLiteral("zone")) {
 						taZone = -1;
 					}
 				}

@@ -36,7 +36,7 @@ prefDevices::prefDevices(QPxSettings *iset, QWidget *p, Qt::WindowFlags f)
 	set = iset;
 
 	layout = new QVBoxLayout(this);
-	layout->setMargin(0);
+	layout->setContentsMargins(0, 0, 0, 0);
 
 	ck_local = new QCheckBox(tr("Use local devices"),this);
 	ck_local->setChecked(set->useLocal);

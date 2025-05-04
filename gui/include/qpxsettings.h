@@ -77,8 +77,8 @@ public:
 	int			type;
 	int			value;
 
-	inline bool operator== (const QString &s)  { return name == s; };
-	inline bool operator== (const Scale &o)    { return name == o.name; };
+	inline bool operator== (const QString &s) const { return name == s; };
+	inline bool operator== (const Scale &o)   const { return name == o.name; };
 };
 
 class ScaleList : public QList<Scale> {

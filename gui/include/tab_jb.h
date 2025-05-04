@@ -23,7 +23,7 @@ class tabJB : public GraphTab
 {
 	Q_OBJECT
 public:
-	tabJB(QPxSettings *iset, devlist *idev, QString iname, QWidget *p=0, Qt::WindowFlags fl = 0);
+	tabJB(QPxSettings *iset, devlist *idev, QString iname, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags{});
 	~tabJB();
 
 public slots:

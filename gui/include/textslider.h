@@ -20,10 +20,10 @@ class SliderItem {
 public:
 	SliderItem(QString s, bool en = true) { text=s; enabled=en; }
 
-	inline bool operator==(SliderItem o) { return text==o.text; };
-	inline bool operator==(SliderItem& o) { return text==o.text; };
-	inline bool operator==(QString o) { return text==o; };
-	inline bool operator==(QString& o) { return text==o; };
+	//inline bool operator==(const SliderItem o) { return text==o.text; };
+	inline bool operator==(const SliderItem& o) const { return text==o.text; };
+	//inline bool operator==(const QString o) { return text==o; };
+	inline bool operator==(const QString& o) const { return text==o; };
 
 	QString text;
 	bool	enabled;

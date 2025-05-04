@@ -23,7 +23,7 @@ class tabFETE : public GraphTab
 {
 	Q_OBJECT
 public:
-	tabFETE(QPxSettings *iset, devlist *idev, QString iname, QWidget *p=0, Qt::WindowFlags fl = 0);
+	tabFETE(QPxSettings *iset, devlist *idev, QString iname, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags{});
 	~tabFETE();
 
 public slots:

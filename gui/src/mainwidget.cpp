@@ -65,7 +65,7 @@ QPxMainWidget::QPxMainWidget(QPxSettings *iset, devlist *idev, QWidget *p)
 
 	QPushButton *pb;
 	layout = new QHBoxLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 
 	bframe = new QFrame(this);
@@ -73,7 +73,7 @@ QPxMainWidget::QPxMainWidget(QPxSettings *iset, devlist *idev, QWidget *p)
 	layout->addWidget(bframe);
 
 	layout_buttons = new QVBoxLayout(bframe);
-	layout_buttons->setMargin(3);
+	layout_buttons->setContentsMargins(3, 3, 3, 3);
 	layout_buttons->setSpacing(0);
 //	layout->addLayout(layout_buttons);
 
@@ -129,7 +129,10 @@ QPxMainWidget::QPxMainWidget(QPxSettings *iset, devlist *idev, QWidget *p)
 	connect(this, SIGNAL(configured()), tab_TA, SLOT(reconfig()));
 	connect(this, SIGNAL(deviceSelected()), tab_TA, SLOT(selectDevice()));
 
-	connect(grp, SIGNAL(buttonClicked(int)), stack, SLOT(setCurrentIndex(int)));
+	connect(grp, &QButtonGroup::buttonClicked, stack, [this](QAbstractButton *btn) {
+		int id = grp->id(btn);
+		stack->setCurrentIndex(id);
+	});
 	layout_buttons->addStretch(10);
 
 

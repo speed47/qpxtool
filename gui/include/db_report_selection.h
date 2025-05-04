@@ -58,7 +58,7 @@ class DbReportSelection : public QDialog
 	Q_OBJECT
 
 public:
-	DbReportSelection(QString conn, QWidget *parent = NULL, Qt::WindowFlags fl = 0);
+	DbReportSelection(QString conn, QWidget *parent = NULL, Qt::WindowFlags fl = Qt::WindowFlags{});
 	~DbReportSelection();
 	int getReportID() const { return report_id; };
 

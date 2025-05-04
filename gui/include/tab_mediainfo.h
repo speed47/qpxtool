@@ -35,7 +35,7 @@ class tabMediaInfo : public QWidget
 {
 	Q_OBJECT
 public:
-	tabMediaInfo(QPxSettings *iset, devlist *idev, QWidget *p=0, Qt::WindowFlags fl = 0);
+	tabMediaInfo(QPxSettings *iset, devlist *idev, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags{});
 	~tabMediaInfo();
 
 public slots:

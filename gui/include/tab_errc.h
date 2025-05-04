@@ -27,7 +27,7 @@ class tabERRC : public GraphTab
 {
 	Q_OBJECT
 public:
-	tabERRC(QPxSettings *iset, devlist *idev, QString iname, QWidget *p=0, Qt::WindowFlags fl = 0);
+	tabERRC(QPxSettings *iset, devlist *idev, QString iname, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags{});
 	~tabERRC();
 
 public slots:

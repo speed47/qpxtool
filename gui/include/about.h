@@ -25,7 +25,7 @@ class AboutDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	AboutDialog(QWidget *p=NULL, Qt::WindowFlags fl=0);
+	AboutDialog(QWidget *p=NULL, Qt::WindowFlags fl=Qt::WindowFlags{});
 	~AboutDialog();
 
 private:

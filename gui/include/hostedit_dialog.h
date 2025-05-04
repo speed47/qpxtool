@@ -25,7 +25,7 @@ class hostEditDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	hostEditDialog(QString host, int port, QWidget* p=NULL, Qt::WindowFlags f=0);
+	hostEditDialog(QString host, int port, QWidget* p=NULL, Qt::WindowFlags f=Qt::WindowFlags{});
 	~hostEditDialog();
 	inline QString hostname() { return e_host->text(); };
 	inline int     port()     { return e_port->value(); };

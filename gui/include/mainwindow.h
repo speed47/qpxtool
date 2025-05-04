@@ -64,7 +64,7 @@ class QPxToolMW : public QMainWindow
 	Q_OBJECT
 
 public:
-	QPxToolMW(int ac, char **av, QWidget *p=0, Qt::WindowFlags fl = 0);
+	QPxToolMW(int ac, char **av, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags{});
 	~QPxToolMW();
 
 public slots:

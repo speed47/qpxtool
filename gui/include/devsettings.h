@@ -36,7 +36,7 @@ class devSettings : public QDialog
 {
 	Q_OBJECT
 public:
-	devSettings(QPxSettings *iset, device *idev, QWidget *p=0, Qt::WindowFlags fl = 0);
+	devSettings(QPxSettings *iset, device *idev, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags{});
 	~devSettings();
 
 public slots:
