@@ -551,7 +551,9 @@ void device::qscan_callback_info()
 	} else if (type == device::DevtypeTCP) {
 //		QObject::disconnect(sock, SIGNAL(disconnected()),
 //				this, SLOT(qscan_callback_info()));
-		sock->disconnectFromHost();
+		if (sock != NULL) {
+			sock->disconnectFromHost();
+		}
 #ifndef QT_NO_DEBUG
 		qDebug("qscan (TCP) finished");
 #endif

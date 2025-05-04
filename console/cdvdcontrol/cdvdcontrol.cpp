@@ -1211,18 +1211,21 @@ int main (int argc, char* argv[])
 		asf = fopen(aslfn,"rb");
 		if (!asf)
 			{ printf("can't open asdb file!\n"); return 6; }
-		if (fread((void*)hdr,1,8,asf)<8)
-			{ printf("error reading asdb file!\n"); return 6; }
+		if (fread((void*)hdr,1,8,asf)<8) {
+			fclose(asf);
+			printf("error reading asdb file!\n");
+			return 6;
+		}
 
 		if (!strncmp((char*)hdr,"ASDB ",5))
 		dev->astrategy.dbcnt = hdr[5];
 		i=0;
 		while (!feof(asf) && i<dev->astrategy.dbcnt) {
 			if (fread((void*)&dev->astrategy.entry[i],1,0x20,asf)<0x20)
-				{ printf("error reading asdb file!\n"); return 6; }
+				{ fclose(asf); printf("error reading asdb file!\n"); return 6; }
 			for (int j=0; j<7; j++)
 				if (fread((void*)&dev->astrategy.entry_data[i][j],1,0x20,asf)<0x20)
-					{ printf("error reading asdb file!\n"); return 6; }
+					{ fclose(asf); printf("error reading asdb file!\n"); return 6; }
 
 			i++;
 		}

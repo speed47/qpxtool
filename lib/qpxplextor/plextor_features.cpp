@@ -860,7 +860,8 @@ int plextor_get_strategy(drive_info* drive){
 
 #ifdef ASDB_SAVE_DEBUG
 	printf("DB HDR0:\n");
-	for (i=0; i<8; i++) printf("%02X ", drive->rd_buf[i]); printf("\n");
+	for (i=0; i<8; i++) printf("%02X ", drive->rd_buf[i]);
+	printf("\n");
 	for (s=0; s<cnt; s++) {
 		offs = 8 + s*0x20;
 		for (i=0; i<0x20; i++) printf("%02X ", drive->rd_buf[offs+i]);
@@ -868,7 +869,8 @@ int plextor_get_strategy(drive_info* drive){
 	}
 	offs = 8 + cnt*0x20;
 	printf("DB HDR1:\n");
-	for (i=0; i<8; i++) printf("%02X ", drive->rd_buf[offs+i]); printf("\n");
+	for (i=0; i<8; i++) printf("%02X ", drive->rd_buf[offs+i]);
+	printf("\n");
 	for (s=0; s<cnt; s++) {
 		printf("Strategy #%02d\n", s+1);
 		for(int s1=0; s1<7; s1++) {
@@ -918,7 +920,8 @@ int plextor_add_strategy(drive_info* drive){
 
 #ifdef ASDB_LOAD_DEBUG
 	printf("DB HDR0:\n");
-	for (i=0; i<8; i++) printf("%02X ", drive->rd_buf[i]); printf("\n");
+	for (i=0; i<8; i++) printf("%02X ", drive->rd_buf[i]);
+	printf("\n");
 	for (int s=0; s<cnt; s++) {
 		offs = 0x8 + s*0x20;
 		for (i=0; i<0x20; i++) printf("%02X ", drive->rd_buf[offs+i]);
@@ -955,7 +958,8 @@ int plextor_add_strategy(drive_info* drive){
 	printf("DB HDR1:\n");
 
 
-	for (i=0; i<8; i++) printf("%02X ", drive->rd_buf[i]); printf("\n");
+	for (i=0; i<8; i++) printf("%02X ", drive->rd_buf[i]);
+	printf("\n");
 	for (int s=0; s<cnt; s++) {
 		printf("Strategy #%02d\n", s+1);
 		for(int s1=0; s1<7; s1++) {
@@ -1029,7 +1033,9 @@ int plextor_create_strategy(drive_info* drive, int mode)
 	if ((drive->err=drive->cmd.transport(READ,drive->rd_buf,0x12) ))
 		{ if (!drive->silent) sperror ("PLEXTOR_AS_GET_STATUS",drive->err); return drive->err;}
 
-	if (!drive->silent) printf("      AS CRE: "); for (i=0; i<0x12; i++) printf("%02X ", drive->rd_buf[i] & 0x0FF); printf("\n");
+	if (!drive->silent) printf("      AS CRE: ");
+	for (i=0; i<0x12; i++) printf("%02X ", drive->rd_buf[i] & 0x0FF);
+	printf("\n");
 
 // Waiting until Strategy is created
 	while (test_unit_ready(drive)) {

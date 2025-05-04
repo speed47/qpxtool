@@ -811,7 +811,7 @@ block_retry:
 int qscanner::run_dvd_ta()
 {
 	struct cdvd_ta ta;
-	uint32_t lba;
+	uint32_t lba=0;
     if (!attached) return -1;
     if (!(dev->media.type & DISC_DVD)) return 1;
 	printf("Running DVD Time Analyser test...\n");

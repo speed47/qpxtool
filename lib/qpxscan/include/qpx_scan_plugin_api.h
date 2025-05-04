@@ -148,19 +148,22 @@ public:
 				if (pif<o.pif) pif=o.pif;
 				if (poe<o.poe) poe=o.poe;
 				if (pof<o.pof) pof=o.pof;
-				if (uncr<o.uncr) uncr=o.uncr; return *this;};
+				if (uncr<o.uncr) uncr=o.uncr;
+				return *this;};
 	inline dvd_errc& operator= (dvd_errc& o) {
 				pie=o.pie;
 				pif=o.pif;
 				poe=o.poe;
 				pof=o.pof;
-				uncr=o.uncr; return *this; };
+				uncr=o.uncr;
+				return *this; };
 	inline dvd_errc& operator+= (dvd_errc& o) {
 				pie+=o.pie;
 				pif+=o.pif;
 				poe+=o.poe;
 				pof+=o.pof;
-				uncr+=o.uncr; return *this; };
+				uncr+=o.uncr;
+				return *this; };
 
 	long pie;
 	long pif;
@@ -176,15 +179,18 @@ public:
 	inline bd_errc& EMAX(bd_errc& o) {
 				if (ldc<o.ldc) ldc=o.ldc;
 				if (bis<o.bis) bis=o.bis;
-				if (uncr<o.uncr) uncr=o.uncr; return *this;};
+				if (uncr<o.uncr) uncr=o.uncr;
+				return *this;};
 	inline bd_errc& operator= (bd_errc& o) {
 				ldc=o.ldc;
 				bis=o.bis;
-				uncr=o.uncr; return *this; };
+				uncr=o.uncr;
+				return *this; };
 	inline bd_errc& operator+= (bd_errc& o) {
 				ldc+=o.ldc;
 				bis+=o.bis;
-				uncr+=o.uncr; return *this; };
+				uncr+=o.uncr;
+				return *this; };
 
 	long ldc;
 	long bis;

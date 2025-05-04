@@ -154,29 +154,24 @@ bool tattoo_read_png(unsigned char *buf, int rows, FILE *fp)
 
 	if (fread(header, 1, 8, fp) < 8) {
 		printf("Error reading PNG header\n");
-		fclose(fp);	
 		return 0;
 	}
 	if (png_sig_cmp(header, 0, 8)) {
 		printf("File not recognized as a PNG\n");
-		fclose(fp);
 		return 0;
 	}
 	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);	
 	if (!png_ptr) {
 		printf("png_create_read_struct failed!\n");
-		fclose(fp);
 		return 0;
 	}
 	info_ptr = png_create_info_struct(png_ptr);
 	if (!info_ptr) {
 		printf("png_create_info_struct failed!\n");
-		fclose(fp);
 		return 0;
 	}
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		printf("png_jmpbuf failed!\n");
-		fclose(fp);
 		return 0;
 	}
 
@@ -467,7 +462,7 @@ int main(int argc, char* argv[])
 		if (flags & FL_TATTOO_TEST) {
 			printf("%s: writing T@2 test image...\n", device);
 			yamaha_f1_do_tattoo(drive, NULL, 0);
-		} else {
+		} else if (tattoofn != NULL) {
 			tattoof = fopen(tattoofn, "rb");
 			if (!tattoof) {
 				printf("Can't open tattoo file: %s", tattoofn);
