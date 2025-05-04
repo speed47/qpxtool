@@ -9,32 +9,23 @@ on:
       - 'v*'
 
 jobs:
-
-  win:
+  win64:
     runs-on: windows-latest
-    strategy:
-      matrix:
-        arch: [x86_64, i686]
-        include:
-          - arch: x86_64
-            msystem: MINGW64
-            grep: x86-64
-          - arch: i686
-            msystem: MINGW32
-            grep: 386
     defaults:
       run:
         shell: msys2 {0}
     steps:
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: ${{ matrix.msystem }}
+          msystem: MINGW64
           update: false
-          install: git make pkg-config zip mingw-w64-${{ matrix.arch }}-gcc mingw-w64-${{ matrix.arch }}-ntldd mingw-w64-${{ matrix.arch }}-qt5 mingw-w64-${{ matrix.arch }}-jq
+          install: git make pkg-config zip mingw-w64-x86_64-gcc mingw-w64-x86_64-ntldd mingw-w64-x86_64-qt5
       - name: git config
         run: git config --global core.autocrlf input
         shell: bash
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: configure (debug)
         run: ./configure --enable-debug
       - name: make (debug)
@@ -42,64 +33,76 @@ jobs:
       - name: check executable (debug)
         run: |
           file gui/debug/qpxtool.exe
-          file gui/debug/qpxtool.exe | grep -q '${{ matrix.grep }}'
+          file gui/debug/qpxtool.exe | grep -q 'x86-64'
           file gui/debug/qpxtool.exe | grep -q 'for MS Windows'
       - name: configure (release)
-        run: make clean && ./configure
+        id: conf
+        run: |
+          git describe --dirty --tags --match 'v*'
+          version="$(git describe --dirty --tags --match 'v*')"
+          sed -i -re "s/^#define VERSION.*/#define VERSION \"${version:1}-speed47\"/" */*/version.h
+          echo "version=${version:1}" >> $GITHUB_OUTPUT
+          make clean && ./configure
       - name: make (release)
         run: nproc && make -j$(nproc)
       - name: check executable (release)
         run: |
           file gui/debug/qpxtool.exe
-          file gui/debug/qpxtool.exe | grep -q '${{ matrix.grep }}'
+          file gui/debug/qpxtool.exe | grep -q 'x86-64'
           file gui/debug/qpxtool.exe | grep -q 'for MS Windows'
       - name: prepare dist
-        run: ./.github/workflows/make-dist.sh ${{ github.ref }}
         id: dist
-      - name: Tag for Continuous Build
-        if: github.ref_name == 'master'
+        run: ./.github/workflows/make-dist.sh ${{ steps.conf.outputs.version }}
+      - name: Tag if needed
+        id: tag
+        if: github.ref_type == 'branch'
         run: |
-          git tag -f latest
-          git push -f origin latest
-      - name: Upload to Continuous Build
-        if: github.ref_name == 'master'
+          case "$GITHUB_REF_NAME" in
+            dev)    tagname=devel
+                    git tag -f $tagname
+                    git push -f origin $tagname
+                    echo "draft=true" >> $GITHUB_OUTPUT
+                    echo "relname=Dev Build" >> $GITHUB_OUTPUT
+                    ;;
+            master) tagname=latest
+                    git tag -f $tagname
+                    git push -f origin $tagname
+                    echo "draft=false" >> $GITHUB_OUTPUT
+                    echo "relname=Continuous Build" >> $GITHUB_OUTPUT
+                    ;;
+            v*)     tagname=$GITHUB_REF_NAME
+                    echo "draft=false" >> $GITHUB_OUTPUT
+                    echo "relname=$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
+                    ;;
+            *)      exit 1;;
+          esac
+          echo "prerelease=true" >> $GITHUB_OUTPUT
+          echo "tagname=$tagname" >> $GITHUB_OUTPUT
+      - name: Delete old assets
+        if: github.ref_type == 'branch'
+        uses: mknejp/delete-release-assets@v1
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          tag: "refs/tags/${{ steps.tag.outputs.tagname }}"
+          fail-if-no-assets: false
+          assets: |
+            qpxtool-*.zip
+      - name: Upload new assets
         uses: softprops/action-gh-release@v2
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: true
-          name: "Continuous Build"
-          tag_name: latest
+          prerelease: "${{ steps.tag.outputs.prerelease }}"
+          draft: "${{ steps.tag.outputs.draft }}"
+          name: "${{ steps.tag.outputs.relname }}"
+          tag_name: "${{ steps.tag.outputs.tagname }}"
           files: ${{ steps.dist.outputs.archive }}
-      - name: Tag for Dev Build
-        if: github.ref_name == 'dev'
-        run: |
-          git tag -f devel
-          git push -f origin devel
-      - name: Upload to Dev Build
-        if: github.ref_name == 'dev'
-        uses: softprops/action-gh-release@v2
-        with:
-          token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: true
-          draft: true
-          name: "Dev Build"
-          tag_name: devel
-          files: ${{ steps.dist.outputs.archive }}
-      - name: Upload to Draft Release
-        if: github.ref_type == 'tag'
-        uses: softprops/action-gh-release@v2
-        with:
-          token: "${{ secrets.GITHUB_TOKEN }}"
-          draft: true
-          name: ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
-          files: ${{ steps.dist.outputs.archive }}
-
 
   linux64-appimage:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: install prerequisites on host
         run: sudo apt-get update && sudo apt-get install -y fuse
       - name: docker
@@ -107,63 +110,80 @@ jobs:
           mkdir -p /tmp/dist
           docker run --device /dev/fuse --privileged --name uu -d -v $PWD:/qpxtool -v /tmp/dist:/dist ubuntu:18.04 sleep 1800
       - name: install prerequisites in docker
-        run: docker exec uu sh -c 'apt-get update && apt-get install -y fuse qt5-default qtbase5-dev binutils g++ file qttools5-dev-tools make libpng12-dev pkg-config
+        run: docker exec uu sh -c 'apt-get update && apt-get install -y fuse qt5-default qtbase5-dev binutils g++ file qttools5-dev-tools make pkg-config'
       - name: configure
-        run: docker exec uu sh -c 'cd /qpxtool && ./configure --prefix=/usr'
+        id: conf
+        run: |
+          git describe --dirty --tags --match 'v*'
+          version="$(git describe --dirty --tags --match 'v*')"
+          sed -i -re "s/^#define VERSION.*/#define VERSION \"${version:1}-speed47\"/" */*/version.h
+          echo "version=${version:1}" >> $GITHUB_OUTPUT
+          docker exec uu sh -c 'cd /qpxtool && ./configure --prefix=/usr'
       - name: make
-        run: docker exec uu sh -c 'make -C /qpxtool -j2'
+        run: docker exec uu sh -c 'make -C /qpxtool -j$(nproc)'
       - name: make install
         run: docker exec uu sh -c "make -C /qpxtool install DESTDIR=/dist"
-      - name: get linuxdeploy
+      - name: build appimage in docker
         run: |
-          wget -q https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
-          chmod 755 linuxdeployqt-continuous-x86_64.AppImage
-      - name: build appimage
-        run: docker exec uu sh -c 'install /qpxtool/contrib/AppRun /dist/ && cd /dist && LD_LIBRARY_PATH=/dist/usr/lib64 /qpxtool/linuxdeployqt-continuous-x86_64.AppImage ./usr/share/applications/qpxtool.desktop -appimage -verbose=2'
+          wget -q https://github.com/probonopd/go-appimage/releases/download/continuous/appimagetool-886-x86_64.AppImage
+          wget -q https://github.com/probonopd/go-appimage/releases/download/continuous/mkappimage-886-x86_64.AppImage
+          chmod +x *.AppImage
+          cp /tmp/dist/usr/share/pixmaps/qpxtool.png /tmp/dist
+          docker exec -e ARCH=x86_64 -e ME=$UID -e VERSION=v"${{ steps.conf.outputs.version }}" uu sh -c '
+            cd /qpxtool && \
+            PREFIX=/dist ./appimagetool*.AppImage deploy /dist/usr/share/applications/qpxtool.desktop && \
+            cp contrib/AppRun /dist/AppRun && \
+            chmod +x /dist/AppRun && \
+            find /dist -type f -name "ld-linux*.so*" -delete && \
+            ./mkappimage*.AppImage -n /dist && \
+            chown $ME QPx*.AppImage
+          '
       - name: get appimage name
         id: dist
         run: |
-          archiveold=$(find /tmp/dist -type f -name "QPx*.AppImage")
-          tagname=$(echo "${{ github.ref }}" | grep -Eo '[^/]+$')
-          archivenew=$(echo "$archiveold" | sed -re "s/QPxTool-/QPxTool-$tagname-/")
-          mv -v "$archiveold" "$archivenew"
-          echo "archive=$archivenew" >> $GITHUB_OUTPUT
-          echo "appimage is <$archivenew>"
-      - name: Tag for Continuous Build
-        if: github.ref_name == 'master'
+          archive=$(find . -type f -name "QPx*.AppImage")
+          echo "archive=$archive" >> $GITHUB_OUTPUT
+          echo "appimage is <$archive>"
+      - name: Tag if needed
+        id: tag
+        if: github.ref_type == 'branch'
         run: |
-          git tag -f latest
-          git push -f origin latest
-      - name: Upload to Continuous Build
-        if: github.ref_name == 'master'
+          case "$GITHUB_REF_NAME" in
+            dev)    tagname=devel
+                    git tag -f $tagname
+                    git push -f origin $tagname
+                    echo "draft=true" >> $GITHUB_OUTPUT
+                    echo "relname=Dev Build" >> $GITHUB_OUTPUT
+                    ;;
+            master) tagname=latest
+                    git tag -f $tagname
+                    git push -f origin $tagname
+                    echo "draft=false" >> $GITHUB_OUTPUT
+                    echo "relname=Continuous Build'" >> $GITHUB_OUTPUT
+                    ;;
+            v*)     tagname=$GITHUB_REF_NAME
+                    echo "draft=false" >> $GITHUB_OUTPUT
+                    echo "relname=$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
+                    ;;
+            *)      exit 1;;
+          esac
+          echo "prerelease=true" >> $GITHUB_OUTPUT
+          echo "tagname=$tagname" >> $GITHUB_OUTPUT
+      - name: Delete old assets
+        if: github.ref_type == 'branch'
+        uses: mknejp/delete-release-assets@v1
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          tag: "refs/tags/${{ steps.tag.outputs.tagname }}"
+          fail-if-no-assets: false
+          assets: |
+            QPxTool-*.AppImage
+      - name: Upload new assets
         uses: softprops/action-gh-release@v2
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: true
-          name: "Continuous Build"
-          tag_name: latest
-          files: ${{ steps.dist.outputs.archive }}
-      - name: Tag for Dev Build
-        if: github.ref_name == 'dev'
-        run: |
-          git tag -f devel
-          git push -f origin devel
-      - name: Upload to Dev Build
-        if: github.ref_name == 'dev'
-        uses: softprops/action-gh-release@v2
-        with:
-          token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: true
-          draft: true
-          name: "Dev Build"
-          tag_name: devel
-          files: ${{ steps.dist.outputs.archive }}
-      - name: Upload to Draft Release
-        if: github.ref_type == 'tag'
-        uses: softprops/action-gh-release@v2
-        with:
-          token: "${{ secrets.GITHUB_TOKEN }}"
-          draft: true
-          name: ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
+          prerelease: "${{ steps.tag.outputs.prerelease }}"
+          draft: "${{ steps.tag.outputs.draft }}"
+          name: "${{ steps.tag.outputs.relname }}"
+          tag_name: "${{ steps.tag.outputs.tagname }}"
           files: ${{ steps.dist.outputs.archive }}

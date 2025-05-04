@@ -2,7 +2,7 @@
 set -e
 set -x
 
-github_ref="$1"
+version="$1"
 
 case "$MSYSTEM" in
     MINGW64) os=win64;;
@@ -11,12 +11,14 @@ case "$MSYSTEM" in
 esac
 
 if [ ! -e "gui/release/qpxtool.exe" ] && [ -e "gui/debug/qpxtool.exe" ]; then
+    suffix=debug
     flavor=debug
 else
+    suffix=""
     flavor=release
 fi
 
-archive=qpxtool-$(echo "$github_ref" | grep -Eo '[^/]+$')-$os-portable-$flavor.zip
+archive=qpxtool-v$version-$os-portable$suffix.zip
 echo "Archive name is $archive"
 [ -n "$GITHUB_OUTPUT" ] && echo "archive=$archive" >> $GITHUB_OUTPUT
 
