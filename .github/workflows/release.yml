@@ -2,130 +2,168 @@ name: autobuild
 
 on:
   push:
+    branches:
+      - 'master'
+      - 'dev'
     tags:
-      - "v*"
+      - 'v*'
 
 jobs:
 
-  win64-gui:
+  win:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [x86_64, i686]
+        include:
+          - arch: x86_64
+            msystem: MINGW64
+            grep: x86-64
+          - arch: i686
+            msystem: MINGW32
+            grep: 386
     defaults:
       run:
         shell: msys2 {0}
     steps:
-    - uses: msys2/setup-msys2@v2
-      with:
-        msystem: MINGW64
-        update: false
-        install: git make pkg-config mingw-w64-x86_64-gcc mingw-w64-x86_64-ntldd-git mingw-w64-x86_64-qt5 mingw-w64-x86_64-jq zip
-    - run: git config --global core.autocrlf input
-      shell: bash
-    - uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-    - name: configure (debug)
-      run: ./configure --enable-debug
-    - name: make (debug)
-      run: nproc && make -j$(nproc)
-    - name: check executable (debug)
-      run: |
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          update: false
+          install: git make pkg-config zip mingw-w64-${{ matrix.arch }}-gcc mingw-w64-${{ matrix.arch }}-ntldd mingw-w64-${{ matrix.arch }}-qt5 mingw-w64-${{ matrix.arch }}-jq
+      - name: git config
+        run: git config --global core.autocrlf input
+        shell: bash
+      - uses: actions/checkout@v4
+      - name: configure (debug)
+        run: ./configure --enable-debug
+      - name: make (debug)
+        run: nproc && make -j$(nproc)
+      - name: check executable (debug)
+        run: |
           file gui/debug/qpxtool.exe
-          file gui/debug/qpxtool.exe | grep -q 'x86-64'
-    - name: configure (release)
-      run: make clean && ./configure
-    - name: make (release)
-      run: nproc && make -j$(nproc)
-    - name: check executable (release)
-      run: |
-          file gui/release/qpxtool.exe
-          file gui/release/qpxtool.exe | grep -q 'x86-64'
-    - name: prepare dist
-      run: ./.github/workflows/make-dist.sh ${{ github.ref }}
-      id: dist
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: ${{ steps.dist.outputs.archive }}
-        draft: true
+          file gui/debug/qpxtool.exe | grep -q '${{ matrix.grep }}'
+          file gui/debug/qpxtool.exe | grep -q 'for MS Windows'
+      - name: configure (release)
+        run: make clean && ./configure
+      - name: make (release)
+        run: nproc && make -j$(nproc)
+      - name: check executable (release)
+        run: |
+          file gui/debug/qpxtool.exe
+          file gui/debug/qpxtool.exe | grep -q '${{ matrix.grep }}'
+          file gui/debug/qpxtool.exe | grep -q 'for MS Windows'
+      - name: prepare dist
+        run: ./.github/workflows/make-dist.sh ${{ github.ref }}
+        id: dist
+      - name: Tag for Continuous Build
+        if: github.ref_name == 'master'
+        run: |
+          git tag -f latest
+          git push -f origin latest
+      - name: Upload to Continuous Build
+        if: github.ref_name == 'master'
+        uses: softprops/action-gh-release@v2
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: true
+          name: "Continuous Build"
+          tag_name: latest
+          files: ${{ steps.dist.outputs.archive }}
+      - name: Tag for Dev Build
+        if: github.ref_name == 'dev'
+        run: |
+          git tag -f devel
+          git push -f origin devel
+      - name: Upload to Dev Build
+        if: github.ref_name == 'dev'
+        uses: softprops/action-gh-release@v2
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: true
+          draft: true
+          name: "Dev Build"
+          tag_name: devel
+          files: ${{ steps.dist.outputs.archive }}
+      - name: Upload to Draft Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          draft: true
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          files: ${{ steps.dist.outputs.archive }}
 
-  win32-gui:
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-    - uses: msys2/setup-msys2@v2
-      with:
-        msystem: MINGW32
-        update: false
-        install: git make pkg-config mingw32/mingw-w64-i686-gcc mingw32/mingw-w64-i686-ntldd mingw32/mingw-w64-i686-qt5-base mingw32/mingw-w64-i686-qt5-tools mingw32/mingw-w64-i686-jq zip
-    - run: git config --global core.autocrlf input
-      shell: bash
-    - uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-    - name: configure (debug)
-      run: ./configure --enable-debug
-    - name: make (debug)
-      run: nproc && make -j$(nproc)
-    - name: check executable (debug)
-      run: |
-          file gui/debug/qpxtool.exe
-          file gui/debug/qpxtool.exe | grep -Eq 'Intel (80|i)386'
-    - name: configure (release)
-      run: make clean && ./configure
-    - name: make (release)
-      run: nproc && make -j$(nproc)
-    - name: check executable (release)
-      run: |
-          file gui/release/qpxtool.exe
-          file gui/release/qpxtool.exe | grep -Eq 'Intel (80|i)386'
-    - name: prepare dist
-      run: ./.github/workflows/make-dist.sh ${{ github.ref }}
-      id: dist
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: ${{ steps.dist.outputs.archive }}
-        draft: true
 
   linux64-appimage:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-    - name: docker
-      run: |
-        mkdir /tmp/dist
-        docker run --device /dev/fuse --privileged --name uu -d -v $PWD:/code -v /tmp/dist:/dist ubuntu:16.04 sleep 900
-    - name: install prerequisites
-      run: docker exec uu sh -c 'apt-get update && apt-get install -y libfuse2 libglib2.0-0 qt5-default qtbase5-dev binutils g++ file qttools5-dev-tools make libpng12-dev gtk2-engines-pixbuf gtk2-engines pkg-config gnome-themes-standard libgtk2.0-dev'
-    - name: copy gtk libs
-      run: docker exec --user $UID uu sh -c 'install -d /dist/usr/lib/gtk-2.0 && cp -va $(pkg-config --variable=libdir gtk+-2.0)/gtk-2.0/$(pkg-config --variable=gtk_binary_version gtk+-2.0)/* /dist/usr/lib/gtk-2.0'
-    - name: configure
-      run: docker exec --user $UID uu sh -c 'cd /code && ./configure --prefix=/usr'
-    - name: make
-      run: docker exec --user $UID uu sh -c 'make -C /code -j2'
-    - name: make install
-      run: docker exec --user $UID uu sh -c "make -C /code install DESTDIR=/dist"
-    - name: get linuxdeploy
-      run: |
-        wget -q https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
-        chmod 755 linuxdeployqt-continuous-x86_64.AppImage
-    - name: build appimage
-      run: docker exec uu sh -c 'install /code/contrib/AppRun /dist/ && cd /dist && LD_LIBRARY_PATH=/dist/usr/lib64 /code/linuxdeployqt-continuous-x86_64.AppImage ./usr/share/applications/qpxtool.desktop -appimage -verbose=2'
-    - name: get appimage name
-      id: dist
-      run: |
-        archiveold=$(find /tmp/dist -type f -name "QPx*.AppImage")
-        tagname=$(echo "${{ github.ref }}" | grep -Eo '[^/]+$')
-        archivenew=$(echo "$archiveold" | sed -re "s/QPxTool-/QPxTool-$tagname-/")
-        mv -v "$archiveold" "$archivenew"
-        echo "archive=$archivenew" >> $GITHUB_OUTPUT
-        echo "appimage is <$archivenew>"
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: ${{ steps.dist.outputs.archive }}
-        draft: true
+      - uses: actions/checkout@v4
+      - name: install prerequisites on host
+        run: sudo apt-get update && sudo apt-get install -y fuse
+      - name: docker
+        run: |
+          mkdir -p /tmp/dist
+          docker run --device /dev/fuse --privileged --name uu -d -v $PWD:/qpxtool -v /tmp/dist:/dist ubuntu:18.04 sleep 1800
+      - name: install prerequisites in docker
+        run: docker exec uu sh -c 'apt-get update && apt-get install -y fuse qt5-default qtbase5-dev binutils g++ file qttools5-dev-tools make libpng12-dev pkg-config
+      - name: configure
+        run: docker exec uu sh -c 'cd /qpxtool && ./configure --prefix=/usr'
+      - name: make
+        run: docker exec uu sh -c 'make -C /qpxtool -j2'
+      - name: make install
+        run: docker exec uu sh -c "make -C /qpxtool install DESTDIR=/dist"
+      - name: get linuxdeploy
+        run: |
+          wget -q https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
+          chmod 755 linuxdeployqt-continuous-x86_64.AppImage
+      - name: build appimage
+        run: docker exec uu sh -c 'install /qpxtool/contrib/AppRun /dist/ && cd /dist && LD_LIBRARY_PATH=/dist/usr/lib64 /qpxtool/linuxdeployqt-continuous-x86_64.AppImage ./usr/share/applications/qpxtool.desktop -appimage -verbose=2'
+      - name: get appimage name
+        id: dist
+        run: |
+          archiveold=$(find /tmp/dist -type f -name "QPx*.AppImage")
+          tagname=$(echo "${{ github.ref }}" | grep -Eo '[^/]+$')
+          archivenew=$(echo "$archiveold" | sed -re "s/QPxTool-/QPxTool-$tagname-/")
+          mv -v "$archiveold" "$archivenew"
+          echo "archive=$archivenew" >> $GITHUB_OUTPUT
+          echo "appimage is <$archivenew>"
+      - name: Tag for Continuous Build
+        if: github.ref_name == 'master'
+        run: |
+          git tag -f latest
+          git push -f origin latest
+      - name: Upload to Continuous Build
+        if: github.ref_name == 'master'
+        uses: softprops/action-gh-release@v2
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: true
+          name: "Continuous Build"
+          tag_name: latest
+          files: ${{ steps.dist.outputs.archive }}
+      - name: Tag for Dev Build
+        if: github.ref_name == 'dev'
+        run: |
+          git tag -f devel
+          git push -f origin devel
+      - name: Upload to Dev Build
+        if: github.ref_name == 'dev'
+        uses: softprops/action-gh-release@v2
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: true
+          draft: true
+          name: "Dev Build"
+          tag_name: devel
+          files: ${{ steps.dist.outputs.archive }}
+      - name: Upload to Draft Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          draft: true
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          files: ${{ steps.dist.outputs.archive }}
