@@ -1286,7 +1286,7 @@ static int css_CrackDiscKey( drive_info* drive, unsigned char *p_disc_key )
     }
 
     /* Initing our Really big table */
-    BigTable = (unsigned int*) malloc( 16777216 * sizeof(int) );
+    BigTable = (unsigned int*) malloc( 16777216 * sizeof(unsigned int) );
     if( BigTable == NULL )
     {
         return -1;

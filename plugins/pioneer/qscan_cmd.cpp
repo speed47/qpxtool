@@ -66,7 +66,8 @@ Data Sent:
 	dev->cmd[2] = 0xE1;
 	dev->cmd[8] = 0x20;
 	if ((dev->err=dev->cmd.transport(WRITE,dev->rd_buf,32))) {
-		if(!dev->silent) sperror ("pioneer_send_scan_cx",dev->err); return dev->err;
+		if(!dev->silent) sperror ("pioneer_send_scan_cx",dev->err);
+		return dev->err;
 	}
 	return 0;
 }
@@ -119,7 +120,8 @@ Data Sent:
 	dev->cmd[2] = 0xE1;
 	dev->cmd[8] = 0x20;
 	if ((dev->err=dev->cmd.transport(WRITE,dev->rd_buf,32))) {
-		if(!dev->silent) sperror ("pioneer_send_scan_pi",dev->err); return dev->err;
+		if(!dev->silent) sperror ("pioneer_send_scan_pi",dev->err);
+		return dev->err;
 	}
 	return 0;
 }

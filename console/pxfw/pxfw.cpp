@@ -472,6 +472,7 @@ int main(int argc,char *argv[]) {
 	const int HH=16;
 	fwfsz=fsize(fwfile);
 	if (!fread(dev->rd_buf, FB, 1, fwfile)) {
+		fclose(fwfile);
 		printf("%s: error reading file: %s\n", argv[0], fwfname);
 		return 1;		
 	}
