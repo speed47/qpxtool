@@ -1149,7 +1149,7 @@ void QPxGraph::contextMenuEvent(QContextMenuEvent *e)
 	QMenu *cmenu;
 	QAction *act;
 	QIcon   icon_ok(":images/ok.png");
-	if (!scale) return;
+	if (!scale[0]) return;
 
 	cmenu = new QMenu(this);
 	cmenu->addAction(

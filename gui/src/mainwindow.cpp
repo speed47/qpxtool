@@ -103,9 +103,10 @@ QPxToolMW::QPxToolMW(int ac, char **av, QWidget *p, Qt::WindowFlags fl)
 	settings_load();
 
 	while (1) {
-		c = getopt_long(ac, av, "hl:", long_options, NULL);
-		if (c == -1)
+		int ret = getopt_long(ac, av, "hl:", long_options, NULL);
+		if (ret == -1)
 			break;
+		c = (char)ret;
 		switch(c) {
 			case 'h':
 				printf("qpxtool options:\n");

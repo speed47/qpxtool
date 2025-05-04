@@ -153,6 +153,7 @@ int smap::load() {
     fseek(f, 0, SEEK_SET);
     for (unsigned i=0; (i<blocks) && (!feof(f)); i++) {
 	if (fread((void*)&tarr, map_block_sz, sizeof(mape), f) < sizeof(mape)) {
+		fclose(f);
 		printf("error reading map file!\n");
 		return 1;
 	}

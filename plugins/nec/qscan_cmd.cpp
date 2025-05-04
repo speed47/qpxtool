@@ -29,14 +29,16 @@ int scan_nec::cmd_cd_errc_init() {
 	dev->cmd[0] = 0xF3;
 	dev->cmd[1] = 0x01;
 	if ((dev->err=dev->cmd.transport(NONE, NULL, 0))){
-		if(!dev->silent) sperror ("nec_init_errc_scan",dev->err); return 1;
+		if(!dev->silent) sperror ("nec_init_errc_scan",dev->err);
+		return 1;
 	}
 	/* set scan interval = 75 sectors */
 	dev->cmd[0] = 0xF3;
 	dev->cmd[1] = 0x02;
 	dev->cmd[8] = 75;  // interval   in sectors
 	if ((dev->err=dev->cmd.transport(NONE, NULL, 0))){
-		if(!dev->silent) sperror ("nec_set_scan_interval",dev->err); return 1;
+		if(!dev->silent) sperror ("nec_set_scan_interval",dev->err);
+		return 1;
 	}
 	return 0;
 }
@@ -46,14 +48,16 @@ int scan_nec::cmd_dvd_errc_init() {
 	dev->cmd[0] = 0xF3;
 	dev->cmd[1] = 0x01;
 	if ((dev->err=dev->cmd.transport(NONE, NULL, 0))){
-		if(!dev->silent) sperror ("nec_init_errc_scan",dev->err); return 1;
+		if(!dev->silent) sperror ("nec_init_errc_scan",dev->err);
+		return 1;
 	}
 	/* set scan interval = 16 sectors = 1 ECC */
 	dev->cmd[0] = 0xF3;
 	dev->cmd[1] = 0x02;
 	dev->cmd[8] = 0x01;  // interval   in ECC blocks 
 	if ((dev->err=dev->cmd.transport(NONE, NULL, 0))){
-		if(!dev->silent) sperror ("nec_set_scan_interval",dev->err); return 1;
+		if(!dev->silent) sperror ("nec_set_scan_interval",dev->err);
+		return 1;
 	}
 	return 0;
 }
@@ -63,14 +67,16 @@ int scan_nec::cmd_bd_errc_init() {
 	dev->cmd[0] = 0xF3;
 	dev->cmd[1] = 0x01;
 	if ((dev->err=dev->cmd.transport(NONE, NULL, 0))){
-		if(!dev->silent) sperror ("nec_init_errc_scan",dev->err); return 1;
+		if(!dev->silent) sperror ("nec_init_errc_scan",dev->err);
+		return 1;
 	}
 	/* set scan interval = 32 sectors (equivalent to 2 ECC blocks on DVD) */
 	dev->cmd[0] = 0xF3;
 	dev->cmd[1] = 0x02;
 	dev->cmd[8] = 0x02;  // interval
 	if ((dev->err=dev->cmd.transport(NONE, NULL, 0))){
-		if(!dev->silent) sperror ("nec_set_scan_interval",dev->err); return 1;
+		if(!dev->silent) sperror ("nec_set_scan_interval",dev->err);
+		return 1;
 	}
 	return 0;
 }
