@@ -929,7 +929,11 @@ bool device::stop_tests()
 #if defined(__unix) || defined(__unix__)
 		kill(pid, SIGINT);
 #elif defined(_WIN32) || defined(_WIN64)
-		TerminateProcess(pid, 0);
+	    HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, static_cast<DWORD>(pid));
+	    if (hProcess) {
+		TerminateProcess(hProcess, 0);
+		CloseHandle(hProcess);
+	    }
 #endif
 	} else if (type == device::DevtypeTCP) {
 		if (!sock) return false;
