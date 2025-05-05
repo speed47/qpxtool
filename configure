@@ -5,7 +5,7 @@ TMPB=tmpb
 
 GMAKE="no"
 MAKE="make"
-QMAKE6_NAMES="qmake qmake6 qmake-qt6 qmake-6"
+QMAKE6_NAMES="qmake6 qmake-qt6 qmake-6 qmake"
 LRELEASE="/usr/lib/qt6/bin/lrelease"
 OSDEFS=""
 OSLIBS=""

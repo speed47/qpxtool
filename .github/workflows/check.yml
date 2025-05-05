@@ -13,7 +13,7 @@ jobs:
     - name: install prerequisites
       run: |
           sudo apt-get update
-          sudo apt-get install -y make qtbase5-dev g++ libpng-dev qttools5-dev-tools
+          sudo apt-get install -y make qt6-base-dev qt6-base-dev-tools qt6-translations-l10n g++ libpng-dev
     - name: configure (debug)
       run: ./configure --enable-debug
     - name: make (debug)
@@ -41,7 +41,7 @@ jobs:
       with:
         msystem: MINGW64
         update: false
-        install: git make pkg-config mingw-w64-x86_64-gcc mingw-w64-x86_64-qt5
+        install: git make pkg-config mingw-w64-x86_64-gcc mingw-w64-x86_64-qt6
     - run: git config --global core.autocrlf input
       shell: bash
     - uses: actions/checkout@v4
@@ -63,36 +63,3 @@ jobs:
       run: |
           file gui/release/qpxtool.exe
           file gui/release/qpxtool.exe | grep -q 'x86-64'
-
-  win32-gui:
-    runs-on: windows-2019
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-    - uses: msys2/setup-msys2@v2
-      with:
-        msystem: MINGW32
-        update: false
-        install: git make pkg-config mingw32/mingw-w64-i686-gcc mingw32/mingw-w64-i686-qt5-base mingw32/mingw-w64-i686-qt5-tools
-    - run: git config --global core.autocrlf input
-      shell: bash
-    - uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-    - name: configure (debug)
-      run: ./configure --enable-debug
-    - name: make (debug)
-      run: nproc && make -j$(nproc)
-    - name: check executable (debug)
-      run: |
-          file gui/debug/qpxtool.exe
-          file gui/debug/qpxtool.exe | grep -Eq 'Intel (80|i)386'
-    - name: configure (release)
-      run: make clean && ./configure
-    - name: make (release)
-      run: nproc && make -j$(nproc)
-    - name: check executable (release)
-      run: |
-          file gui/release/qpxtool.exe
-          file gui/release/qpxtool.exe | grep -Eq 'Intel (80|i)386'

@@ -19,7 +19,7 @@ jobs:
         with:
           msystem: MINGW64
           update: false
-          install: git make pkg-config zip mingw-w64-x86_64-gcc mingw-w64-x86_64-ntldd mingw-w64-x86_64-qt5
+          install: git make pkg-config zip mingw-w64-x86_64-gcc mingw-w64-x86_64-ntldd mingw-w64-x86_64-qt6
       - name: git config
         run: git config --global core.autocrlf input
         shell: bash
@@ -109,9 +109,9 @@ jobs:
       - name: docker
         run: |
           mkdir -p /tmp/dist
-          docker run --device /dev/fuse --privileged --name uu -d -v $PWD:/qpxtool -v /tmp/dist:/dist ubuntu:18.04 sleep 1800
+          docker run --device /dev/fuse --privileged --name uu -d -v $PWD:/qpxtool -v /tmp/dist:/dist ubuntu:22.04 sleep 1800
       - name: install prerequisites in docker
-        run: docker exec uu sh -c 'apt-get update && apt-get install -y fuse qt5-default qtbase5-dev binutils g++ file qttools5-dev-tools make pkg-config'
+        run: docker exec uu sh -c 'apt-get update && apt-get install -y fuse qt6-base-dev qt6-base-dev-tools qt6-tools-dev-tools qt6-l10n-tools binutils g++ file make pkg-config libpng-dev'
       - name: configure
         id: conf
         run: |
