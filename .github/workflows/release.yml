@@ -85,6 +85,7 @@ jobs:
           token: "${{ secrets.GITHUB_TOKEN }}"
           tag: "refs/tags/${{ steps.tag.outputs.tagname }}"
           fail-if-no-assets: false
+          fail-if-no-release: false
           assets: |
             qpxtool-*.zip
       - name: Upload new assets
@@ -176,6 +177,7 @@ jobs:
           token: "${{ secrets.GITHUB_TOKEN }}"
           tag: "refs/tags/${{ steps.tag.outputs.tagname }}"
           fail-if-no-assets: false
+          fail-if-no-release: false
           assets: |
             QPxTool-*.AppImage
       - name: Upload new assets
