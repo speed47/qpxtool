@@ -44,7 +44,7 @@ cleanup()
 
 check_make()
 {
-	echo -n "Checking for make... "
+	printf "Checking for make... "
 	x=`gmake -v 2>/dev/null`
 	if test "$?" -gt 0; then
 		x=`make -v 2>/dev/null`
@@ -61,7 +61,7 @@ check_make()
 	echo "yes"
 
 
-	echo -n "Checking if we have GNU Make... "
+	printf "Checking if we have GNU Make... "
 	make_t0=`make -v | tr '[A-Z]' '[a-z]' | grep make | cut -d ' ' -f 1`
 	make_t1=`$MAKE -v | tr '[A-Z]' '[a-z]' | grep make | grep ver | cut -d ' ' -f 1`
 	
@@ -76,14 +76,14 @@ check_make()
 
 check_compiler()
 {
-	echo -n "Checking C compiler... "
+	printf "Checking C compiler... "
 	cc_name=`$__cc -v 2>&1 | tail -n 1 | cut -d ' ' -f 1`
 	cc_ver=`$__cc -dumpversion 2>&1`
 	if test "$?" -gt 0; then
 		cc_name="not found"
 		cc_ver=""
 	fi
-	echo -n $cc_name $cc_ver
+	printf $cc_name $cc_ver
 
 	case $cc_name in
 		"not found")
@@ -99,7 +99,7 @@ check_compiler()
 			;;
 	esac
 
-	echo -n "Checking C++ compiler... "
+	printf "Checking C++ compiler... "
 	cxx_name=`$__cxx -v 2>&1 | tail -n 1 | cut -d ' ' -f 1`
 	cxx_ver=`$__cxx -dumpversion 2>&1`
 	if test "$?" -gt 0; then
@@ -119,7 +119,7 @@ check_compiler()
 check_libpng()
 {
 	__enable_png=no
-	echo -n "Checking for libpng... "
+	printf "Checking for libpng... "
 	lpng_ver=`libpng-config --version 2>/dev/null`
 	if test "$?" -gt 0; then
 		lpng_ver="not found"
@@ -128,14 +128,14 @@ check_libpng()
 
 	if test "$lpng_ver" != "not found" ; then
 
-		echo -n "  libpng compiler flags: "
+		printf "  libpng compiler flags: "
 		lpng_iopts=`libpng-config --I_opts`
 		echo $lpng_iopts
-		echo -n "  libpng linker flags: "
+		printf "  libpng linker flags: "
 		lpng_ldflags=`libpng-config --ldflags`
 		echo $lpng_ldflags
 	
-		echo -n "Checking png.h presense... "
+		printf "Checking png.h presense... "
 
 		echo "
 		#include <png.h>
@@ -149,7 +149,7 @@ check_libpng()
 			lpng_ldflags=""
 		else
 			echo "yes"
-			echo -n "Checking zlib.h presence... "
+			printf "Checking zlib.h presence... "
 			echo "
 			#include <zlib.h>
 			int main(int ac, char** av) { return 0; } 
@@ -162,7 +162,7 @@ check_libpng()
 				lpng_ldflags=""
 			else
 				echo "yes"
-				echo -n "Checking png.h usability... "
+				printf "Checking png.h usability... "
 				echo "
 				#include <png.h>
 				int main(int ac, char** av) {
@@ -187,7 +187,7 @@ check_libpng()
 
 check_offset64()
 {
-	echo -n "Checking off_t size with _FILE_OFFSET_BITS = 64... "
+	printf "Checking off_t size with _FILE_OFFSET_BITS = 64... "
 	echo "
 			#define _FILE_OFFSET_BITS 64
 			#include <sys/types.h>
@@ -212,7 +212,7 @@ check_offset64()
 	fi
 
 
-	echo -n "Checking for fopen64()... "
+	printf "Checking for fopen64()... "
 	echo "
 			#define _FILE_OFFSET_BITS 64
 			#include <stdio.h>
@@ -231,7 +231,7 @@ check_offset64()
 	fi
 
 
-	echo -n "Checking for fseek64()... "
+	printf "Checking for fseek64()... "
 	echo "
 			#define _FILE_OFFSET_BITS 64
 			#include <stdio.h>
@@ -250,7 +250,7 @@ check_offset64()
 	fi
 
 
-	echo -n "Checking for fseeko()... "
+	printf "Checking for fseeko()... "
 	echo "
 			#define _FILE_OFFSET_BITS 64
 			#include <stdio.h>
@@ -593,7 +593,7 @@ Makefile.qmake:
 	echo    "	\$(QMAKE5) LIBS+=-L../lib/lib LIBS+=-lqpxtransport $QDEBUG -o Makefile.qmake" >> $mf
 	echo    "	test -e Makefile.qmake.Release && test -e Makefile.qmake.Debug && sed -i -re '/qpxtool.exe: /a #TAB#windres -v qpxtool.rc -O coff -o obj/winres.o' Makefile.qmake.Release Makefile.qmake.Debug || true" >> $mf
 	echo    "	test -e Makefile.qmake.Release && test -e Makefile.qmake.Debug && sed -i -re 's=@object_script.qpxtool=obj/winres.o @object_script.qpxtool=' Makefile.qmake.Release Makefile.qmake.Debug || true" >> $mf
-	echo -n "	test -e Makefile.qmake.Release && test -e Makefile.qmake.Debug && sed -i -re 's/#TAB#/\$(TAB)/' Makefile.qmake.Release Makefile.qmake.Debug || true" >> $mf
+	echo    "	test -e Makefile.qmake.Release && test -e Makefile.qmake.Debug && sed -i -re 's/#TAB#/\$(TAB)/' Makefile.qmake.Release Makefile.qmake.Debug || true" >> $mf
 	echo "
 .PHONY: all clean install uninstall" >> $mf
 }
@@ -813,7 +813,7 @@ for arg in $* ; do
 	esac
 done
 
-echo -n "Checking OS... "
+printf "Checking OS... "
 OS=`uname -s`
 OSL=`uname -s | tr '[A-Z]' '[a-z]'`
 echo $OS
@@ -883,7 +883,7 @@ if test "$__prefix" = "" ; then
 	__prefix=$__defprefix
 fi
 
-echo -n "Checking machine arch... "
+printf "Checking machine arch... "
 ARCH=`uname -m | tr '[A-Z]' '[a-z]' | tr ', /\\()"' ',//////' | tr ',/' ',-'`
 BHOST=`uname -srv`
 
