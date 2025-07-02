@@ -4,6 +4,34 @@ on: [push, pull_request]
 
 jobs:
 
+  mac:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+    - name: install prerequisites
+      env:
+        HOMEBREW_NO_INSTALL_CLEANUP: 1
+      run: brew install qt@5
+    - name: configure
+      env:
+        CFLAGS: -L/opt/homebrew/opt/qt@5/lib -I/opt/homebrew/opt/qt@5/include
+        CXXFLAGS: -L/opt/homebrew/opt/qt@5/lib -I/opt/homebrew/opt/qt@5/include
+        PKG_CONFIG_PATH: /opt/homebrew/opt/qt@5/lib/pkgconfig
+      run: |
+          export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
+          ./configure --prefix=$PWD/dist
+    - name: make
+      run: |
+          export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
+          make -j$(sysctl -n hw.ncpu || 2)
+          make install
+    - name: check executability
+      run: |
+          env LD_LIBRARY_PATH=$PWD/dist/lib ./dist/bin/qscan --help
+          env LD_LIBRARY_PATH=$PWD/dist/lib ./dist/bin/qscan --help | grep -q 'qscan is a CD/DVD'
+
   linux64-gui:
     runs-on: ubuntu-latest
     steps:

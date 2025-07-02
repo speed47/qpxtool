@@ -384,8 +384,8 @@ LPNG_LIB  = $lpng_ldflags
 	echo "WFLAGS   += -Wno-unused-but-set-variable -Wno-format-truncation -Wno-error=cpp" >> Makefile
 	echo "WFLAGS   += -Wno-misleading-indentation -Wno-unused-result -Wno-unused-parameter" >> Makefile
 	echo "WFLAGS   += -Wno-deprecated-copy -Wno-literal-suffix -Wno-deprecated-declarations" >> Makefile
-	echo "CXXFLAGS += \$(WFLAGS) -O2 $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
-	echo "CFLAGS   += \$(WFLAGS) -O2 $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
+	echo "CXXFLAGS += \$(WFLAGS) -O2 $CXXFLAGS $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
+	echo "CFLAGS   += \$(WFLAGS) -O2 $CFLAGS   $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
 
 	if test "$__enable_debug" = "yes" ; then
 		echo "# additional debug options" >> Makefile
@@ -526,7 +526,7 @@ else
 #			echo "	strip qpxtool.app/Contents/MacOS/qpxtool" >> $mf
 			echo "	" >> $mf
 		else
-			echo "	strip --strip-unneeded qpxtool" >> $mf
+			echo "	strip qpxtool" >> $mf
 		fi
 	fi
 fi
@@ -653,8 +653,8 @@ clean:
 	rm -f \$(LIB)* \$(OBJS) ../lib/\$(LIB) *~ include/*~
 
 install: " >> $mf
-			if test "$__enable_debug" = "no" ; then
-				echo "	strip --strip-unneeded \$(LIB)" >> $mf
+			if test "$__enable_debug" = "no" && test "$OSL" != "darwin" ; then
+				echo "	strip \$(LIB)" >> $mf
 			fi
 			echo "
 	mkdir -p \$(DESTDIR)\$(LIBDIR)
@@ -687,8 +687,8 @@ clean:
 	rm -f \$(LIB_SHORT)* \$(OBJS) ../lib/\$(LIB_SHORT) *~ include/*~
 
 install: " >> $mf
-			if test "$__enable_debug" = "no" ; then
-				echo "	strip --strip-unneeded \$(LIB)" >> $mf
+			if test "$__enable_debug" = "no" && test "$OSL" != "darwin" ; then
+				echo "	strip \$(LIB)" >> $mf
 			fi
 			echo "
 	mkdir -p \$(DESTDIR)\$(LIBDIR)
@@ -754,8 +754,8 @@ clean:
 
 install: " > $mf
 
-	if test "$__enable_debug" = "no" ; then
-		echo "	strip --strip-unneeded \$(LIB_SHORT)" >> $mf
+	if test "$__enable_debug" = "no" && test "$OSL" != "darwin" ; then
+		echo "	strip \$(LIB_SHORT)" >> $mf
 	fi
 echo "
 	mkdir -p \$(DESTDIR)\$(PLUGINDIR)
