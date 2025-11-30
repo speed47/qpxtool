@@ -505,6 +505,9 @@ int qscanner::run_cd_errc()
 				err.uncr);
 			err_tot+=err;
 		err_max.EMAX(err);
+		if (err.e22 > 0)
+		  printf("c2 spike: %5ld\n", err_max.e22);
+		
 #ifdef USE_FFLUSH
 		fflush(stdout);
 #endif
