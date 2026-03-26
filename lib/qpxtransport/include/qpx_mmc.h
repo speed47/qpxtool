@@ -389,6 +389,8 @@ public:
 
 	bool		get_performance_fail;
 	char		silent;
+	bool		liteon_force_old;
+	bool		hldtst_test_mode;
 private:
 	bool		busy;
 };

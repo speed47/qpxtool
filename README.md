@@ -14,6 +14,7 @@ This unofficial version adds the following changes from upstream **v0.8.0**:
 - Fix some drives having only the maximum read speed available, closes [#2](https://github.com/speed47/qpxtool/issues/2)
 - Fix erroneous detection of finalized BD-R as BD-ROM
 - Add a way to force the old LiteOn scanning way (by setting the `LITEON_FORCE_OLD=1` env var)
+- Add HL-DT-ST test mode support (set `HLDTST_TEST_MODE=1` env var) to enable LiteOn-compatible error scanning on certain Hitachi-LG drives (e.g., BU40N)
 - Fix compilation under mingw-w64 (courtesy of [Eli Bildirici](https://sourceforge.net/u/bilditup1/), [view patch](https://sourceforge.net/p/qpxtool/patches/6/))
 - Fix a few coding errors (thanks to compiler warnings)
 

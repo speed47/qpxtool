@@ -11,6 +11,9 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <colors.h>
 #include <qscan_plugin.h>
 
 scan_plugin*	plugin_create(drive_info* idev){
@@ -22,7 +25,7 @@ void plugin_destroy(scan_plugin* iplugin){
 }
 
 scan_liteon::scan_liteon(drive_info* idev)
-	: scan_plugin(), lba(0), cd_errc_new(false)
+	: scan_plugin(), lba(0), cd_errc_new(false), hldtst_test_mode(false)
 {
 	dev = idev;
 	if (!dev->silent) printf("scan_liteon()\n");
@@ -32,11 +35,26 @@ scan_liteon::scan_liteon(drive_info* idev)
 }
 
 scan_liteon::~scan_liteon() {
+	if (hldtst_test_mode) {
+		printf("LiteOn: Exiting HL-DT-ST test mode\n");
+		cmd_hldtst_test_mode_toggle();
+		hldtst_test_mode = false;
+	}
 	if (!dev->silent) printf("~scan_liteon()\n");
 }
 
 int  scan_liteon::probe_drive() {
 #ifndef PLUGINS_LITEON_NOPROBE
+	if (dev->hldtst_test_mode
+	    && !strncmp(dev->ven, "HL-DT-ST", 8)) {
+		printf(COL_YEL "LiteOn: Entering HL-DT-ST test mode..." COL_NORM "\n");
+		if (!cmd_hldtst_test_mode_toggle()) {
+			hldtst_test_mode = true;
+		} else {
+			printf(COL_RED "LiteOn: HL-DT-ST test mode entry failed" COL_NORM "\n");
+		}
+	}
+
 	if (dev->media.type & DISC_CD) {
 		if (cmd_cd_errc_init()) return DEV_FAIL;
 		if (cmd_cd_errc_end()) return DEV_FAIL;

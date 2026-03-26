@@ -73,6 +73,8 @@ drive_info::drive_info(const char* _device){
 	parms.spindown_idx=0;
 	parms.speed_mult=176;
 	silent=0;
+	liteon_force_old=false;
+	hldtst_test_mode=false;
 	rpc.phase=0;
 	rpc.region=0;
 
