@@ -83,6 +83,8 @@ private:
 //	QComboBox		*spd_TA;
 
 	QFrame			*hline1;
+	QCheckBox		*ck_liteon_force_old;
+	QCheckBox		*ck_hldtst_test_mode;
 	QLabel			*l_plugin;
 	QComboBox		*cb_plugin;
 	QLabel			*l_plugin_info;

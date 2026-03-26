@@ -174,17 +174,23 @@ void TestDialog::winit()
 	hline1->setFrameStyle(QFrame::HLine | QFrame::Sunken);
 	layout_tests->addWidget(hline1, 9,0,1,2);
 
+	ck_liteon_force_old = new QCheckBox(tr("Force old LiteOn CD ERRC commands"), this);
+	layout_tests->addWidget(ck_liteon_force_old, 10,0,1,2);
+
+	ck_hldtst_test_mode = new QCheckBox(tr("HL-DT-ST test mode (LG drives)"), this);
+	layout_tests->addWidget(ck_hldtst_test_mode, 11,0,1,2);
+
 	l_plugin = new QLabel(tr("qScan plugin:"), this);
-	layout_tests->addWidget(l_plugin, 10,0);
+	layout_tests->addWidget(l_plugin, 12,0);
 
 	cb_plugin = new QComboBox(this);
 //	cb_plugin->setEnabled(false);
-	layout_tests->addWidget(cb_plugin, 10,1);
+	layout_tests->addWidget(cb_plugin, 12,1);
 
 	l_plugin_info = new QLabel(this);
-	layout_tests->addWidget(l_plugin_info, 11,0,1,2);
+	layout_tests->addWidget(l_plugin_info, 13,0,1,2);
 
-	layout_tests->setRowStretch(12,10);
+	layout_tests->setRowStretch(14,10);
 
 /*
 // media summary
@@ -313,6 +319,9 @@ void TestDialog::updateData(bool save, bool setPlugin)
 	ck_TA->setEnabled(dev->test_cap & TEST_TA && dev->media.creads);
 	ck_TA->setChecked(ck_TA->isEnabled() && (dev->test_req & TEST_TA));
 
+	ck_liteon_force_old->setChecked(dev->liteon_force_old);
+	ck_hldtst_test_mode->setChecked(dev->hldtst_test_mode);
+
 	spd_RT->clear();   spd_RT->setEnabled(ck_RT->isChecked());
 	spd_WT->clear();   spd_WT->setEnabled(ck_WT->isChecked()); ck_WT_simul->setEnabled(ck_WT->isChecked());
 	spd_ERRC->clear(); spd_ERRC->setEnabled(ck_ERRC->isChecked());
@@ -379,6 +388,8 @@ void TestDialog::saveData()
 		(ck_FT->isChecked() ?   TEST_FT : 0) |
 		(ck_TA->isChecked() ?   TEST_TA : 0);
 	dev->WT_simul	  = noSimul ? 0 : ck_WT_simul->isChecked();
+	dev->liteon_force_old = ck_liteon_force_old->isChecked();
+	dev->hldtst_test_mode = ck_hldtst_test_mode->isChecked();
 
 	dev->tspeeds.rt   = (int) spd_RT->currentText().remove(QRegularExpression("[Xx]")).toFloat();
 	dev->tspeeds.wt   = (int) spd_WT->currentText().remove(QRegularExpression("[Xx]")).toFloat();

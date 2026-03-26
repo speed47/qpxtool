@@ -131,6 +131,11 @@ void detect_vendor_features(drive_info *dev) {
 	}
 }
 
+enum {
+	OPT_LITEON_FORCE_OLD = 256,
+	OPT_HLDTST_TEST_MODE,
+};
+
 static struct option long_options[] = {
 	{"help",      0, NULL, 'h'},
 	{"scan",      0, NULL, 'l'},
@@ -148,6 +153,8 @@ static struct option long_options[] = {
 	{"media",     0, NULL, 'm'},
 	{"mediashort",0, NULL, 'M'},
 	{"verbose",   0, NULL, 'v'},
+	{"liteon-force-old",  0, NULL, OPT_LITEON_FORCE_OLD},
+	{"hldtst-test-mode",  0, NULL, OPT_HLDTST_TEST_MODE},
 	{0,0,0,0}
 };
 
@@ -186,6 +193,8 @@ int main(int argc, char** argv) {
 	int     wspeed=-1;
 	scanner=NULL;
 	bool	simul=1;
+	bool	liteon_force_old=false;
+	bool	hldtst_test_mode=false;
 	printf( "qScan " VERSION " (C) 2007-2009  Gennady \"ShultZ\" Kozlov\n");
 	while (1) {
 		c = getopt_long(argc, argv, "hvliImMd:pf:t:WSs:r:w:", long_options, NULL);
@@ -214,6 +223,8 @@ int main(int argc, char** argv) {
 				printf("-W --write          do real write instead simulation (for use with --test wt)\n");
 				printf("-p --plugins        list all available plugins\n");
 				printf("-f --force PLUGIN   force using specified plugin (default: autodetect)\n");
+				printf("   --liteon-force-old  LiteOn: force old CD ERRC commands\n");
+				printf("   --hldtst-test-mode  LiteOn: try to enable test mode on some LG/Hitachi (HL-DT-ST) drives\n");
 				printf("-I --shortinfo      print device info\n");
 				printf("-i --info           print device info (with supported features list)\n");
 				printf("-m --media          print media info\n");
@@ -304,6 +315,12 @@ int main(int argc, char** argv) {
 			case 'v':
 				flags |= FL_DEBUG;
 				break;
+			case OPT_LITEON_FORCE_OLD:
+				liteon_force_old = true;
+				break;
+			case OPT_HLDTST_TEST_MODE:
+				hldtst_test_mode = true;
+				break;
 			default:
 				break;
 		}
@@ -311,6 +328,13 @@ int main(int argc, char** argv) {
 	if (!device) {
 		printf( MSGPREF "no device specified! Try using -l to see list\n");
 		return 1;
+	}
+
+	// LITEON_FORCE_OLD env var kept for backwards compatibility
+	if (!liteon_force_old) {
+		const char *env = getenv("LITEON_FORCE_OLD");
+		if (env && strcmp(env, "1") == 0)
+			liteon_force_old = true;
 	}
 
     dev = new drive_info(device);
@@ -340,6 +364,8 @@ int main(int argc, char** argv) {
 			return 3;
     }
 	printf( MSGPREF "using device '%s': '%s' '%s' '%s'\n", device, dev->ven, dev->dev, dev->fw);
+	dev->liteon_force_old = liteon_force_old;
+	dev->hldtst_test_mode = hldtst_test_mode;
     //dev->silent = 0;
 //	get_features_list(dev);
 	if (!(flags & FL_DEBUG)) dev->silent++;

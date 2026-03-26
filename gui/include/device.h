@@ -491,6 +491,8 @@ devtype		type;
 	TestData	testData;
 	TestSpeeds	tspeeds;
 	bool		WT_simul;
+	bool		liteon_force_old;
+	bool		hldtst_test_mode;
 	struct timespec		timeSta;
 
 	QMutex	   *mutex;

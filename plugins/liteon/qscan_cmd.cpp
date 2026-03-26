@@ -24,6 +24,17 @@
 
 #include <qscan_plugin.h>
 
+// ************* HL-DT-ST test mode toggle *********
+int scan_liteon::cmd_hldtst_test_mode_toggle() {
+	dev->cmd[0] = 0xF8;
+	dev->cmd[1] = 0x0F;
+	if ((dev->err = dev->cmd.transport(NONE, NULL, 0))) {
+		sperror("HLDTST_test_mode_toggle", dev->err);
+		return 1;
+	}
+	return 0;
+}
+
 // ************* Scan init commands *********
 int scan_liteon::cmd_cd_errc_init_old() {
 	dev->cmd[0] = 0xDF;
@@ -88,8 +99,7 @@ int scan_liteon::cmd_cd_errc_init_new() {
 }
 
 int scan_liteon::cmd_cd_errc_init() {
-	const char *liteon_force_old = getenv("LITEON_FORCE_OLD");
-	if (liteon_force_old && strcmp(liteon_force_old, "1") == 0) {
+	if (dev->liteon_force_old) {
 		printf(COL_GRN "LiteOn: forced old CD ERRC commands" COL_NORM "\n");
 		cd_errc_new = false;
 		return cmd_cd_errc_init_old();

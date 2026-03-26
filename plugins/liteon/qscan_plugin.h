@@ -158,6 +158,9 @@ public:
 private:
 	uint32_t lba;
 	bool cd_errc_new;
+	bool hldtst_test_mode;
+
+	int cmd_hldtst_test_mode_toggle();
 
 // CD ERRC methods
 	int cmd_cd_errc_init_old();

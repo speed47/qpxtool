@@ -24,6 +24,8 @@
 
 #include <sys/types.h>
 #include <signal.h>
+#include <cstdlib>
+#include <cstring>
 #include <qpx_mmc_defs.h>
 
 #ifndef QT_NO_DEBUG
@@ -200,6 +202,10 @@ device::device(QObject* p)
 	tests = 0;
 	ctest = 0;
 	WT_simul = 1;
+
+	const char *env_liteon = getenv("LITEON_FORCE_OLD");
+	liteon_force_old = (env_liteon && strcmp(env_liteon, "1") == 0);
+	hldtst_test_mode = false;
 
 	tspeeds.rt = 1;
 	tspeeds.wt = 1;
@@ -410,10 +416,17 @@ bool device::start_update_info()
 				proc->start("qscan", QStringList() << "-d" << path << "-Ip");
 				break;
 			case threadMedia:
-				if (plugin.isEmpty()) {
-					proc->start("qscan", QStringList() << "-d" << path << "-m");
-				} else {
-					proc->start("qscan", QStringList() << "-d" << path << "--force-plugin" << plugin << "-m");
+				{
+					QStringList qopts;
+					qopts << "-d" << path;
+					if (!plugin.isEmpty())
+						qopts << "--force-plugin" << plugin;
+					if (liteon_force_old)
+						qopts << "--liteon-force-old";
+					if (hldtst_test_mode)
+						qopts << "--hldtst-test-mode";
+					qopts << "-m";
+					proc->start("qscan", qopts);
 				}
 				break;
 			case threadGetFeatures:
@@ -1050,6 +1063,10 @@ bool device::next_test()
 		if (stest != "rt" && stest != "wt" && !plugin.isEmpty()) {
 			qopts << "--force-plugin" << plugin;
 		}
+		if (liteon_force_old)
+			qopts << "--liteon-force-old";
+		if (hldtst_test_mode)
+			qopts << "--hldtst-test-mode";
 
 #if (!defined(QT_NO_DEBUG) && 0)
 		for (int i=0;i<qopts.size();i++)
