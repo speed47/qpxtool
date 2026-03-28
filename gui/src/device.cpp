@@ -917,17 +917,19 @@ bool device::start_tests()
 	
 bool device::stop_tests()
 {
-	qWarning() << "stop_tests(): running=" << running << "type=" << type << "proc=" << proc;
-	if (!running) return false;
+	if (!running) {
+		qWarning() << "stop_tests(): not running, aborting";
+		return false;
+	}
 	tests = 0;
 	if (type == DevtypeLocal) {
-		if (!proc) return false;
-		qWarning() << "stop_tests(): proc state=" << proc->state() << "pid=" << proc->processId();
-		proc->terminate();
-		if (!proc->waitForFinished(3000)) {
-			qWarning() << "stop_tests(): terminate didn't work, sending kill";
-			proc->kill();
+		if (!proc) {
+			qWarning() << "stop_tests(): proc is null, aborting";
+			return false;
 		}
+		qWarning() << "stop_tests(): killing proc, pid=" << proc->processId()
+		           << "state=" << proc->state();
+		proc->kill();
 	} else if (type == device::DevtypeTCP) {
 		if (!sock) return false;
 #ifndef QT_NO_DEBUG
