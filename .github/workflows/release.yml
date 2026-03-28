@@ -116,7 +116,7 @@ jobs:
           mkdir -p /tmp/dist
           docker run --device /dev/fuse --privileged --name uu -d -v $PWD:/qpxtool -v /tmp/dist:/dist ubuntu:22.04 sleep 1800
       - name: install prerequisites in docker
-        run: docker exec uu sh -c 'apt-get update && apt-get install -y fuse qt6-base-dev binutils g++ file qt6-tools-dev-tools make pkg-config'
+        run: docker exec uu sh -c 'apt-get update && apt-get install -y fuse qt6-base-dev binutils g++ file qt6-tools-dev-tools qt6-l10n-tools make pkg-config libgl1-mesa-dev libxcb-cursor0'
       - name: configure
         id: conf
         run: |
@@ -124,7 +124,7 @@ jobs:
           version="$(git describe --dirty --tags --match 'v*')"
           sed -i -re "s/^#define VERSION.*/#define VERSION \"${version:1}-speed47\"/" */*/version.h
           echo "version=${version:1}" >> $GITHUB_OUTPUT
-          docker exec uu sh -c 'cd /qpxtool && ./configure --prefix=/usr'
+          docker exec uu sh -c 'cd /qpxtool && ./configure --prefix=/usr --libdir=/usr/lib'
       - name: make
         run: docker exec uu sh -c 'make -C /qpxtool -j$(nproc)'
       - name: make install
@@ -132,12 +132,13 @@ jobs:
       - name: build appimage in docker
         run: |
           wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-          chmod 755 linuxdeploy-x86_64.AppImage
+          wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod 755 linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
           docker exec -e LINUXDEPLOY_OUTPUT_VERSION=v"${{ steps.conf.outputs.version }}" -e ARCH=x86_64 -e ME=$UID uu sh -c '
             find /dist
             cd /qpxtool
             ./linuxdeploy-x86_64.AppImage -d /dist/usr/share/applications/qpxtool.desktop -i /dist/usr/share/pixmaps/qpxtool.png --icon-filename qpxtool \
-              --custom-apprun=contrib/AppRun --appdir /dist/ --output appimage
+              --custom-apprun=contrib/AppRun --appdir /dist/ --plugin qt --output appimage
             chown $ME QPx*.AppImage
           '
       - name: get appimage name
