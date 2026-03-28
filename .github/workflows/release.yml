@@ -19,7 +19,7 @@ jobs:
         with:
           msystem: MINGW64
           update: false
-          install: git make pkg-config zip mingw-w64-x86_64-gcc mingw-w64-x86_64-ntldd mingw-w64-x86_64-qt5
+          install: git make pkg-config zip mingw-w64-x86_64-gcc mingw-w64-x86_64-ntldd mingw-w64-x86_64-qt5 mingw-w64-x86_64-qt5-static
       - name: git config
         run: git config --global core.autocrlf input
         shell: bash
@@ -29,7 +29,12 @@ jobs:
       - name: configure (debug)
         run: ./configure --enable-debug
       - name: make (debug)
-        run: nproc && make -j$(nproc)
+        run: |
+          ls -ld /mingw64/bin
+          echo $PATH
+          env
+          ( cd ../.. ; pwd ; find . -name "lrelease*" )
+          nproc && make -j$(nproc)
       - name: check executable (debug)
         run: |
           file gui/debug/qpxtool.exe
@@ -101,7 +106,7 @@ jobs:
   linux64-appimage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: install prerequisites on host
@@ -126,17 +131,13 @@ jobs:
         run: docker exec uu sh -c "make -C /qpxtool install DESTDIR=/dist"
       - name: build appimage in docker
         run: |
-          wget -q https://github.com/probonopd/go-appimage/releases/download/continuous/appimagetool-886-x86_64.AppImage
-          wget -q https://github.com/probonopd/go-appimage/releases/download/continuous/mkappimage-886-x86_64.AppImage
-          chmod +x *.AppImage
-          cp /tmp/dist/usr/share/pixmaps/qpxtool.png /tmp/dist
-          docker exec -e ARCH=x86_64 -e ME=$UID -e VERSION=v"${{ steps.conf.outputs.version }}" uu sh -c '
-            cd /qpxtool && \
-            PREFIX=/dist ./appimagetool*.AppImage deploy /dist/usr/share/applications/qpxtool.desktop && \
-            cp contrib/AppRun /dist/AppRun && \
-            chmod +x /dist/AppRun && \
-            find /dist -type f -name "ld-linux*.so*" -delete && \
-            ./mkappimage*.AppImage -n /dist && \
+          wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          chmod 755 linuxdeploy-x86_64.AppImage
+          docker exec -e LINUXDEPLOY_OUTPUT_VERSION=v"${{ steps.conf.outputs.version }}" -e ARCH=x86_64 -e ME=$UID uu sh -c '
+            find /dist
+            cd /qpxtool
+            ./linuxdeploy-x86_64.AppImage -d /dist/usr/share/applications/qpxtool.desktop -i /dist/usr/share/pixmaps/qpxtool.png --icon-filename qpxtool \
+              --custom-apprun=contrib/AppRun --appdir /dist/ --output appimage
             chown $ME QPx*.AppImage
           '
       - name: get appimage name
