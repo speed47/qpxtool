@@ -20,6 +20,10 @@
 #include <QDebug>
 
 #include <QIcon>
+#include <QDir>
+#include <QPalette>
+#include <QColor>
+#include <QStyleFactory>
 
 #include "../config.h"
 
@@ -33,6 +37,33 @@ int main(int ac, char** av)
 	QString locale = QLocale::system().name();
 	QPixmap *pix;
     QPxTool = new QApplication(ac,av);
+#if defined (_WIN32) || defined (_WIN64)
+    QDir::setCurrent(QCoreApplication::applicationDirPath());
+#endif
+    QPxTool->setStyle("Fusion");
+    QPalette lightPalette;
+    lightPalette.setColor(QPalette::Window, QColor(240, 240, 240));
+    lightPalette.setColor(QPalette::WindowText, Qt::black);
+    lightPalette.setColor(QPalette::Base, Qt::white);
+    lightPalette.setColor(QPalette::AlternateBase, QColor(233, 233, 233));
+    lightPalette.setColor(QPalette::ToolTipBase, QColor(255, 255, 220));
+    lightPalette.setColor(QPalette::ToolTipText, Qt::black);
+    lightPalette.setColor(QPalette::Text, Qt::black);
+    lightPalette.setColor(QPalette::Button, QColor(240, 240, 240));
+    lightPalette.setColor(QPalette::ButtonText, Qt::black);
+    lightPalette.setColor(QPalette::BrightText, Qt::red);
+    lightPalette.setColor(QPalette::Link, QColor(0, 0, 255));
+    lightPalette.setColor(QPalette::Highlight, QColor(0, 120, 215));
+    lightPalette.setColor(QPalette::HighlightedText, Qt::white);
+    // Disabled state colors so disabled widgets (checkboxes, etc.) are visibly greyed out
+    lightPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(160, 160, 160));
+    lightPalette.setColor(QPalette::Disabled, QPalette::Text, QColor(160, 160, 160));
+    lightPalette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(160, 160, 160));
+    lightPalette.setColor(QPalette::Disabled, QPalette::Base, QColor(240, 240, 240));
+    lightPalette.setColor(QPalette::Disabled, QPalette::Button, QColor(225, 225, 225));
+    lightPalette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(190, 190, 190));
+    lightPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, Qt::white);
+    QPxTool->setPalette(lightPalette);
 #ifndef QT_NO_DEBUG
 	qDebug("Creating splash screen...");
 #endif
