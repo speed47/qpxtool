@@ -24,6 +24,7 @@
 #include <QDialogButtonBox>
 #include <QMessageBox>
 #include <QRegularExpression>
+#include <QDateTime>
 
 #include "testdialog.h"
 
@@ -105,12 +106,13 @@ void TestDialog::winit()
 	media->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
 	layout->addWidget(media,1,1);
 
-	llabel = new QLabel(tr("Label:"),this);
+	llabel = new QLabel(tr("Test name:"),this);
 	llabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 	layout->addWidget(llabel,2,0);
 
 	elabel = new QLineEdit(this);
 	elabel->setMaxLength(128);
+	elabel->setText(QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss"));
 	layout->addWidget(elabel,2,1);
 
 // tests selection
@@ -262,8 +264,7 @@ void TestDialog::start()
 {
 	saveData();
 	if (elabel->text().isEmpty()) {
-		QMessageBox::information(this, tr("Media label is empty!"), tr("You have to define a media label!"));
-		return;
+		elabel->setText(QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss"));
 	}
 	if (!dev->test_req) {
 		QMessageBox::information(this, tr("No tests selected!"), tr("You have selected no tests!"));
