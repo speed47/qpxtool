@@ -515,9 +515,14 @@ void QPxToolMW::cancel_run_tests()
 
 void QPxToolMW::terminate_tests()
 {
+	qWarning() << "terminate_tests(): called";
 	device *dev = devices.current();
-	if (dev->type == device::DevtypeNone) return;
-	dev->stop_tests();
+	if (dev->type == device::DevtypeNone) {
+		qWarning() << "terminate_tests(): device type is None, aborting";
+		return;
+	}
+	bool ret = dev->stop_tests();
+	qWarning() << "terminate_tests(): stop_tests returned" << ret;
 }
 
 void QPxToolMW::tests_done()

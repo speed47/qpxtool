@@ -25,6 +25,11 @@
 #include <QColor>
 #include <QStyleFactory>
 
+#if defined(_WIN32) || defined(_WIN64)
+#include <windows.h>
+#include <cstdio>
+#endif
+
 #include "../config.h"
 
 int main(int ac, char** av)
@@ -36,6 +41,14 @@ int main(int ac, char** av)
 	QSplashScreen *splash;
 	QString locale = QLocale::system().name();
 	QPixmap *pix;
+#if defined(_WIN32) || defined(_WIN64)
+    if (qEnvironmentVariableIsSet("QPXTOOL_DEBUG")) {
+        if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+            freopen("CONOUT$", "w", stdout);
+            freopen("CONOUT$", "w", stderr);
+        }
+    }
+#endif
     QPxTool = new QApplication(ac,av);
 #if defined (_WIN32) || defined (_WIN64)
     QDir::setCurrent(QCoreApplication::applicationDirPath());
