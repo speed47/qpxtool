@@ -22,8 +22,6 @@
 #include <resultsio.h>
 #include "device.h"
 
-#include <sys/types.h>
-#include <signal.h>
 #include <cstdlib>
 #include <cstring>
 #include <qpx_mmc_defs.h>
@@ -31,22 +29,6 @@
 #ifndef QT_NO_DEBUG
 #include <QDebug>
 static int devcnt=0;
-#endif
-
-#if defined(_WIN32) || defined (_WIN64)
-#define WIN32_LEAN_AND_MEAN
-// defines extra omissions for mingw32 and mingw-w64-32
-#if defined(__MINGW32__)
-#define NOGDI
-#if defined(__MINGW64_VERSION_MAJOR)
-#define NOUSER
-#define NOMCX
-#define NOCRYPT
-#define NOSERVICE
-#define NOIME
-#endif
-#endif
-#include <windows.h>
 #endif
 
 void ErrcADD(Errc<int64_t> *tot, const Errc<int>& o) {
@@ -933,18 +915,19 @@ bool device::start_tests()
 	return start();
 }
 	
-bool device::stop_tests() 
+bool device::stop_tests()
 {
+	qWarning() << "stop_tests(): running=" << running << "type=" << type << "proc=" << proc;
 	if (!running) return false;
 	tests = 0;
 	if (type == DevtypeLocal) {
 		if (!proc) return false;
-		qint64 pid = proc->processId();
-#if defined(__unix) || defined(__unix__)
-		kill(pid, SIGINT);
-#elif defined(_WIN32) || defined(_WIN64)
-		TerminateProcess((HANDLE)pid, 0);
-#endif
+		qWarning() << "stop_tests(): proc state=" << proc->state() << "pid=" << proc->processId();
+		proc->terminate();
+		if (!proc->waitForFinished(3000)) {
+			qWarning() << "stop_tests(): terminate didn't work, sending kill";
+			proc->kill();
+		}
 	} else if (type == device::DevtypeTCP) {
 		if (!sock) return false;
 #ifndef QT_NO_DEBUG

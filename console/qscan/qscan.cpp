@@ -802,6 +802,7 @@ int main(int argc, char** argv) {
 //		printf("setting signal handlers...\n");
 #if defined (__unix) || defined (__unix__)
 		signal(SIGINT, &sigint_handler);
+		signal(SIGTERM, &sigint_handler);
 		signal(SIGUSR1, &sigusr_handler);
 #ifdef USE_SIGUSR2
 		signal(SIGUSR2, &sigusr_handler);
