@@ -100,5 +100,6 @@ SOURCES += src/about.cpp \
            src/testdialog.cpp \
            src/textslider.cpp
 RESOURCES += qpxtool.qrc
+win32:RC_FILE += qpxtool.rc
 TRANSLATIONS += locale/qpxtool.ru_RU.ts \
 		locale/qpxtool.de_DE.ts
