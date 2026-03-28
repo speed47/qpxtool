@@ -201,7 +201,7 @@ int TextSlider::value()
 
 QString TextSlider::text()
 {
-	if (op.sliderPosition <0 || op.sliderPosition >= items.size()) return QString::null;
+	if (op.sliderPosition <0 || op.sliderPosition >= items.size()) return QString();
 	return items[op.sliderPosition].text;
 }
 
@@ -230,7 +230,7 @@ void TextSlider::setEnabled(bool enable)
 		op.activeSubControls = op.subControls;
 		op.state = QStyle::State_Active | QStyle::State_Enabled;
 	} else {
-		op.activeSubControls = 0;
+		op.activeSubControls = QStyle::SubControls();
 		op.state = QStyle::State_None;
 	}
 	QAbstractSlider::setEnabled(en);
@@ -246,10 +246,10 @@ void TextSlider::mouseReleaseEvent(QMouseEvent* e)
 	if (!items.size()) return;
 
 	if (op.orientation == Qt::Vertical) {
-		pos = QStyle::sliderValueFromPosition(op.minimum, op.maximum, e->pos().y()-10, height()-21, op.upsideDown);
+		pos = QStyle::sliderValueFromPosition(op.minimum, op.maximum, e->position().toPoint().y()-10, height()-21, op.upsideDown);
 	} else {
 		int itemw = width() / items.size();
-		pos = QStyle::sliderValueFromPosition(op.minimum, op.maximum, e->pos().x()-itemw/2, width() - itemw , op.upsideDown);
+		pos = QStyle::sliderValueFromPosition(op.minimum, op.maximum, e->position().toPoint().x()-itemw/2, width() - itemw , op.upsideDown);
 	}
 
 	if (items[pos].enabled) {
@@ -268,10 +268,10 @@ void TextSlider::mouseMoveEvent(QMouseEvent* e)
 	if (!items.size()) return;
 
 	if (op.orientation == Qt::Vertical) {
-		pos = QStyle::sliderValueFromPosition(op.minimum, op.maximum, e->pos().y()-10, height()-21, op.upsideDown);
+		pos = QStyle::sliderValueFromPosition(op.minimum, op.maximum, e->position().toPoint().y()-10, height()-21, op.upsideDown);
 	} else {
 		int itemw = width() / items.size();
-		pos = QStyle::sliderValueFromPosition(op.minimum, op.maximum, e->pos().x()-itemw/2, width() - itemw , op.upsideDown);
+		pos = QStyle::sliderValueFromPosition(op.minimum, op.maximum, e->position().toPoint().x()-itemw/2, width() - itemw , op.upsideDown);
 	}
 
 	if (items[pos].enabled) {
@@ -283,9 +283,9 @@ void TextSlider::mouseMoveEvent(QMouseEvent* e)
 void TextSlider::wheelEvent(QWheelEvent* e)
 {
 	int pos = op.sliderPosition;
-	if (e->delta() * (op.upsideDown ? -1:1) * (op.orientation == Qt::Vertical ? 1:-1) < 0) {
+	if (e->angleDelta().y() * (op.upsideDown ? -1:1) * (op.orientation == Qt::Vertical ? 1:-1) < 0) {
 		prev();
-	} else if (e->delta() * (op.upsideDown ? -1:1) * (op.orientation == Qt::Vertical ? 1:-1) > 0) {
+	} else if (e->angleDelta().y() * (op.upsideDown ? -1:1) * (op.orientation == Qt::Vertical ? 1:-1) > 0) {
 		next();
 	} else {
 		return;

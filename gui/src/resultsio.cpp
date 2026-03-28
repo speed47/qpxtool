@@ -196,9 +196,9 @@ void ResultsReader::run() {
 							dev->media.cfreemsf = attr.value("free_msf").toString();
 							dev->media.ctotmsf  = attr.value("tot_msf").toString();
 						} else if (xml.name() == "speeds") {
-							dev->media.rspeeds  = attr.value("rspeeds" ).toString().split(" ", QString::SkipEmptyParts);
-							dev->media.wspeedsd = attr.value("wspeedsd").toString().split(" ", QString::SkipEmptyParts);
-							dev->media.wspeedsm = attr.value("wspeedsm").toString().split(" ", QString::SkipEmptyParts);
+							dev->media.rspeeds  = attr.value("rspeeds" ).toString().split(" ", Qt::SkipEmptyParts);
+							dev->media.wspeedsd = attr.value("wspeedsd").toString().split(" ", Qt::SkipEmptyParts);
+							dev->media.wspeedsm = attr.value("wspeedsm").toString().split(" ", Qt::SkipEmptyParts);
 						} else if (xml.name() == "misc") {
 							dev->media.writer   = attr.value("writer").toString();
 							dev->media.prot     = attr.value("protection").toString();

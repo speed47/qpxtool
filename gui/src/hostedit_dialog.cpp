@@ -23,7 +23,7 @@ hostEditDialog::hostEditDialog(QString host, int port, QWidget* p, Qt::WindowFla
 	setWindowTitle(tr("Add host"));
 
 	layout = new QGridLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 
 	l_host = new QLabel(tr("Host:"), this);
@@ -55,7 +55,7 @@ hostEditDialog::hostEditDialog(QString host, int port, QWidget* p, Qt::WindowFla
 	layout->setColumnStretch(1,20);
 	layout->setColumnStretch(2,1);
 
-	connect(e_host, SIGNAL(textChanged(QString&)), this, SLOT(hostChanged(QString&)));
+	connect(e_host, SIGNAL(textChanged(QString)), this, SLOT(hostChanged(QString)));
 	connect(bdef, SIGNAL(clicked()), this,  SLOT(setPortDfl()));
 	connect(bbox, SIGNAL(accepted()), this, SLOT(accept()));
 	connect(bbox, SIGNAL(rejected()), this, SLOT(reject()));
@@ -71,7 +71,7 @@ void hostEditDialog::setPortDfl()
 	e_port->setValue(46660);
 }
 
-void hostEditDialog::hostChanged(QString& h)
+void hostEditDialog::hostChanged(const QString& h)
 {
 	QPushButton *pb = bbox->button(QDialogButtonBox::Ok);
 	if (!pb) return;

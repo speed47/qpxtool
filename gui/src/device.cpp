@@ -15,6 +15,7 @@
 #include <QProcess>
 #include <QTcpSocket>
 #include <QDataStream>
+#include <QRegularExpression>
 
 #include <qpxiodevice.h>
 #include <mwatcher.h>
@@ -925,11 +926,11 @@ bool device::stop_tests()
 	tests = 0;
 	if (type == DevtypeLocal) {
 		if (!proc) return false;
-		Q_PID pid = proc->pid();
+		qint64 pid = proc->processId();
 #if defined(__unix) || defined(__unix__)
 		kill(pid, SIGINT);
 #elif defined(_WIN32) || defined(_WIN64)
-		TerminateProcess(pid, 0);
+		TerminateProcess((HANDLE)pid, 0);
 #endif
 	} else if (type == device::DevtypeTCP) {
 		if (!sock) return false;
@@ -1199,7 +1200,7 @@ void device::qscan_process_line(QString& qout)
 
 		if (sl[0].contains("Available quality tests", Qt::CaseInsensitive)) {
 			if (sl.size()>=2) {
-				QStringList slt = sl[1].split(' ', QString::SkipEmptyParts);
+				QStringList slt = sl[1].split(' ', Qt::SkipEmptyParts);
 				test_cap = 0;
 				for (int ii=0; ii<slt.size(); ii++) {
 					test_cap |= (slt[ii] == "errc") ? TEST_ERRC : 0;
@@ -1209,9 +1210,9 @@ void device::qscan_process_line(QString& qout)
 				}
 			}
 		} else if (sl[0].contains("ERRC speeds", Qt::CaseInsensitive)) {
-			media.tspeeds_errc = sl[1].split(" ", QString::SkipEmptyParts);
+			media.tspeeds_errc = sl[1].split(" ", Qt::SkipEmptyParts);
 		} else if (sl[0].contains("ERRC data", Qt::CaseInsensitive)) {
-			QStringList td = sl[1].split(" ", QString::SkipEmptyParts);
+			QStringList td = sl[1].split(" ", Qt::SkipEmptyParts);
 			media.tdata_errc = 0;
 			for (int ii=0; ii<td.size(); ii++) {
 				if (td[ii] == "BLER")     { media.tdata_errc |= GRAPH_BLER; }
@@ -1233,7 +1234,7 @@ void device::qscan_process_line(QString& qout)
 			}
 //			qDebug() << "Available ERRC data: " << media.tdata_errc;
 		} else if (sl[0].contains("JB speeds", Qt::CaseInsensitive)) {
-			media.tspeeds_jb = sl[1].split(" ", QString::SkipEmptyParts);
+			media.tspeeds_jb = sl[1].split(" ", Qt::SkipEmptyParts);
 		}
 
 		
@@ -1431,7 +1432,7 @@ void device::qscan_process_line(QString& qout)
 /*
 			} else if (sl[0].contains("Available quality tests", Qt::CaseInsensitive)) {
 				if (sl.size()>=2) {
-					QStringList slt = sl[1].split(' ', QString::SkipEmptyParts);
+					QStringList slt = sl[1].split(' ', Qt::SkipEmptyParts);
 					test_cap = 0;
 					for (int ii=0; ii<slt.size(); ii++) {
 						test_cap |= (slt[ii] == "errc") ? TEST_ERRC : 0;
@@ -1456,11 +1457,11 @@ void device::qscan_process_line(QString& qout)
 		if (sl.size() >=2 ) {
 			sl[1].remove('\'');
 			if (sl[0].contains("RD speed #", Qt::CaseInsensitive)) {
-				sl[1].remove(QRegExp("\\([a-z,A-Z,0-9, /]*\\)"));
+				sl[1].remove(QRegularExpression("\\([a-z,A-Z,0-9, /]*\\)"));
 				sl[1].remove(' ');
 				media.rspeeds.append(sl[1]);
 			} else if (sl[0].contains("D WR speed #", Qt::CaseInsensitive)) {
-				sl[1].remove(QRegExp("\\([a-z,A-Z,0-9, /]*\\)"));
+				sl[1].remove(QRegularExpression("\\([a-z,A-Z,0-9, /]*\\)"));
 				sl[1].remove(' ');
 				media.wspeedsd.prepend(sl[1]);
 			} else if (sl[0].contains("M WR speed #", Qt::CaseInsensitive)) {
@@ -1659,7 +1660,7 @@ void device::cdvdcontrol_process_line(QString& qout)
 			sl[1].remove("inner");
 			sl[1].replace("outer", " ");
 			sl[1].replace("image", " ");
-			QStringList sl2 = sl[1].split(" ", QString::SkipEmptyParts);
+			QStringList sl2 = sl[1].split(" ", Qt::SkipEmptyParts);
 #ifndef QT_NO_DEBUG
 			qDebug () << "*** DISC T@2 ***\nsl[1]: " << sl[1] << "\nsl2 size: " << sl2.size();
 #endif
@@ -1701,7 +1702,7 @@ void device::cdvdcontrol_process_asdb(QString& qout)
 
 	it.present=1;
 	it.active = sl[1] == "*";
-//	it.type   = sl[2].remove(QRegExp("[]"));
+//	it.type   = sl[2].remove(QRegularExpression("[]"));
 	it.type   = sl[2].remove("[A1]").remove("[25]");
 	it.speed  = sl[3];
 	it.mid    = sl[4];
@@ -1829,7 +1830,7 @@ void device::qscan_process_test()
 				if (qout.startsWith("lba") && qout.contains("speed")) {
 //					qDebug("RT");
 					DI_Transfer di;
-					sl = qout.split(" ", QString::SkipEmptyParts);
+					sl = qout.split(" ", Qt::SkipEmptyParts);
 			//		for (int i=0; i<sl.size(); i++) qDebug(QString::number(i) + "  '" + sl[i] + "'");
 					if (sl.size()>=6) {
 						di.lba = sl[1].toLongLong();
@@ -1863,7 +1864,7 @@ void device::qscan_process_test()
 			case TEST_WT:
 				if (qout.startsWith("Track ") && qout.contains("MB written")) {
 					DI_Transfer di;
-					sl = qout.split(" ", QString::SkipEmptyParts);
+					sl = qout.split(" ", Qt::SkipEmptyParts);
 			//		for (int i=0; i<sl.size(); i++) qDebug(QString::number(i) + "  '" + sl[i] + "'");
 					if (sl.size()>=10) {
 						di.lba = sl[2].toLongLong() << 9;
@@ -1895,7 +1896,7 @@ void device::qscan_process_test()
 			case TEST_ERRC:
 				if (qout.startsWith("cur")) {
 					DI_Errc di;
-					sl = qout.split(QRegExp("[:\\ |]"), QString::SkipEmptyParts);
+					sl = qout.split(QRegularExpression("[:\\ |]"), Qt::SkipEmptyParts);
 					// for (int i=0; i<sl.size(); i++) qDebug(QString::number(i) + "  '" + sl[i] + "'");
 
 					if (media.type.startsWith("CD") && sl.size()>=14) {
@@ -1970,7 +1971,7 @@ void device::qscan_process_test()
 			case TEST_JB:
 				if (qout.startsWith("cur")) {
 					DI_JB di;
-					sl = qout.split(QRegExp("[:\\ |]"), QString::SkipEmptyParts);
+					sl = qout.split(QRegularExpression("[:\\ |]"), Qt::SkipEmptyParts);
 //					for (int i=0; i<sl.size(); i++) qDebug(QString::number(i) + "'" + sl[i] + "'");
 
 					if (sl.size()>=8) {
@@ -2004,7 +2005,7 @@ void device::qscan_process_test()
 			case TEST_FT:
 				if (qout.startsWith("cur")) {
 					DI_FT di;
-					sl = qout.split(QRegExp("[:\\ |]"), QString::SkipEmptyParts);
+					sl = qout.split(QRegularExpression("[:\\ |]"), Qt::SkipEmptyParts);
 //					for (int i=0; i<sl.size(); i++) qDebug(QString::number(i) + "'" + sl[i] + "'");
 
 					if (sl.size()>=8) {
@@ -2030,7 +2031,7 @@ void device::qscan_process_test()
 				if (qout.startsWith("TA")) {
 					if (taIdx <0 || taIdx>5) break;
 					DI_TA di;
-					sl = qout.split(" ", QString::SkipEmptyParts);
+					sl = qout.split(" ", Qt::SkipEmptyParts);
 					if (sl.size() >=4) {
 						di.idx  = sl[1].toInt();
 						di.pit  = sl[2].toInt();
@@ -2043,7 +2044,7 @@ void device::qscan_process_test()
 				} else if (qout.startsWith("Running TA on")) {
 					int taLayer=0;
 					int taZone=0;
-					sl = qout.split(" ", QString::SkipEmptyParts);
+					sl = qout.split(" ", Qt::SkipEmptyParts);
 					if (sl.size() >=6) {
 						sl[3].remove("L");
 #ifndef QT_NO_DEBUG

@@ -161,12 +161,12 @@ PrintPreview::PrintPreview(QWidget *parent, QTextDocument *document)
 	}
 
 	layout_main = new QVBoxLayout(this);
-	layout_main->setMargin(3);
+	layout_main->setContentsMargins(3, 3, 3, 3);
 	layout_main->setSpacing(3);
 	setLayout(layout_main);
 
 	layout_butt = new QHBoxLayout;
-	layout_butt->setMargin(0);
+	layout_butt->setContentsMargins(0, 0, 0, 0);
 	layout_butt->setSpacing(3);
 	layout_main->addLayout(layout_butt);
 
@@ -241,7 +241,7 @@ PrintPreview::PrintPreview(QWidget *parent, QTextDocument *document)
 	scaleChanged(1.0);
 	connect(thumbs, SIGNAL(pageSelected(int)), view, SLOT(gotoPage(int)));
 	connect(view, SIGNAL(scaleChanged(double)), this, SLOT(scaleChanged(double)));
-	connect(box_scale, SIGNAL(currentIndexChanged(QString)), this, SLOT(scaleChanged(QString)));
+	connect(box_scale, SIGNAL(currentTextChanged(QString)), this, SLOT(scaleChanged(QString)));
    	connect(pb_print, SIGNAL(clicked()), this, SLOT(print()));
 	connect(pb_psetup, SIGNAL(clicked()), this, SLOT(pageSetup()));
 	connect(pb_zoomin, SIGNAL(clicked()), view, SLOT(scaleIn()));

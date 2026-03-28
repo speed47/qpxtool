@@ -81,7 +81,7 @@ void ImagesList::winit(ListDir	orient)
 		setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
 		clayout = new QHBoxLayout(cwidget);
 	}
-	clayout->setMargin(1);
+	clayout->setContentsMargins(1, 1, 1, 1);
 	clayout->setSpacing(4);
 	cwidget->setLayout(clayout);
 };

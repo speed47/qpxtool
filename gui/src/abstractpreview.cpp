@@ -17,6 +17,8 @@
 #include <QPrinter>
 #include <QPageSetupDialog>
 #include <QPrintDialog>
+#include <QPageSize>
+#include <QPageLayout>
 #include <QDebug>
 
 #include <sys/time.h>
@@ -450,8 +452,8 @@ void AbstractPreviewPrivate::setPageDefaults()
     mm_bottom = DEFAULT_MARGIN_BOTTOM;
     recalcMarginsFromMM();
 
-    printer->setPaperSize(QPrinter::A4);
-    printer->setPageMargins(mm_left, mm_top, mm_right, mm_bottom, QPrinter::Millimeter);
+    printer->setPageSize(QPageSize(QPageSize::A4));
+    printer->setPageMargins(QMarginsF(mm_left, mm_top, mm_right, mm_bottom), QPageLayout::Millimeter);
 #ifdef PRINTER_USE_FULLPAGE
     printer->setFullPage(true);
 #else
@@ -462,7 +464,7 @@ void AbstractPreviewPrivate::setPageDefaults()
 //--------------------------------------------------------------
 void AbstractPreviewPrivate::setup()
 {
-    paperSizeMM = printer->paperRect(QPrinter::Millimeter).size();
+    paperSizeMM = printer->pageLayout().fullRect(QPageLayout::Millimeter).size();
     paperSize = QSize(
 		inchesToPixelsX ( mmToInches(paperSizeMM.width()),  currentDevice) +1,
 		inchesToPixelsY ( mmToInches(paperSizeMM.height()), currentDevice) +1
@@ -474,16 +476,19 @@ void AbstractPreviewPrivate::setup()
 //    if(pageSizeMM.width() -  ((qreal)(int)pageSize.width()) > 0.0)  pageSize.setWidth ((int)pageSize.width() + 1);
 //    if(pageSizeMM.height() - ((qreal)(int)pageSize.height()) > 0.0) pageSize.setHeight((int)pageSize.height() + 1);
 
-    printer->getPageMargins(&mm_left, &mm_top, &mm_right, &mm_bottom, QPrinter::Millimeter);
+    {
+        QMarginsF m = printer->pageLayout().margins(QPageLayout::Millimeter);
+        mm_left = m.left(); mm_top = m.top(); mm_right = m.right(); mm_bottom = m.bottom();
+    }
 	recalcMarginsFromMM();
 
-#if (PRINTER_USE_FULLPAGE == 1) || (QT_VERSION < 0x040500)
+#if (PRINTER_USE_FULLPAGE == 1)
 	pageSizeMM = QSize(
 		paperSizeMM.width() - mm_left - mm_right,
 		paperSizeMM.height() - mm_top - mm_bottom
 	);
 #else
-	pageSizeMM = printer->pageRect(QPrinter::Millimeter).size();
+	pageSizeMM = printer->pageLayout().paintRect(QPageLayout::Millimeter).size();
 #endif
 
 	pageSize = QSize(
@@ -1158,7 +1163,7 @@ void AbstractPreview::wheelEvent(QWheelEvent * event)
         return;
     }
 
-    if (event->delta() > 0) scaleIn();
+    if (event->angleDelta().y() > 0) scaleIn();
     else scaleOut();
 }
 //--------------------------------------------------------------
