@@ -34,7 +34,7 @@ tabMediaInfo::tabMediaInfo(QPxSettings *iset, devlist *idev, QWidget *p, Qt::Win
 	devices = idev;
 
 	layout = new QVBoxLayout(this);
-	layout->setMargin(0);
+	layout->setContentsMargins(0, 0, 0, 0);
 	layout->setSpacing(3);
 
 	layout_info = new QGridLayout;

@@ -15,6 +15,7 @@
 #include <QMenuBar>
 #include <QToolBar>
 #include <QToolButton>
+#include <QActionGroup>
 #include <QStatusBar>
 #include <QMessageBox>
 #include <QPushButton>
@@ -45,6 +46,7 @@
 #include <QDragLeaveEvent>
 
 #include <QApplication>
+#include <QPageSize>
 
 #include <colors.h>
 #include <db_report_selection.h>
@@ -179,12 +181,12 @@ void QPxToolMW::winit()
 	cwidget = new QWidget(this);
 	setCentralWidget(cwidget);
 	layout = new QVBoxLayout(cwidget);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 
 // device
 	layout_dev = new QHBoxLayout;
-	layout_dev->setMargin(0);
+	layout_dev->setContentsMargins(0, 0, 0, 0);
 	layout_dev->setSpacing(3);
 	layout->addLayout(layout_dev);
 
@@ -1088,7 +1090,7 @@ void QPxToolMW::save_report(device *dev, QString fname)
 	prepare_report(dev, doc);
 
 	printer.setOutputFormat(QPrinter::PdfFormat);
-	printer.setPaperSize(QPrinter::A4);
+	printer.setPageSize(QPageSize(QPageSize::A4));
 	printer.setOutputFileName(fname);
 
 	PrintPreview::printDoc(this, &printer, doc);

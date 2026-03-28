@@ -43,7 +43,7 @@ prefReports::prefReports(QPxSettings *iset, QWidget *p, Qt::WindowFlags fl)
 	set = iset;
 
 	layout = new QVBoxLayout(this);
-	layout->setMargin(0);
+	layout->setContentsMargins(0, 0, 0, 0);
 	layout->setSpacing(3);
 
 // reports -> files
@@ -52,11 +52,11 @@ prefReports::prefReports(QPxSettings *iset, QWidget *p, Qt::WindowFlags fl)
 	layout->addWidget(box_rep);
 
 	layout_rep = new QVBoxLayout(box_rep);
-	layout_rep->setMargin(3);
+	layout_rep->setContentsMargins(3, 3, 3, 3);
 	layout_rep->setSpacing(3);
 
 	layout_rep_path = new QHBoxLayout();
-	layout_rep_path->setMargin(0);
+	layout_rep_path->setContentsMargins(0, 0, 0, 0);
 	layout_rep_path->setSpacing(3);
 	layout_rep->addLayout(layout_rep_path);
 
@@ -75,7 +75,7 @@ prefReports::prefReports(QPxSettings *iset, QWidget *p, Qt::WindowFlags fl)
 	layout->addWidget(box_rep_db);
 
     layout_db = new QGridLayout(box_rep_db);
-    layout_db->setMargin(3);
+    layout_db->setContentsMargins(3, 3, 3, 3);
     layout_db->setSpacing(3);
 // DB driver
     ldb_driver = new QLabel( tr("Driver:"), this);

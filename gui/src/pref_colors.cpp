@@ -36,7 +36,7 @@ prefColors::prefColors(QPxSettings *iset, QWidget *p, Qt::WindowFlags fl)
 	int idx=0;
 
 	layout = new QGridLayout(this);
-	layout->setMargin(0);
+	layout->setContentsMargins(0, 0, 0, 0);
 	layout->setSpacing(3);
 
 	lc_bg = new ColorLabel(set->col_bg, tr("Background"), 1, this);

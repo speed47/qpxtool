@@ -24,7 +24,7 @@ MediaWatcher::MediaWatcher(device *qdev)
 #endif
 	if (qdev->type == device::DevtypeLocal) {
 		QByteArray ba;
-		ba+=qdev->path;
+		ba+=qdev->path.toUtf8();
 		dev = new drive_info(ba.data());
 		if (inquiry(dev)) {
 			delete dev;

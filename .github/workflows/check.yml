@@ -13,18 +13,18 @@ jobs:
     - name: install prerequisites
       env:
         HOMEBREW_NO_INSTALL_CLEANUP: 1
-      run: brew install qt@5
+      run: brew install qt@6
     - name: configure
       env:
-        CFLAGS: -L/opt/homebrew/opt/qt@5/lib -I/opt/homebrew/opt/qt@5/include
-        CXXFLAGS: -L/opt/homebrew/opt/qt@5/lib -I/opt/homebrew/opt/qt@5/include
-        PKG_CONFIG_PATH: /opt/homebrew/opt/qt@5/lib/pkgconfig
+        CFLAGS: -L/opt/homebrew/opt/qt@6/lib -I/opt/homebrew/opt/qt@6/include
+        CXXFLAGS: -L/opt/homebrew/opt/qt@6/lib -I/opt/homebrew/opt/qt@6/include
+        PKG_CONFIG_PATH: /opt/homebrew/opt/qt@6/lib/pkgconfig
       run: |
-          export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
+          export PATH="/opt/homebrew/opt/qt@6/bin:$PATH"
           ./configure --prefix=$PWD/dist
     - name: make
       run: |
-          export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
+          export PATH="/opt/homebrew/opt/qt@6/bin:$PATH"
           make -j$(sysctl -n hw.ncpu || 2)
           make install
     - name: check executability
@@ -41,7 +41,7 @@ jobs:
     - name: install prerequisites
       run: |
           sudo apt-get update
-          sudo apt-get install -y make qtbase5-dev g++ libpng-dev qttools5-dev-tools
+          sudo apt-get install -y make qt6-base-dev g++ libpng-dev qt6-tools-dev-tools
     - name: configure (debug)
       run: ./configure --enable-debug
     - name: make (debug)
@@ -69,7 +69,7 @@ jobs:
       with:
         msystem: MINGW64
         update: false
-        install: git make pkg-config mingw-w64-x86_64-gcc mingw-w64-x86_64-qt5
+        install: git make pkg-config mingw-w64-x86_64-gcc mingw-w64-x86_64-qt6-base mingw-w64-x86_64-qt6-tools
     - run: git config --global core.autocrlf input
       shell: bash
     - uses: actions/checkout@v4

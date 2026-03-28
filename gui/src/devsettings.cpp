@@ -47,7 +47,7 @@ devSettings::devSettings(QPxSettings *iset, device *idev, QWidget *p, Qt::Window
 	cpage = NULL;
 
 	layout = new QHBoxLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 	setLayout(layout);
 
@@ -72,7 +72,7 @@ devSettings::devSettings(QPxSettings *iset, device *idev, QWidget *p, Qt::Window
 		ilist->addLabel(tr("Disc T@2"), QImage(":images/tattoo.png"),	TAB_TATTOO);
 
 	layoutc = new QVBoxLayout();
-	layoutc->setMargin(0);
+	layoutc->setContentsMargins(0, 0, 0, 0);
 	layoutc->setSpacing(3);
 	layout->addLayout(layoutc,4);
 

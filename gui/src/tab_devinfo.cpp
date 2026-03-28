@@ -36,7 +36,7 @@ tabDevInfo::tabDevInfo(QPxSettings *iset, devlist *idev, QWidget *p, Qt::WindowF
 	devices = idev;
 
 	layout = new QHBoxLayout(this);
-	layout->setMargin(0);
+	layout->setContentsMargins(0, 0, 0, 0);
 	layout->setSpacing(3);
 
 	layout_left = new QGridLayout();

@@ -60,7 +60,7 @@ void QPxPreferences::winit()
 	layout = new QHBoxLayout();
 	//layout = new QHBoxLayout();
 	setLayout(layout);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 
 	ilist  = new ImagesList(80,this);
 	layout->addWidget(ilist);
@@ -82,7 +82,7 @@ void QPxPreferences::winit()
 	parea->addWidget(hline0);
 
 	layout_butt = new QHBoxLayout;
-	layout_butt->setMargin(0);
+	layout_butt->setContentsMargins(0, 0, 0, 0);
 	layout_butt->setSpacing(3);
 	parea->addLayout(layout_butt);
 
@@ -99,7 +99,7 @@ void QPxPreferences::winit()
 	connect( pb_save,   SIGNAL(clicked()), this, SLOT(save()) );
 	connect( pb_cancel, SIGNAL(clicked()), this, SLOT(cancel()) );
 //	playout = new QVBoxLayout;
-//	playout->setMargin(0);
+//	playout->setContentsMargins(0, 0, 0, 0);
 //	layout->addLayout(playout);
 }
 

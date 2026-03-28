@@ -39,7 +39,7 @@ GraphTab::GraphTab(QPxSettings *iset, devlist *idev, QString iname, int test, QW
 	settings->loadScale(name);
 
 	layout = new QHBoxLayout(this);
-	layout->setMargin(0);
+	layout->setContentsMargins(0, 0, 0, 0);
 	layout->setSpacing(3);
 
 	split = new SplitButton(Qt::Vertical, this);
@@ -51,7 +51,7 @@ GraphTab::GraphTab(QPxSettings *iset, devlist *idev, QString iname, int test, QW
 	layout->addWidget(lw);
 
 	layoutl = new QVBoxLayout(lw);
-	layoutl->setMargin(0);
+	layoutl->setContentsMargins(0, 0, 0, 0);
 	layoutl->setSpacing(3);
 //	layout->addLayout(layoutl);
 
@@ -65,7 +65,7 @@ GraphTab::GraphTab(QPxSettings *iset, devlist *idev, QString iname, int test, QW
 	layoutl->addWidget(grp_time,1);
 	
 	layoutt = new QVBoxLayout(grp_time);
-	layoutt->setMargin(3);
+	layoutt->setContentsMargins(3, 3, 3, 3);
 	layoutt->setSpacing(0);
 
 	ltime = new QLabel(grp_time);

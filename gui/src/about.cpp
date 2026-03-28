@@ -27,7 +27,7 @@ AboutDialog::AboutDialog(QWidget *p, Qt::WindowFlags fl)
 	setWindowTitle(tr("About QPxTool"));
 
 	layout = new QVBoxLayout(this);
-	layout->setMargin(3);
+	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
 
 	lversion = new QLabel("QPxTool version " VERSION, this);

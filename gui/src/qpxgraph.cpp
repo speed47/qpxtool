@@ -201,17 +201,17 @@ void QPxGraph::setLayerTA(int layer) {
 void QPxGraph::wheelEvent(QWheelEvent* e)
 {
 #ifndef QT_NO_DEBUG
-//	qDebug(QString("QPxGraph::wheelEvent(): %1").arg(e->delta()));
+//	qDebug(QString("QPxGraph::wheelEvent(): %1").arg(e->angleDelta().y()));
 #endif
 	if (e->modifiers() == Qt::NoModifier) {
 		if (!scale[0] || scale[0]->type != Scale::Linear) return;
-		if (e->delta() > 0)		 scaleIn(0);
-		else if (e->delta() < 0) scaleOut(0);
+		if (e->angleDelta().y() > 0)		 scaleIn(0);
+		else if (e->angleDelta().y() < 0) scaleOut(0);
 		update();
 	} else if (e->modifiers() == Qt::ControlModifier) {
 		if (test != TEST_JB || !scale[1] || scale[1]->type != Scale::Linear) return;
-		if (e->delta() > 0)		 scaleIn(1);
-		else if (e->delta() < 0) scaleOut(1);
+		if (e->angleDelta().y() > 0)		 scaleIn(1);
+		else if (e->angleDelta().y() < 0) scaleOut(1);
 		update();
 	}
 }

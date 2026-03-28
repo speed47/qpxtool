@@ -30,7 +30,7 @@ prefCommon::prefCommon(QPxSettings *iset, QWidget *p, Qt::WindowFlags fl)
 	set = iset;
 
 	layout = new QVBoxLayout(this);
-	layout->setMargin(0);
+	layout->setContentsMargins(0, 0, 0, 0);
 	layout->setSpacing(3);
 
 // default actions
@@ -63,7 +63,7 @@ prefCommon::prefCommon(QPxSettings *iset, QWidget *p, Qt::WindowFlags fl)
 	pl_testsb->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
 	layout->addWidget(pl_testsb);
 	layout_testsb = new QGridLayout();
-	layout_testsb->setMargin(0);
+	layout_testsb->setContentsMargins(0, 0, 0, 0);
 	layout_testsb->setSpacing(3);
 	layout->addLayout(layout_testsb);
 
