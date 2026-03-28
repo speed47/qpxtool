@@ -36,7 +36,7 @@ QPxSettings::QPxSettings()
 	geometry_pref = QRect(0,0,0,0);
 //	geometry_testsel = QRect(0,0,0,0);
 
-	show_sidebar  = 0;
+	show_sidebar  = 1;
 	show_allctl   = 0;
 	actions_flags = 0;
 
@@ -134,7 +134,7 @@ void QPxSettings::load()
 //	settings = new QSettings(QSettings::NativeFormat, QSettings::UserScope, "qpxtool");
 	settings = new QSettings(QSettings::NativeFormat, QSettings::UserScope, "QPxTool", "qpxtool");
 	settings->beginGroup("/common");
-		show_sidebar     = settings->value("show_sidebar", 0).toBool();
+		show_sidebar     = settings->value("show_sidebar", 1).toBool();
 		show_allctl      = settings->value("show_allctl", 0).toBool();
 		report_autosave  = settings->value("report_autosave", 0).toBool();
 		report_path      = settings->value("report_path", "").toString();
