@@ -134,7 +134,7 @@ jobs:
           wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
           wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
           chmod 755 linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
-          docker exec -e LINUXDEPLOY_OUTPUT_VERSION=v"${{ steps.conf.outputs.version }}" -e ARCH=x86_64 -e ME=$UID uu sh -c '
+          docker exec -e LINUXDEPLOY_OUTPUT_VERSION=v"${{ steps.conf.outputs.version }}" -e ARCH=x86_64 -e ME=$UID -e LD_LIBRARY_PATH=/dist/usr/lib uu sh -c '
             find /dist
             cd /qpxtool
             ./linuxdeploy-x86_64.AppImage -d /dist/usr/share/applications/qpxtool.desktop -i /dist/usr/share/pixmaps/qpxtool.png --icon-filename qpxtool \
