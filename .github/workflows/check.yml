@@ -4,6 +4,7 @@ on: [push, pull_request]
 
 jobs:
   win64:
+    needs: lint
     runs-on: windows-latest
     defaults:
       run:
@@ -41,7 +42,26 @@ jobs:
           file gui/release/qpxtool.exe | grep -q 'x86-64'
           file gui/release/qpxtool.exe | grep -q 'for MS Windows'
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: install clang-format-19
+        run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/llvm.asc
+          . /etc/lsb-release
+          sudo add-apt-repository -y "deb http://apt.llvm.org/$DISTRIB_CODENAME/ llvm-toolchain-$DISTRIB_CODENAME-19 main"
+          sudo apt-get update && sudo apt-get install -y clang-format-19
+      - name: configure
+        run: ./configure --disable-gui
+      - name: lint
+        run: make lint
+
   linux64-gui:
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -70,6 +90,7 @@ jobs:
             file gui/qpxtool | grep -q 'x86-64'
 
   mac:
+    needs: lint
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v5

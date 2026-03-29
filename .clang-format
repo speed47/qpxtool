@@ -1,0 +1,89 @@
+---
+# QPxTool clang-format configuration
+# Matches the existing coding style of the project.
+#
+# Usage:
+#   clang-format -i <file>             # Format a single file in-place
+#   clang-format --dry-run <file>      # Preview changes without writing
+#
+# To format all source files:
+#   find . \( -name '*.cpp' -o -name '*.h' -o -name '*.c' \) \
+#     -not -path './build/*' | xargs clang-format -i
+
+Language: Cpp
+Standard: c++11
+
+# --- Indentation ---
+UseTab: ForIndentation
+TabWidth: 4
+IndentWidth: 4
+ContinuationIndentWidth: 4
+ConstructorInitializerIndentWidth: 4
+AccessModifierOffset: -4
+IndentCaseLabels: true
+IndentPPDirectives: None
+NamespaceIndentation: None
+
+# --- Braces ---
+BreakBeforeBraces: Attach
+
+# --- Line length ---
+ColumnLimit: 120
+
+# --- Spacing ---
+SpaceBeforeParens: ControlStatements
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceInEmptyBlock: false
+SpaceInEmptyParentheses: false
+SpacesInAngles: false
+SpacesInCStyleCastParentheses: false
+SpacesInContainerLiterals: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpacesBeforeTrailingComments: 1
+
+# --- Pointer/Reference alignment ---
+PointerAlignment: Left
+ReferenceAlignment: Left
+DerivePointerAlignment: false
+
+# --- Short statements ---
+AllowShortBlocksOnASingleLine: Always
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLoopsOnASingleLine: true
+AllowAllArgumentsOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+
+# --- Breaking ---
+AlwaysBreakAfterReturnType: None
+BreakConstructorInitializers: BeforeColon
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: false
+BreakStringLiterals: true
+BinPackArguments: true
+BinPackParameters: true
+
+# --- Alignment ---
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignConsecutiveMacros: false
+AlignEscapedNewlines: Left
+AlignOperands: true
+AlignTrailingComments: true
+
+# --- Includes ---
+SortIncludes: false
+
+# --- Misc ---
+FixNamespaceComments: true
+MaxEmptyLinesToKeep: 2
+KeepEmptyLinesAtTheStartOfBlocks: false
+ReflowComments: false
+Cpp11BracedListStyle: true
+...

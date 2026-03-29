@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -o pipefail
+#
+# Pre-commit hook: reject commits with incorrectly formatted C/C++ files.
+# Only checks staged files that are being committed, not the entire codebase.
+#
+# Setup (run once per clone):
+#   git config core.hooksPath .githooks
+#
+
+CLANG_FORMAT_REQUIRED_MAJOR=19
+
+# Find a clang-format binary matching the required major version
+CLANG_FORMAT=""
+for cmd in clang-format-$CLANG_FORMAT_REQUIRED_MAJOR clang-format; do
+	ver=$($cmd --version 2>/dev/null) || continue
+	major=$(echo "$ver" | sed -n 's/.*version \([0-9]*\)\..*/\1/p')
+	if [ "$major" = "$CLANG_FORMAT_REQUIRED_MAJOR" ]; then
+		CLANG_FORMAT="$cmd"
+		break
+	fi
+done
+
+if [ -z "$CLANG_FORMAT" ]; then
+	echo "warning: clang-format $CLANG_FORMAT_REQUIRED_MAJOR not found, skipping format check"
+	exit 0
+fi
+
+# Collect staged C/C++ files (only added/modified, not deleted)
+staged_files=$(git diff --cached --name-only --diff-filter=ACM -- '*.c' '*.cpp' '*.h')
+
+if [ -z "$staged_files" ]; then
+	exit 0
+fi
+
+failed=0
+for file in $staged_files; do
+	# Format the staged version of the file, not the working tree version
+	if ! git show ":$file" | $CLANG_FORMAT --assume-filename="$file" --dry-run -Werror 2>/dev/null; then
+		echo "  $file"
+		failed=1
+	fi
+done
+
+if [ "$failed" -ne 0 ]; then
+	echo ""
+	echo "Commit rejected: the files above are not formatted correctly."
+	echo "Run: $CLANG_FORMAT -i <file>  (or use the command below to fix all staged files)"
+	echo ""
+	echo "  git diff --cached --name-only --diff-filter=ACM -- '*.c' '*.cpp' '*.h' | xargs $CLANG_FORMAT -i"
+	echo ""
+	exit 1
+fi

@@ -1,5 +1,6 @@
 Makefile
 */Makefile.*
+config.h
 */*/*.o
 */.qmake.stash
 */*/lib*.so*
