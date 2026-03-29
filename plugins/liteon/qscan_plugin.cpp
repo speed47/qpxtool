@@ -106,6 +106,18 @@ int* scan_liteon::get_test_speeds(unsigned int itest) { return NULL; }
 
 int  scan_liteon::start_test(unsigned int itest, long ilba, int &speed)
 {
+	// Activate HL-DT-ST test mode if requested and not already active.
+	// This is needed for listed devices that skip probe_drive().
+	if (!hldtst_test_mode && dev->hldtst_test_mode
+	    && !strncmp(dev->ven, "HL-DT-ST", 8)) {
+		printf(COL_YEL "LiteOn: Entering HL-DT-ST test mode..." COL_NORM "\n");
+		if (!cmd_hldtst_test_mode_toggle()) {
+			hldtst_test_mode = true;
+		} else {
+			printf(COL_RED "LiteOn: HL-DT-ST test mode entry failed" COL_NORM "\n");
+		}
+	}
+
 	int r=-1;
 	switch (itest) {
 		case CHK_ERRC_CD:
