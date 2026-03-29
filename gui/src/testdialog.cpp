@@ -224,8 +224,9 @@ void TestDialog::winit() {
 #if defined(__linux__)
 	if (getuid() != 0) {
 		l_root_hint = new QLabel(this);
-		l_root_hint->setText(tr("Tip: Running this program with root privileges (e.g. sudo) may\n"
-		                        "enable additional test types on some drive models."));
+		l_root_hint->setText(tr("Tip: Running this program with root privileges\n"
+		                        "(e.g. sudo) may enable additional test types\n"
+		                        "on some systems configurations."));
 		l_root_hint->setWordWrap(true);
 		QFont hintFont = l_root_hint->font();
 		hintFont.setItalic(true);
