@@ -42,6 +42,30 @@ cleanup()
 	rm -f $TMPC $TMPB
 }
 
+CLANG_FORMAT_REQUIRED_MAJOR=19
+
+check_clang_format()
+{
+	printf "Checking for clang-format $CLANG_FORMAT_REQUIRED_MAJOR... "
+	__clang_format=""
+	for cmd in clang-format-$CLANG_FORMAT_REQUIRED_MAJOR clang-format; do
+		ver=`$cmd --version 2>/dev/null`
+		if test "$?" -eq 0; then
+			major=`echo "$ver" | sed -n 's/.*version \([0-9]*\)\..*/\1/p'`
+			if test "$major" = "$CLANG_FORMAT_REQUIRED_MAJOR"; then
+				__clang_format="$cmd"
+				break
+			fi
+		fi
+	done
+	if test "$__clang_format" != ""; then
+		printf "found ($__clang_format)\n"
+	else
+		printf "not found (optional, needed for 'make lint')\n"
+		__clang_format="clang-format-$CLANG_FORMAT_REQUIRED_MAJOR"
+	fi
+}
+
 check_make()
 {
 	printf "Checking for make... "
@@ -398,6 +422,8 @@ LIBS_THREAD = $OSLIBS_THREAD
 
 LPNG_INC  = $lpng_iopts
 LPNG_LIB  = $lpng_ldflags
+
+CLANG_FORMAT = $__clang_format
 " >> Makefile
 	echo "WFLAGS    = -Wall" >> Makefile
 	echo "WFLAGS   += -Wno-unused-but-set-variable" >> Makefile
@@ -490,6 +516,24 @@ gui_uninstall:" >> Makefile
 	fi
 
 	echo "
+lint:
+	@command -v \$(CLANG_FORMAT) >/dev/null 2>&1 || { echo \"Error: \$(CLANG_FORMAT) not found\"; exit 1; }
+	@echo \"Checking C/C++ formatting...\"
+	@fail=0; \
+	for f in \$(shell find lib console plugins gui/src gui/include -name '*.cpp' -o -name '*.h' -o -name '*.c' 2>/dev/null); do \
+		\$(CLANG_FORMAT) --dry-run -Werror \"\$\$f\" || { echo \"  # FAILED: \$\$f\"; fail=1; }; \
+	done; \
+	if [ \"\$\$fail\" -ne 0 ]; then \
+		echo \"\"; \
+		echo \"Lint failed. To fix:\"; \
+		echo \"  find lib console plugins gui/src gui/include -name '*.cpp' -o -name '*.h' -o -name '*.c' | xargs \$(CLANG_FORMAT) -i\"; \
+		exit 1; \
+	else \
+		echo \"All files formatted correctly.\"; \
+	fi
+" >> Makefile
+
+	echo "
 help:
 	@echo \"\"
 	@echo \"Available targets:\"
@@ -504,10 +548,12 @@ help:
 	@echo \"clean         - clean source tree from object files\"
 	@echo \"uninstall     - uninstall all\"
 	@echo \"cli_uninstall - uninstall libs and console tools\"
-	@echo \"gui_uninstall - uninstall gui only\"" >> Makefile
+	@echo \"gui_uninstall - uninstall gui only\"
+	@echo \"\"
+	@echo \"lint          - check code formatting (clang-format)\"" >> Makefile
 
 	echo "
-.PHONY: all clean cli lib console plugins man nogui gui install cli_install gui_install uninstall cli_uninstall gui_uninstall help" >> Makefile
+.PHONY: all clean cli lib console plugins man nogui gui install cli_install gui_install uninstall cli_uninstall gui_uninstall lint help" >> Makefile
 }
 
 create_makefile_gui()
@@ -969,6 +1015,7 @@ if test "$mandir" != "" ; then
 	__mandir=$mandir
 fi
 
+check_clang_format
 check_make
 check_compiler
 check_offset64
