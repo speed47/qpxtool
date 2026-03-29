@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <strings.h>
 
 #include "qpx_scan.h"
 
@@ -279,6 +280,14 @@ int qscanner::plugins_probe_all(probe_result* results, int max_results) {
 			closedir(dir);
 		}
 	}
+	// Sort results alphabetically by name (case-insensitive) for deterministic selection
+	for (int a = 0; a < count - 1; a++)
+		for (int b = a + 1; b < count; b++)
+			if (strcasecmp(results[a].name, results[b].name) > 0) {
+				probe_result tmp = results[a];
+				results[a] = results[b];
+				results[b] = tmp;
+			}
 	return count;
 }
 
