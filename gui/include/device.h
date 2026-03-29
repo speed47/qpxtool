@@ -534,6 +534,7 @@ signals:
 
 	void testsDone();
 	void testsError();
+	void testsStopped();
 
 	void block_RT();
 	void block_WT();
@@ -556,6 +557,7 @@ private:
 	bool next_test();
 	ThreadType threadType;
 	bool stop;
+	bool stopped;
 	bool running;
 	bool preserveMediaInfo;
 

@@ -307,6 +307,7 @@ bool device::start() {
 		return false;
 	}
 	stop = 0;
+	stopped = false;
 	running = 1;
 	switch (threadType) {
 		case threadDevice:
@@ -880,6 +881,7 @@ bool device::start_tests() {
 	if (running) return false;
 	threadType = threadTest;
 	tests = test_req;
+	stopped = false;
 	return start();
 }
 
@@ -889,6 +891,7 @@ bool device::stop_tests() {
 		return false;
 	}
 	tests = 0;
+	stopped = true;
 	if (type == DevtypeLocal) {
 		if (!proc) {
 			qWarning() << "stop_tests(): proc is null, aborting";
@@ -1789,7 +1792,13 @@ void device::qscan_callback_test() {
 			break;
 	}
 
-	if (xcode) { emit testsError(); }
+	if (xcode) {
+		if (stopped) {
+			emit testsStopped();
+		} else {
+			emit testsError();
+		}
+	}
 
 	next_test();
 
