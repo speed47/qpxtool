@@ -229,10 +229,23 @@ void TestDialog::winit()
 	layout_media->addWidget(media);
 	layout->setRowStretch(1,10);
 */
+#if defined(__linux__)
+	if (getuid() != 0) {
+		l_root_hint = new QLabel(this);
+		l_root_hint->setText(tr("Tip: Running this program with root privileges (e.g. sudo) may\n"
+			"enable additional test types on some drive models."));
+		l_root_hint->setWordWrap(true);
+		QFont hintFont = l_root_hint->font();
+		hintFont.setItalic(true);
+		l_root_hint->setFont(hintFont);
+		layout->addWidget(l_root_hint, 4, 0, 1, 2);
+	}
+#endif
+
 	layout_butt = new QHBoxLayout;
 	layout_butt->setContentsMargins(0, 0, 0, 0);
 	layout_butt->setSpacing(3);
-	layout->addLayout(layout_butt, 4, 0, 1, 2);
+	layout->addLayout(layout_butt, 5, 0, 1, 2);
 
 	layout_butt->addStretch(3);
 	butt_run = new QPushButton(tr("Run"),this);
@@ -247,6 +260,7 @@ void TestDialog::winit()
 	layout->setRowStretch(2,1);
 	layout->setRowStretch(3,20);
 	layout->setRowStretch(4,1);
+	layout->setRowStretch(5,1);
 
 	connect( ck_RT,   SIGNAL(clicked(bool)), spd_RT,SLOT(setEnabled(bool)));
 	connect( ck_WT,   SIGNAL(clicked(bool)), spd_WT,SLOT(setEnabled(bool)));
