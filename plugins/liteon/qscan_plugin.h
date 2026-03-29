@@ -106,7 +106,7 @@ static const drivedesclist drivelist =
 	{ "Slimtype",  DEV_LITEON, "DVDRW SOSW-833S",	LTN_SDVDR_G3, CHK_ERRC_CD | CHK_ERRC_DVD },
 	
 	{ "Slimtype",  DEV_LITEON, "DVD A  DS8A2S   ",	LTN_SDVDR_G3, CHK_ERRC_CD | CHK_ERRC_DVD },
-	
+
 	{ "SONY    ",  DEV_LITEON, "DVD RW DW-D56A",	LTN_SDVDR_G2, CHK_ERRC_CD | CHK_ERRC_DVD },
 	{ "SONY    ",  DEV_LITEON, "DVD+RW DW-R56A",	LTN_SDVDR_G2, CHK_ERRC_CD | CHK_ERRC_DVD },
 
