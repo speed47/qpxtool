@@ -97,6 +97,59 @@ LD_LINUX=$(find "$HERE" -name 'ld-*.so.*' | head -n 1)
   export GSETTINGS_SCHEMA_DIR="${HERE}"/usr/share/glib-2.0/runtime-schemas/:"${HERE}"/usr/share/glib-2.0/schemas/:"${GSETTINGS_SCHEMA_DIR}"
   export QT_PLUGIN_PATH="$(readlink -f "$(dirname "$(find "${HERE}" -type d -path '*/plugins/platforms' 2>/dev/null)" 2>/dev/null)" 2>/dev/null)"
   #export QT_QPA_PLATFORM_PLUGIN_PATH=$QT_PLUGINS_PATH
+############################################################################################
+# If the first argument is a known CLI tool name, run that instead of the GUI
+############################################################################################
+
+CLI_TOOLS="qscan qscand cdvdcontrol f1tattoo pxfw readdvd"
+
+if [ -n "$1" ] ; then
+  for tool in $CLI_TOOLS; do
+    if [ "$1" = "$tool" ] ; then
+      CLI_BIN=$(find "$HERE/usr/bin" -name "$1" | head -n 1)
+      if [ -z "$CLI_BIN" ] ; then
+        echo "Error: $1 not found in AppImage" >&2
+        exit 1
+      fi
+      shift
+      if [ -e "$LD_LINUX" ] ; then
+        case $line in
+          "ld-linux"*) exec "${LD_LINUX}" --inhibit-cache "${CLI_BIN}" "$@" ;;
+          *) exec "${LD_LINUX}" "${CLI_BIN}" "$@" ;;
+        esac
+      else
+        exec "${CLI_BIN}" "$@"
+      fi
+    fi
+  done
+  # First argument didn't match any known tool
+  echo "Unknown command: $1"
+  echo ""
+  echo "Usage: $(basename "$ARGV0") [COMMAND] [ARGS...]"
+  echo ""
+  echo "When run without a command, the QPxTool GUI is started."
+  echo "Available commands:"
+  for tool in $CLI_TOOLS; do
+    echo "  $tool"
+  done
+  exit 1
+fi
+
+if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ] ; then
+  echo "No display server found (DISPLAY and WAYLAND_DISPLAY are unset)."
+  echo "The QPxTool GUI cannot start without a graphical environment."
+  echo ""
+  echo "You can use the following CLI tools instead:"
+  echo ""
+  echo "Usage: $(basename "$ARGV0") COMMAND [ARGS...]"
+  echo ""
+  echo "Available commands:"
+  for tool in $CLI_TOOLS; do
+    echo "  $tool"
+  done
+  exit 1
+fi
+
 if [ -e "$LD_LINUX" ] ; then
   case $line in
     "ld-linux"*) exec "${LD_LINUX}" --inhibit-cache "${MAIN_BIN}" "$@" ;;
