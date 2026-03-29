@@ -16,4 +16,3 @@
 #include <qscand_defs.h>
 
 #endif // QSCAND_H
-

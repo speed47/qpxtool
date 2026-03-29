@@ -28,7 +28,7 @@ class QPxPreferences : public QDialog {
 	Q_OBJECT
 
 public:
-	QPxPreferences(QPxSettings *iset, QWidget *p=0, Qt::WindowFlags f=Qt::WindowFlags());
+	QPxPreferences(QPxSettings* iset, QWidget* p = 0, Qt::WindowFlags f = Qt::WindowFlags());
 	virtual ~QPxPreferences();
 
 public slots:
@@ -47,19 +47,17 @@ private:
 	int curPage;
 
 	QPxSettings set;
-	QPxSettings *set_old;
+	QPxSettings* set_old;
 
-	QHBoxLayout	*layout;
-	ImagesList	*ilist;
+	QHBoxLayout* layout;
+	ImagesList* ilist;
 
-	QVBoxLayout	*parea;
-	QFrame		*hline0;
-	QHBoxLayout	*layout_butt;
-	QPushButton *pb_save,
-				*pb_cancel;
-//	QWidget*	pagew;
-	QWidget*	pages[PREF_PAGES];
+	QVBoxLayout* parea;
+	QFrame* hline0;
+	QHBoxLayout* layout_butt;
+	QPushButton *pb_save, *pb_cancel;
+	//	QWidget*	pagew;
+	QWidget* pages[PREF_PAGES];
 };
 
 #endif
-

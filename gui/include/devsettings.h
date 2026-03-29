@@ -32,11 +32,10 @@ class TextSlider;
 class QPxSettings;
 class device;
 
-class devSettings : public QDialog
-{
+class devSettings : public QDialog {
 	Q_OBJECT
 public:
-	devSettings(QPxSettings *iset, device *idev, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags());
+	devSettings(QPxSettings* iset, device* idev, QWidget* p = 0, Qt::WindowFlags fl = Qt::WindowFlags());
 	~devSettings();
 
 public slots:
@@ -45,14 +44,13 @@ private slots:
 	void setPage(int);
 
 private:
-	QBoxLayout  *layout;
-	QBoxLayout  *layoutc;
-	ImagesList	*ilist;
-	QWidget     *cpage;
+	QBoxLayout* layout;
+	QBoxLayout* layoutc;
+	ImagesList* ilist;
+	QWidget* cpage;
 
-	QPxSettings	*set;
-	device		*dev;
+	QPxSettings* set;
+	device* dev;
 };
 
 #endif
-

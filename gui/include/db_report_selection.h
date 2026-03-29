@@ -29,11 +29,10 @@ class QBoxLayout;
 class QEvent;
 class QTextBrowser;
 
-class ListModel : public QAbstractListModel
-{
+class ListModel : public QAbstractListModel {
 	Q_OBJECT
 public:
-	ListModel(QObject *p) : QAbstractListModel(p) {};
+	ListModel(QObject* p) : QAbstractListModel(p) {};
 	~ListModel() {};
 
 	void clear();
@@ -43,22 +42,20 @@ public:
 	void addRow(int, QString, QIcon icon = QIcon());
 	bool setData(int, int role, QVariant);
 	void removeRow(int);
-	int  getKey(int);
+	int getKey(int);
 
 private:
-	QList<QString>		tdata;
-	QList<QIcon>		idata;
-	QList<int>		keys;
+	QList<QString> tdata;
+	QList<QIcon> idata;
+	QList<int> keys;
 };
 
 
-
-class DbReportSelection : public QDialog
-{
+class DbReportSelection : public QDialog {
 	Q_OBJECT
 
 public:
-	DbReportSelection(QString conn, QWidget *parent = NULL, Qt::WindowFlags fl = Qt::WindowFlags());
+	DbReportSelection(QString conn, QWidget* parent = NULL, Qt::WindowFlags fl = Qt::WindowFlags());
 	~DbReportSelection();
 	int getReportID() const { return report_id; };
 
@@ -68,29 +65,24 @@ private slots:
 	void itemActivated(const QModelIndex);
 
 protected:
-	bool eventFilter(QObject *o, QEvent *e);
+	bool eventFilter(QObject* o, QEvent* e);
 	static QImage getMediaLogo(quint64);
 
 private:
 	void winit();
 
-	QBoxLayout	*layout,
-				*layout_l,
-				*layout_pb;
-	QTextBrowser *info;
+	QBoxLayout *layout, *layout_l, *layout_pb;
+	QTextBrowser* info;
 
-	QLabel		*llabel;
-	QLineEdit	*elabel;
-	QToolButton *elabel_clear,
-				*elabel_search;
-	QListView	*list;
-	QPushButton	*pb_load,
-				*pb_cancel;
+	QLabel* llabel;
+	QLineEdit* elabel;
+	QToolButton *elabel_clear, *elabel_search;
+	QListView* list;
+	QPushButton *pb_load, *pb_cancel;
 
-	ListModel	*model;
+	ListModel* model;
 	QSqlDatabase db;
-	int			report_id;
+	int report_id;
 };
 
 #endif // DB_REPORT_SELECTION
-

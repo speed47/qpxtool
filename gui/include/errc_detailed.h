@@ -24,15 +24,14 @@ class QPxSettings;
 class device;
 class devlist;
 
-class ErrcDetailedDialog : public QDialog
-{
+class ErrcDetailedDialog : public QDialog {
 	Q_OBJECT
 
 public:
-	ErrcDetailedDialog(QPxSettings *iset, devlist *idev, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags());
+	ErrcDetailedDialog(QPxSettings* iset, devlist* idev, QWidget* p = 0, Qt::WindowFlags fl = Qt::WindowFlags());
 	~ErrcDetailedDialog();
 	void updateAll();
-	void updateGraphs(device *idev = NULL);
+	void updateGraphs(device* idev = NULL);
 
 signals:
 	void closed();
@@ -44,22 +43,21 @@ protected slots:
 	void changeScale();
 
 private:
-	devlist		*devices;
-	QPxSettings	*settings;
+	devlist* devices;
+	QPxSettings* settings;
 	const char** labels;
 
-	QGridLayout *layout;
-	QGridLayout *layout_top;
-	QPxGraph	*graph[8];
+	QGridLayout* layout;
+	QGridLayout* layout_top;
+	QPxGraph* graph[8];
 
-	QGridLayout *layout_summary;
-	QLabel		*pl_tot, *pl_max, *pl_avg;
-	QFrame		*hline0, *hline1;
-	QLabel		*pl_name[8];
-	QLabel		*l_tot[8];
-	QLabel		*l_max[8];
-	QLabel		*l_avg[8];
+	QGridLayout* layout_summary;
+	QLabel *pl_tot, *pl_max, *pl_avg;
+	QFrame *hline0, *hline1;
+	QLabel* pl_name[8];
+	QLabel* l_tot[8];
+	QLabel* l_max[8];
+	QLabel* l_avg[8];
 };
 
 #endif
-

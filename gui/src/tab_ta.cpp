@@ -25,16 +25,14 @@
 
 #include <colorlabel.h>
 
-tabTA::tabTA(QPxSettings *iset, devlist *idev, QString iname, QWidget *p, Qt::WindowFlags fl)
-	: QWidget(p, fl)
-{
+tabTA::tabTA(QPxSettings* iset, devlist* idev, QString iname, QWidget* p, Qt::WindowFlags fl) : QWidget(p, fl) {
 #ifndef QT_NO_DEBUG
 	qDebug("STA: tabTA()");
 #endif
 	settings = iset;
 	devices = idev;
-	name    = iname;
-//	prevTvalid = 0;
+	name = iname;
+	//	prevTvalid = 0;
 	clock_gettime(CLOCK_MONOTONIC, &prevT);
 	settings->loadScale(name);
 
@@ -52,26 +50,28 @@ tabTA::tabTA(QPxSettings *iset, devlist *idev, QString iname, QWidget *p, Qt::Wi
 	layoutg->setSpacing(3);
 	layout->addLayout(layoutg);
 
-// Layer selection
-	box_layer = new QGroupBox(tr("Layer"),this);
+	// Layer selection
+	box_layer = new QGroupBox(tr("Layer"), this);
 	layoutl->addWidget(box_layer);
 	lay_layer = new QVBoxLayout(box_layer);
 
 	grp_layer = new QButtonGroup(box_layer);
-	layer0 = new QRadioButton(tr("Layer")+" 0", box_layer); layer0->setChecked(true);
+	layer0 = new QRadioButton(tr("Layer") + " 0", box_layer);
+	layer0->setChecked(true);
 	lay_layer->addWidget(layer0);
 	grp_layer->addButton(layer0, 0);
-	layer1 = new QRadioButton(tr("Layer")+" 1", box_layer);
+	layer1 = new QRadioButton(tr("Layer") + " 1", box_layer);
 	lay_layer->addWidget(layer1);
 	grp_layer->addButton(layer1, 1);
 
-// Zone Selection
-	box_zone = new QGroupBox(tr("Zone"),this);
+	// Zone Selection
+	box_zone = new QGroupBox(tr("Zone"), this);
 	layoutl->addWidget(box_zone);
 	lay_zone = new QVBoxLayout(box_zone);
 
 	grp_zone = new QButtonGroup(box_zone);
-	zone0 = new QRadioButton(tr("Inner"), box_zone); zone0->setChecked(true);
+	zone0 = new QRadioButton(tr("Inner"), box_zone);
+	zone0->setChecked(true);
 	lay_zone->addWidget(zone0);
 	grp_zone->addButton(zone0, 0);
 	zone1 = new QRadioButton(tr("Middle"), box_zone);
@@ -84,21 +84,21 @@ tabTA::tabTA(QPxSettings *iset, devlist *idev, QString iname, QWidget *p, Qt::Wi
 // Legend
 #ifdef __LEGEND_SHOW_TA
 	cl_pit = new ColorLabel(settings->col_tapit, tr("Pit"), 0, this);
-	cl_pit->setMinimumSize(100,20);
+	cl_pit->setMinimumSize(100, 20);
 	layoutl->addWidget(cl_pit);
 
 	cl_land = new ColorLabel(settings->col_taland, tr("Land"), 0, this);
-	cl_land->setMinimumSize(100,20);
+	cl_land->setMinimumSize(100, 20);
 	layoutl->addWidget(cl_land);
 #endif
 
 	layoutl->addStretch(10);
 
-// Test time
+	// Test time
 	grp_time = new QGroupBox(tr("Time"), this);
 	grp_time->setMinimumWidth(100);
 	layoutl->addWidget(grp_time);
-	
+
 	layoutt = new QVBoxLayout(grp_time);
 	layoutt->setContentsMargins(3, 3, 3, 3);
 	layoutt->setSpacing(0);
@@ -108,11 +108,11 @@ tabTA::tabTA(QPxSettings *iset, devlist *idev, QString iname, QWidget *p, Qt::Wi
 	ltime->setMinimumHeight(22);
 	QFont tfont = ltime->font();
 	tfont.setFamily("Monospace");
-	ltime->setFont( tfont );
+	ltime->setFont(tfont);
 
 	layoutt->addWidget(ltime);
 
-// Graphs...
+	// Graphs...
 	graphPit = new QPxGraph(iset, idev, name, TEST_TA, this);
 	graphPit->setModeTA(0);
 	layoutg->addWidget(graphPit);
@@ -121,11 +121,11 @@ tabTA::tabTA(QPxSettings *iset, devlist *idev, QString iname, QWidget *p, Qt::Wi
 	graphLand->setModeTA(1);
 	layoutg->addWidget(graphLand);
 
-	connect(grp_layer, SIGNAL(idClicked(int)), graphPit,  SLOT(setLayerTA(int)));
+	connect(grp_layer, SIGNAL(idClicked(int)), graphPit, SLOT(setLayerTA(int)));
 	connect(grp_layer, SIGNAL(idClicked(int)), graphLand, SLOT(setLayerTA(int)));
 
-	connect(grp_zone , SIGNAL(idClicked(int)), graphPit,  SLOT(setZoneTA(int)));
-	connect(grp_zone , SIGNAL(idClicked(int)), graphLand, SLOT(setZoneTA(int)));
+	connect(grp_zone, SIGNAL(idClicked(int)), graphPit, SLOT(setZoneTA(int)));
+	connect(grp_zone, SIGNAL(idClicked(int)), graphLand, SLOT(setZoneTA(int)));
 
 	clear();
 #ifndef QT_NO_DEBUG
@@ -133,36 +133,32 @@ tabTA::tabTA(QPxSettings *iset, devlist *idev, QString iname, QWidget *p, Qt::Wi
 #endif
 }
 
-tabTA::~tabTA()
-{
+tabTA::~tabTA() {
 #ifndef QT_NO_DEBUG
 	qDebug("STA: ~tabTA()");
 	qDebug("END: ~tabTA()");
 #endif
 }
 
-void tabTA::clear()
-{
+void tabTA::clear() {
 #ifndef QT_NO_DEBUG
 	qDebug("tabTA::clear()");
 #endif
 }
 
 
-void tabTA::selectDevice()
-{
+void tabTA::selectDevice() {
 #ifndef QT_NO_DEBUG
 	qDebug("tabTA::selectDevice()");
 #endif
-	device *dev = devices->current();
+	device* dev = devices->current();
 	graphPit->update();
 	graphLand->update();
-	QObject::connect( dev, SIGNAL(doneMInfo(int)), this, SLOT(updateAll()) );
-	QObject::connect( dev, SIGNAL(block_TA()), this, SLOT(updateLast()) );
+	QObject::connect(dev, SIGNAL(doneMInfo(int)), this, SLOT(updateAll()));
+	QObject::connect(dev, SIGNAL(block_TA()), this, SLOT(updateLast()));
 }
 
-void tabTA::updateAll()
-{
+void tabTA::updateAll() {
 	if (devices->current()->media.layers.toInt() < 2) {
 		layer0->setChecked(true);
 		layer1->setEnabled(false);
@@ -172,23 +168,20 @@ void tabTA::updateAll()
 	updateLast();
 }
 
-void tabTA::updateLast()
-{
+void tabTA::updateLast() {
 	graphPit->update();
 	graphLand->update();
 }
 
-void tabTA::reconfig()
-{
+void tabTA::reconfig() {
 	graphPit->update();
 	graphLand->update();
 }
 
-void tabTA::drawGraph(QImage& img, device *dev, int ttype, int eflags)
-{
+void tabTA::drawGraph(QImage& img, device* dev, int ttype, int eflags) {
 	int w = img.width();
 	int h = img.height();
-	QSize s(w,h);
+	QSize s(w, h);
 	QRect r(0, 0, w, h);
 	QPainter p(&img);
 
@@ -198,4 +191,3 @@ void tabTA::drawGraph(QImage& img, device *dev, int ttype, int eflags)
 		graphPit->drawGraph(&p, s, dev, ttype, r, eflags & (~1), FORCE_REPAINT);
 	}
 }
-

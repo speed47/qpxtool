@@ -23,35 +23,24 @@ class QGroupBox;
 class QLabel;
 class QCheckBox;
 
-class prefCommon : public QWidget
-{
+class prefCommon : public QWidget {
 	Q_OBJECT
 
 public:
-	prefCommon(QPxSettings *iset, QWidget *p=0, Qt::WindowFlags fl=Qt::WindowFlags());
+	prefCommon(QPxSettings* iset, QWidget* p = 0, Qt::WindowFlags fl = Qt::WindowFlags());
 	~prefCommon();
 
 private:
-	QVBoxLayout	*layout;
+	QVBoxLayout* layout;
 
-	QCheckBox	*ck_autow,
-				*ck_autob;
+	QCheckBox *ck_autow, *ck_autob;
 
-	QLabel		*pl_testsw,
-				*pl_testsb;
-	QGridLayout	*layout_testsb;
+	QLabel *pl_testsw, *pl_testsb;
+	QGridLayout* layout_testsb;
 
-	QCheckBox	*ck_rt,
-				*ck_wt,
-				*ck_wt_simul,
-				*ck_errc,
-				*ck_jb,
-				*ck_ftb,
-				*ck_ftw,
-				*ck_ta;
+	QCheckBox *ck_rt, *ck_wt, *ck_wt_simul, *ck_errc, *ck_jb, *ck_ftb, *ck_ftw, *ck_ta;
 
-	QPxSettings *set;
+	QPxSettings* set;
 };
 
 #endif
-

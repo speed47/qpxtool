@@ -25,16 +25,15 @@
 
 #include <QDebug>
 
-GraphTab::GraphTab(QPxSettings *iset, devlist *idev, QString iname, int test, QWidget *p, Qt::WindowFlags fl)
-	: QWidget(p,fl)
-{
+GraphTab::GraphTab(QPxSettings* iset, devlist* idev, QString iname, int test, QWidget* p, Qt::WindowFlags fl)
+    : QWidget(p, fl) {
 #ifndef QT_NO_DEBUG
 	qDebug("STA: GraphTab()");
 #endif
 	settings = iset;
 	devices = idev;
-	name    = iname;
-//	prevTvalid = 0;
+	name = iname;
+	//	prevTvalid = 0;
 	clock_gettime(CLOCK_MONOTONIC, &prevT);
 	settings->loadScale(name);
 
@@ -53,17 +52,17 @@ GraphTab::GraphTab(QPxSettings *iset, devlist *idev, QString iname, int test, QW
 	layoutl = new QVBoxLayout(lw);
 	layoutl->setContentsMargins(0, 0, 0, 0);
 	layoutl->setSpacing(3);
-//	layout->addLayout(layoutl);
+	//	layout->addLayout(layoutl);
 
 	infow = new QWidget(lw);
 	infow->setMinimumWidth(80);
-	layoutl->addWidget(infow,20);
-//	layoutl->addStretch(1);
+	layoutl->addWidget(infow, 20);
+	//	layoutl->addStretch(1);
 
 	grp_time = new QGroupBox(tr("Time"), lw);
 	grp_time->setMinimumWidth(100);
-	layoutl->addWidget(grp_time,1);
-	
+	layoutl->addWidget(grp_time, 1);
+
 	layoutt = new QVBoxLayout(grp_time);
 	layoutt->setContentsMargins(3, 3, 3, 3);
 	layoutt->setSpacing(0);
@@ -73,7 +72,7 @@ GraphTab::GraphTab(QPxSettings *iset, devlist *idev, QString iname, int test, QW
 	ltime->setMinimumHeight(22);
 	QFont tfont = ltime->font();
 	tfont.setFamily("Monospace");
-	ltime->setFont( tfont );
+	ltime->setFont(tfont);
 
 	layoutt->addWidget(ltime);
 
@@ -82,7 +81,7 @@ GraphTab::GraphTab(QPxSettings *iset, devlist *idev, QString iname, int test, QW
 	layout->addWidget(vline0);
 
 	graph = new QPxGraph(iset, idev, name, test, this);
-//	graph->setDataNames(QStringList() << "speed_rt" << "speed_wt");
+	//	graph->setDataNames(QStringList() << "speed_rt" << "speed_wt");
 	layout->addWidget(graph);
 
 	clear();
@@ -97,42 +96,39 @@ void GraphTab::clear() {}
 
 void GraphTab::infoToggle() { lw->setVisible(!lw->isVisible()); }
 
-void GraphTab::updateLast(int time, bool *Tvalid, bool force)
-{
+void GraphTab::updateLast(int time, bool* Tvalid, bool force) {
 	struct timespec curT;
 	float dt;
 	clock_gettime(CLOCK_MONOTONIC, &curT);
 
-//	if (prevTvalid)
+	//	if (prevTvalid)
 	dt = curT.tv_sec - prevT.tv_sec + (curT.tv_nsec - prevT.tv_nsec) / 1000000000.0;
-//	if (!prevTvalid || dt>0.5) {
-	if (force || dt>0.5) {
+	//	if (!prevTvalid || dt>0.5) {
+	if (force || dt > 0.5) {
 		int s = time % 60;
 		int m = (time - s) / 60;
-		ltime->setText(QString("%1:%2").arg(m).arg(s, 2,10, QChar('0')));	
+		ltime->setText(QString("%1:%2").arg(m).arg(s, 2, 10, QChar('0')));
 
 		clock_gettime(CLOCK_MONOTONIC, &prevT);
-	//	prevTvalid = 1;
+		//	prevTvalid = 1;
 		if (force) {
 			graph->update();
 		} else {
 			int x = graph->getLastX();
-			graph->update(x, 0, graph->width()-x, graph->height());
+			graph->update(x, 0, graph->width() - x, graph->height());
 		}
-		if (Tvalid) *Tvalid=1;
+		if (Tvalid) *Tvalid = 1;
 		return;
 	}
-	if (Tvalid) *Tvalid=0;
+	if (Tvalid) *Tvalid = 0;
 }
 
-void GraphTab::drawGraph(QImage& img, device *dev, int ttype, int eflags)
-{
+void GraphTab::drawGraph(QImage& img, device* dev, int ttype, int eflags) {
 	int w = img.width();
 	int h = img.height();
-	QSize s(w,h);
+	QSize s(w, h);
 	QRect r(0, 0, w, h);
 	QPainter p(&img);
 
 	graph->drawGraph(&p, s, dev, ttype, r, (ttype == TEST_ERRC) ? eflags : 0, FORCE_REPAINT);
 }
-

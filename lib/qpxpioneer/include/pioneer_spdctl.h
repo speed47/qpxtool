@@ -12,26 +12,20 @@
 #ifndef __pioneer_spdctl
 #define __pioneer_spdctl
 
-#define PIO_SILENT_STD	 0x00
-#define PIO_SILENT_PERF	 0x01
+#define PIO_SILENT_STD 0x00
+#define PIO_SILENT_PERF 0x01
 #define PIO_SILENT_QUIET 0x02
 
-const str_dev pioneer_silent_tbl[]={
-  "Standard",
-  "Performance",
-  "Quiet"};
+const str_dev pioneer_silent_tbl[] = {"Standard", "Performance", "Quiet"};
 
-#define PIO_SPD_NOLIMIT	0x00
-#define PIO_SPD_LIMIT	0x01
+#define PIO_SPD_NOLIMIT 0x00
+#define PIO_SPD_LIMIT 0x01
 
-#define PIO_PURE_READ_STD     0x00
-#define PIO_PURE_READ_MASTER  0x01
+#define PIO_PURE_READ_STD 0x00
+#define PIO_PURE_READ_MASTER 0x01
 #define PIO_PURE_READ_PERFECT 0x02
 
-const str_dev pioneer_pureread_tbl[]={
-	"Standard",
-	"Master",
-	"Perfect"};
+const str_dev pioneer_pureread_tbl[] = {"Standard", "Master", "Perfect"};
 
 extern int pioneer_get_quiet(drive_info* drive);
 extern int pioneer_set_quiet(drive_info* drive, char silent, bool limit, bool save);
@@ -42,4 +36,3 @@ extern int pioneer_set_peakpower(drive_info* drive, bool en, bool save);
 extern int pioneer_set_pureread(drive_info* drive, char pr);
 
 #endif
-

@@ -19,9 +19,7 @@
 #include "about.h"
 #include "version.h"
 
-AboutDialog::AboutDialog(QWidget *p, Qt::WindowFlags fl)
-	: QDialog(p,fl)
-{
+AboutDialog::AboutDialog(QWidget* p, Qt::WindowFlags fl) : QDialog(p, fl) {
 	QFile f;
 
 	setWindowTitle(tr("About QPxTool"));
@@ -33,7 +31,7 @@ AboutDialog::AboutDialog(QWidget *p, Qt::WindowFlags fl)
 	lversion = new QLabel("QPxTool version " VERSION, this);
 	lversion->setAlignment(Qt::AlignCenter);
 	layout->addWidget(lversion);
-	
+
 	tw = new QTabWidget(this);
 	layout->addWidget(tw);
 
@@ -56,9 +54,7 @@ AboutDialog::AboutDialog(QWidget *p, Qt::WindowFlags fl)
 	tw->addTab(te_about, tr("About QPxTool"));
 	tw->addTab(te_licence, tr("Licence"));
 
-	resize(600,400);
+	resize(600, 400);
 }
 
 AboutDialog::~AboutDialog() {}
-
-

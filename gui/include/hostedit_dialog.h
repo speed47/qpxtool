@@ -21,28 +21,26 @@ class QLabel;
 class QDialogButtonBox;
 class QGridLayout;
 
-class hostEditDialog : public QDialog
-{
+class hostEditDialog : public QDialog {
 	Q_OBJECT
 public:
-	hostEditDialog(QString host, int port, QWidget* p=NULL, Qt::WindowFlags f=Qt::WindowFlags());
+	hostEditDialog(QString host, int port, QWidget* p = NULL, Qt::WindowFlags f = Qt::WindowFlags());
 	~hostEditDialog();
 	inline QString hostname() { return e_host->text(); };
-	inline int     port()     { return e_port->value(); };
+	inline int port() { return e_port->value(); };
 
 private slots:
 	void setPortDfl();
 	void hostChanged(const QString&);
 
 private:
-	QGridLayout			*layout;
-	QLabel				*l_host;
-	QLineEdit			*e_host;
-	QLabel				*l_port;
-	QSpinBox			*e_port;
-	QPushButton			*bdef;
-	QDialogButtonBox	*bbox;
+	QGridLayout* layout;
+	QLabel* l_host;
+	QLineEdit* e_host;
+	QLabel* l_port;
+	QSpinBox* e_port;
+	QPushButton* bdef;
+	QDialogButtonBox* bbox;
 };
 
 #endif
-

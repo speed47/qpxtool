@@ -15,12 +15,11 @@
 
 #include <QWidget>
 
-class SplitButton : public QWidget
-{
+class SplitButton : public QWidget {
 	Q_OBJECT
 
 public:
-	SplitButton(Qt::Orientation o, QWidget *p=0, Qt::WindowFlags f=Qt::WindowFlags());
+	SplitButton(Qt::Orientation o, QWidget* p = 0, Qt::WindowFlags f = Qt::WindowFlags());
 	~SplitButton();
 
 protected:
@@ -39,4 +38,3 @@ signals:
 };
 
 #endif
-

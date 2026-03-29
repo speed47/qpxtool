@@ -19,30 +19,29 @@
 #include <qscan_plugin.h>
 
 // ************* Scan init commands *********
-int scan_tsst::cmd_cd_errc_init() {
-	return seek(dev,0);
-}
+int scan_tsst::cmd_cd_errc_init() { return seek(dev, 0); }
 
 // DVD part is same as Lite-On
 
 int scan_tsst::cmd_dvd_errc_init() {
-// 2B 00 00 00 00 00 00 00 00 00
+	// 2B 00 00 00 00 00 00 00 00 00
 	dev->cmd[0] = 0x2B;
-	if ((dev->err=dev->cmd.transport(NONE,NULL,0))){
-		sperror ("TSST INIT DVD ERRC",dev->err); return 1;
+	if ((dev->err = dev->cmd.transport(NONE, NULL, 0))) {
+		sperror("TSST INIT DVD ERRC", dev->err);
+		return 1;
 	}
 	printf("TSST INIT DVD ERRC: OK\n");
 	return 0;
 }
 
 // **********************
-int scan_tsst::cmd_cd_errc_block(cd_errc *data)
-{
+int scan_tsst::cmd_cd_errc_block(cd_errc* data) {
 	dev->cmd[0] = 0xF3;
 	dev->cmd[1] = 0x0E;
 	dev->cmd[8] = 0x4B;
-	if ((dev->err=dev->cmd.transport(READ,dev->rd_buf,8))){
-		sperror ("TSST Cx SCAN INTERVAL",dev->err); return 1;
+	if ((dev->err = dev->cmd.transport(READ, dev->rd_buf, 8))) {
+		sperror("TSST Cx SCAN INTERVAL", dev->err);
+		return 1;
 	}
 #if 0
 	for (int i=0; i<8; i++) {
@@ -52,28 +51,28 @@ int scan_tsst::cmd_cd_errc_block(cd_errc *data)
 #endif
 	lba = ntoh32(dev->rd_buf);
 
-	data->bler = ntoh16(dev->rd_buf+4);
+	data->bler = ntoh16(dev->rd_buf + 4);
 	data->e11 = 0;
 	data->e21 = 0;
 	data->e31 = 0;
 	data->e12 = 0;
-	data->e22 = ntoh16(dev->rd_buf+6);
+	data->e22 = ntoh16(dev->rd_buf + 6);
 	data->e32 = 0;
 	data->uncr = 0;
 	return 0;
 }
 
 
-int scan_tsst::cmd_dvd_errc_block(dvd_errc *data)
-{
-//	int i;
-//	*pie = 0;
+int scan_tsst::cmd_dvd_errc_block(dvd_errc* data) {
+	//	int i;
+	//	*pie = 0;
 
 	dev->cmd[0] = 0xF3;
 	dev->cmd[1] = 0x0E;
 	dev->cmd[8] = 0x10;
-	if ((dev->err=dev->cmd.transport(READ,dev->rd_buf,10))){
-		sperror ("TSST PI SCAN INTERVAL",dev->err); return 1;
+	if ((dev->err = dev->cmd.transport(READ, dev->rd_buf, 10))) {
+		sperror("TSST PI SCAN INTERVAL", dev->err);
+		return 1;
 	}
 #if 0
 	for (int i=0; i<8; i++) {
@@ -82,18 +81,18 @@ int scan_tsst::cmd_dvd_errc_block(dvd_errc *data)
 	printf("\n");
 #endif
 
-// Data Received:
-// 00000000  00 00 00 8E 00 00 00 00                           ...Ž....        
-//	lba+=16;
+	// Data Received:
+	// 00000000  00 00 00 8E 00 00 00 00                           ...Ž....
+	//	lba+=16;
 
-//	lba = ((dev->rd_buf[1] << 16 )& 0xFF0000) + ((dev->rd_buf[2] << 8)&0xFF00 ) + (dev->rd_buf[3] & 0xFF);
+	//	lba = ((dev->rd_buf[1] << 16 )& 0xFF0000) + ((dev->rd_buf[2] << 8)&0xFF00 ) + (dev->rd_buf[3] & 0xFF);
 	lba = ntoh32(dev->rd_buf);
 
-	data->pie = ntoh16(dev->rd_buf+4);
-//	data->pi8 = 0;
-	data->pif = ntoh16(dev->rd_buf+6);
+	data->pie = ntoh16(dev->rd_buf + 4);
+	//	data->pi8 = 0;
+	data->pif = ntoh16(dev->rd_buf + 6);
 	data->poe = 0;
-//	data->po8 = 0;
+	//	data->po8 = 0;
 	data->pof = 0;
 	return 0;
 }

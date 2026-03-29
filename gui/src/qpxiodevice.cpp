@@ -23,27 +23,24 @@
 #ifndef QT_NO_DEBUG
 //#define QPXIO_DEBUG
 #endif
-	
-QPxIODevice::QPxIODevice(QObject* p)
-	:QObject(p)
-{
+
+QPxIODevice::QPxIODevice(QObject* p) : QObject(p) {
 	buf = "";
 	io = NULL;
 }
 
 QPxIODevice::~QPxIODevice() {}
 
-void QPxIODevice::setIODevice(QIODevice* iio)
-{
+void QPxIODevice::setIODevice(QIODevice* iio) {
 #ifdef QPXIO_DEBUG
 	qDebug("STA: QPxIODevice::setIODevice()");
 #endif
 	buf = "";
 	io = iio;
 	if (io) {
-		if ( typeid(*io) == typeid(QProcess) )
+		if (typeid(*io) == typeid(QProcess))
 			connect(io, SIGNAL(readyReadStandardOutput()), this, SLOT(splitInput()));
-		else if ( typeid(*io) == typeid(QTcpSocket) )
+		else if (typeid(*io) == typeid(QTcpSocket))
 			connect(io, SIGNAL(readyRead()), this, SLOT(splitInput()));
 	}
 #ifdef QPXIO_DEBUG
@@ -53,33 +50,31 @@ void QPxIODevice::setIODevice(QIODevice* iio)
 
 QIODevice* QPxIODevice::IODevice() { return io; }
 
-QString QPxIODevice::readLine()
-{
-	QString ts="";
+QString QPxIODevice::readLine() {
+	QString ts = "";
 	if (lines.size()) {
 		ts = lines[0];
 		lines.removeFirst();
 	}
-	return ts; 
+	return ts;
 }
 
 int QPxIODevice::linesAvailable() { return lines.size(); }
 
-void QPxIODevice::splitInput()
-{
+void QPxIODevice::splitInput() {
 #ifdef QPXIO_DEBUG
 	qDebug("STA: QPxIODevice::splitInput()");
 #endif
 
-	int    bi;
+	int bi;
 	qint64 ba;
 	while ((ba = io->bytesAvailable())) {
-	//while ((io->bytesAvailable())) {
+		//while ((io->bytesAvailable())) {
 #ifdef QPXIO_DEBUG
 		qDebug() << "IODevice bytes: " << ba;
 #endif
 
-/*
+		/*
 #ifdef QPXIO_DEBUG
 		if ( typeid(*io) == typeid(QTcpSocket) ) {
 //			QByteArray tb;
@@ -94,22 +89,21 @@ void QPxIODevice::splitInput()
 		}
 #else
 */
-		buf+=io->readAll().replace(0,'\n');
-/*
+		buf += io->readAll().replace(0, '\n');
+		/*
 #endif
 */
-		while ((bi = buf.indexOf(QRegularExpression("[\n\r]"),0)) >=0 ) {
-			if (bi>0) {
+		while ((bi = buf.indexOf(QRegularExpression("[\n\r]"), 0)) >= 0) {
+			if (bi > 0) {
 				lines << buf.left(bi);
-				buf.remove(0,bi);
+				buf.remove(0, bi);
 			}
-			buf.remove(0,1);
+			buf.remove(0, 1);
 		}
-//		if (lines.size() > 4) emit readyReadLine();
+		//		if (lines.size() > 4) emit readyReadLine();
 	}
 	if (lines.size()) emit readyReadLine();
 #ifdef QPXIO_DEBUG
 	qDebug("END: QPxIODevice::splitInput()");
 #endif
 }
-

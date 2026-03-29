@@ -45,26 +45,32 @@ class TestDialog;
 class QTextDocument;
 
 #ifndef QT_NO_DEBUG
-class QMutex2 : public QMutex
-{
+class QMutex2 : public QMutex {
 public:
-	inline void lock()
-		{ qDebug(" * QMutex::lock()"); QMutex::lock(); } ;
-	inline bool tryLock()
-		{ qDebug(" * QMutex::trylock()"); return QMutex::tryLock(); } ;
-	inline bool tryLock(int to)
-		{ qDebug(" * QMutex::trylock(int)"); return QMutex::tryLock(to); } ;
-	inline void unlock()
-		{ qDebug(" * QMutex::unlock()"); QMutex::unlock(); } ;
+	inline void lock() {
+		qDebug(" * QMutex::lock()");
+		QMutex::lock();
+	};
+	inline bool tryLock() {
+		qDebug(" * QMutex::trylock()");
+		return QMutex::tryLock();
+	};
+	inline bool tryLock(int to) {
+		qDebug(" * QMutex::trylock(int)");
+		return QMutex::tryLock(to);
+	};
+	inline void unlock() {
+		qDebug(" * QMutex::unlock()");
+		QMutex::unlock();
+	};
 };
 #endif
 
-class QPxToolMW : public QMainWindow
-{
+class QPxToolMW : public QMainWindow {
 	Q_OBJECT
 
 public:
-	QPxToolMW(int ac, char **av, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags());
+	QPxToolMW(int ac, char** av, QWidget* p = 0, Qt::WindowFlags fl = Qt::WindowFlags());
 	~QPxToolMW();
 
 public slots:
@@ -82,7 +88,7 @@ private slots:
 	void selectTab();
 
 	void select_tests();
-	void select_tests(device *idev);
+	void select_tests(device* idev);
 	void run_tests();
 	void cancel_run_tests();
 	void terminate_tests();
@@ -101,7 +107,7 @@ private slots:
 	void print_results();
 	void export_results();
 	void save_results();
-	void save_results_db(device *idev = NULL);
+	void save_results_db(device* idev = NULL);
 	void load_results();
 	void load_results(QString);
 	void load_results_db();
@@ -116,7 +122,7 @@ protected:
 	virtual void dropEvent(QDropEvent*);
 
 private:
-	ProgressWidget *progress;
+	ProgressWidget* progress;
 	void winit();
 	void create_actions();
 	void winit_menubar();
@@ -129,72 +135,56 @@ private:
 	void scanbus_remote();
 	void update_media_info(device* dev);
 	void run_test(int);
-//	void prepare_images(QString path=QString::null);
+	//	void prepare_images(QString path=QString::null);
 	void autosave_report(device* dev);
 	void save_report(device* dev, QString fname);
 	void prepare_report(device* dev, QTextDocument*);
-	QString generate_html(device *dev, QString idir = QString());
+	QString generate_html(device* dev, QString idir = QString());
 
-//	infoTypeT		infoType;
+	//	infoTypeT		infoType;
 	device::devtype dt;
-	QString			dhost;
-	int				dport;
-	QPxIODevice		*scanbusio;
+	QString dhost;
+	int dport;
+	QPxIODevice* scanbusio;
 #ifndef QT_NO_DEBUG
-	QMutex2	 mutex_dev;
+	QMutex2 mutex_dev;
 #else
-	QMutex	 mutex_dev;
+	QMutex mutex_dev;
 #endif
-//	bool	 scanbusDis;
+	//	bool	 scanbusDis;
 
-	QMenuBar *menubar;
+	QMenuBar* menubar;
 
-	QToolBar *toolbar;
-	QAction		*act_exit,
-				*act_pref,
-				*act_save,
-				*act_save_db,
-				*act_load,
-				*act_load_db,
-				*act_export,
-				*act_report,
-				*act_print,
-				*act_scanbus,
-				*act_minfo,
-				*act_devctl,
-				*act_test,
-				*act_stop,
-				*act_about;
+	QToolBar* toolbar;
+	QAction *act_exit, *act_pref, *act_save, *act_save_db, *act_load, *act_load_db, *act_export, *act_report,
+	    *act_print, *act_scanbus, *act_minfo, *act_devctl, *act_test, *act_stop, *act_about;
 
-	QAction		    *act_sb;
+	QAction* act_sb;
 	QList<QAction*> act_sblist;
-	QActionGroup    *act_sbgrp;
+	QActionGroup* act_sbgrp;
 
-	QWidget		*cwidget;
+	QWidget* cwidget;
 
-	QVBoxLayout *layout;
-	QHBoxLayout *layout_dev;
-	QLabel		*l_dev;
-	QComboBox	*c_dev;
-	QPushButton	*pb_loej;
-	QPushButton	*pb_lock;
-//	QFrame		*hline;
-	QPxMainWidget *mwidget;
+	QVBoxLayout* layout;
+	QHBoxLayout* layout_dev;
+	QLabel* l_dev;
+	QComboBox* c_dev;
+	QPushButton* pb_loej;
+	QPushButton* pb_lock;
+	//	QFrame		*hline;
+	QPxMainWidget* mwidget;
 
-// statusbar widgets
-	QProgressBar *status_progress;
-	QLabel		 *status_process,
-				 *status_media,
-				 *status_mid;
+	// statusbar widgets
+	QProgressBar* status_progress;
+	QLabel *status_process, *status_media, *status_mid;
 
-	TestDialog	*testDialog;
+	TestDialog* testDialog;
 
-	devlist			devices; // devices
-//	QSqlDatabase	db;		 // reports database connection
-// settings
-	QPxSettings		set;
-	bool			splash;
+	devlist devices; // devices
+	                 //	QSqlDatabase	db;		 // reports database connection
+	                 // settings
+	QPxSettings set;
+	bool splash;
 };
 
 #endif
-

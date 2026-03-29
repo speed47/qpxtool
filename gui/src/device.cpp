@@ -28,41 +28,40 @@
 
 #ifndef QT_NO_DEBUG
 #include <QDebug>
-static int devcnt=0;
+static int devcnt = 0;
 #endif
 
-void ErrcADD(Errc<int64_t> *tot, const Errc<int>& o) {
-	for (int i=0; i<8; i++)
+void ErrcADD(Errc<int64_t>* tot, const Errc<int>& o) {
+	for (int i = 0; i < 8; i++)
 		if (o.raw.err[i] > 0) tot->raw.err[i] += o.raw.err[i];
 };
 
-void ErrcMAX(Errc<int> *max, const Errc<int>& o) {
-	for (int i=0; i<8; i++)
+void ErrcMAX(Errc<int>* max, const Errc<int>& o) {
+	for (int i = 0; i < 8; i++)
 		if (max->raw.err[i] < o.raw.err[i]) max->raw.err[i] = o.raw.err[i];
 };
 
-void CDErrcAVG(Errc<float> *avg, Errc<int64_t> *tot, uint64_t blocks) {
-	if (!blocks) blocks=1;
-	for (int i=0; i<8; i++)
-		avg->raw.err[i] = (float) tot->raw.err[i] / blocks;
+void CDErrcAVG(Errc<float>* avg, Errc<int64_t>* tot, uint64_t blocks) {
+	if (!blocks) blocks = 1;
+	for (int i = 0; i < 8; i++) avg->raw.err[i] = (float)tot->raw.err[i] / blocks;
 };
 
-void DVDErrcAVG(Errc<float> *avg, Errc<int64_t> *tot, uint64_t blocks) {
-	avg->dvd.pie = (float) tot->dvd.pie / blocks;
-	avg->dvd.pif = (float) tot->dvd.pif / blocks;
-	avg->dvd.poe = (float) tot->dvd.poe / blocks;
-	avg->dvd.pof = (float) tot->dvd.pof / blocks;
-	avg->dvd.uncr = (float) tot->dvd.uncr / blocks;
+void DVDErrcAVG(Errc<float>* avg, Errc<int64_t>* tot, uint64_t blocks) {
+	avg->dvd.pie = (float)tot->dvd.pie / blocks;
+	avg->dvd.pif = (float)tot->dvd.pif / blocks;
+	avg->dvd.poe = (float)tot->dvd.poe / blocks;
+	avg->dvd.pof = (float)tot->dvd.pof / blocks;
+	avg->dvd.uncr = (float)tot->dvd.uncr / blocks;
 	if (blocks >= 8) {
-		avg->dvd.pi8 = (float) tot->dvd.pi8 / ( blocks >> 3);
-		avg->dvd.po8 = (float) tot->dvd.po8 / ( blocks >> 3);
+		avg->dvd.pi8 = (float)tot->dvd.pi8 / (blocks >> 3);
+		avg->dvd.po8 = (float)tot->dvd.po8 / (blocks >> 3);
 	}
 };
 
-void BDErrcAVG(Errc<float> *avg, Errc<int64_t> *tot, uint64_t blocks) {
-	avg->bd.ldc = (float) tot->bd.ldc / blocks;
-	avg->bd.bis = (float) tot->bd.bis / blocks;
-	avg->bd.uncr = (float) tot->bd.uncr / blocks;
+void BDErrcAVG(Errc<float>* avg, Errc<int64_t>* tot, uint64_t blocks) {
+	avg->bd.ldc = (float)tot->bd.ldc / blocks;
+	avg->bd.bis = (float)tot->bd.bis / blocks;
+	avg->bd.uncr = (float)tot->bd.uncr / blocks;
 };
 
 static device NullDev(NULL);
@@ -73,13 +72,11 @@ static device NullDev(NULL);
  *
  */
 
-devlist::devlist()
-	: QList<device*>()
-{
+devlist::devlist() : QList<device*>() {
 #ifndef QT_NO_DEBUG
 	qDebug("* STA: devlist()");
 #endif
-	devidx=-1;
+	devidx = -1;
 #ifndef QT_NO_DEBUG
 	qDebug("* END: devlist()");
 #endif
@@ -98,25 +95,25 @@ devlist::~devlist() {
 int devlist::idx() { return devidx; };
 
 void devlist::setIdx(int iidx) {
-	if (iidx<0 || iidx>=size()) {
-		devidx=-1;
-		return; 
+	if (iidx < 0 || iidx >= size()) {
+		devidx = -1;
+		return;
 	}
-	devidx=iidx;
+	devidx = iidx;
 };
 
 void devlist::clear() {
-	device *dev;
+	device* dev;
 	while (size()) {
 		dev = takeLast();
 		dev->stopWatcher();
 		delete dev;
 	}
-	devidx=-1; 
+	devidx = -1;
 };
 
 device* devlist::current() {
-	if (devidx<0 || devidx>=size()) return &NullDev;
+	if (devidx < 0 || devidx >= size()) return &NullDev;
 	return (*this)[devidx];
 };
 
@@ -126,30 +123,28 @@ device* devlist::current() {
  *
  */
 
-device::device(QObject* p)
-	: QObject(p)
-{
+device::device(QObject* p) : QObject(p) {
 #ifndef QT_NO_DEBUG
-	qDebug() << "* STA: device(): " << this << " #"<< devcnt++ << " parent: "<< p;
+	qDebug() << "* STA: device(): " << this << " #" << devcnt++ << " parent: " << p;
 #endif
-	preserveMediaInfo=0;
-	running=0;
+	preserveMediaInfo = 0;
+	running = 0;
 	type = DevtypeNone;
 	host = "";
 	port = 0;
 	info_set = 0;
 
 	rpc_phase = -1;
-	rpc_reg   = -1;
-	rpc_ch    = -1;
-	rpc_rst   = -1;
+	rpc_reg = -1;
+	rpc_ch = -1;
+	rpc_rst = -1;
 
 	plextor_lock = 0;
 
 	asdb.clear();
 	clearMinfo();
 
-	cap	   = 0;
+	cap = 0;
 	cap_rd = 0;
 	cap_wr = 0;
 
@@ -179,13 +174,13 @@ device::device(QObject* p)
 	pprocess = 0.0;
 	nprocess = "";
 
-	test_cap=0;
-	test_req=0;
+	test_cap = 0;
+	test_req = 0;
 	tests = 0;
 	ctest = 0;
 	WT_simul = 1;
 
-	const char *env_liteon = getenv("LITEON_FORCE_OLD");
+	const char* env_liteon = getenv("LITEON_FORCE_OLD");
 	liteon_force_old = (env_liteon && strcmp(env_liteon, "1") == 0);
 	hldtst_test_mode = false;
 	force_probe = false;
@@ -206,13 +201,13 @@ device::device(QObject* p)
 	resReader = new ResultsReader(this);
 	resWriter = new ResultsWriter(this);
 
-if (!p) {
+	if (!p) {
 #ifndef QT_NO_DEBUG
 		qDebug() << "device: NULL parent!";
 #endif
 	} else {
-		connect(this, SIGNAL(doneMInfo(int)),     p, SLOT(mediaUpdated(int)));
-		connect(this, SIGNAL(process_started()),  p, SLOT(process_started()));
+		connect(this, SIGNAL(doneMInfo(int)), p, SLOT(mediaUpdated(int)));
+		connect(this, SIGNAL(process_started()), p, SLOT(process_started()));
 		connect(this, SIGNAL(process_finished()), p, SLOT(process_finished()));
 		connect(this, SIGNAL(process_progress()), p, SLOT(process_progress()));
 	}
@@ -223,15 +218,12 @@ if (!p) {
 #endif
 };
 
-device::~device()
-{
+device::~device() {
 #ifndef QT_NO_DEBUG
-	qDebug() << "* STA: ~device(): " << this << " #"<< --devcnt;
+	qDebug() << "* STA: ~device(): " << this << " #" << --devcnt;
 #endif
 	stopWatcher();
-	if (mwatcher) {
-		delete mwatcher;
-	}
+	if (mwatcher) { delete mwatcher; }
 	QTreeWidgetItem* item;
 #ifdef MINFO_TREE
 	while (info_media.size()) {
@@ -247,50 +239,46 @@ device::~device()
 	}
 */
 #endif
-//	mutex->unlock();
+	//	mutex->unlock();
 	delete mutex;
 #ifndef QT_NO_DEBUG
 	qDebug() << "* END: ~device()";
 #endif
 };
 
-bool device::isRunning()
-{
-	return running;
-};
+bool device::isRunning() { return running; };
 
-void device::clearMinfo()
-{
+void device::clearMinfo() {
 	QTreeWidgetItem* item;
 
 	testData.clear();
 
-//	media.isCD      = 0;
-//	media.isDVD     = 0;
-	media.label		= "";
-	media.type		= "-";
-	media.category	= "-";
-	media.mid		= "-";
-	media.erasable	= "-";
-	media.layers	= "-";
-	media.ilayers	= 1;
-	media.gbpl	= "-";
-	media.igbpl	= 25;
-	media.prot		= "-";
-	media.regions	= "-";
-	media.creads	= 0;
-	media.creadm	= 0;
-	media.creadmsf	= "";
-	media.cfrees	= 0;
-	media.cfreem	= 0;
-	media.cfreemsf	= "";
-	media.ctots		= 0;
-	media.ctotm		= 0;
-	media.ctotmsf	= "";
-	media.dstate	= "-";
-	media.sstate	= "-";
-	media.writer	= "-";
-	media.grec      = 0.0;
+	//	media.isCD      = 0;
+	//	media.isDVD     = 0;
+	media.label = "";
+	media.type = "-";
+	media.category = "-";
+	media.mid = "-";
+	media.erasable = "-";
+	media.layers = "-";
+	media.ilayers = 1;
+	media.gbpl = "-";
+	media.igbpl = 25;
+	media.prot = "-";
+	media.regions = "-";
+	media.creads = 0;
+	media.creadm = 0;
+	media.creadmsf = "";
+	media.cfrees = 0;
+	media.cfreem = 0;
+	media.cfreemsf = "";
+	media.ctots = 0;
+	media.ctotm = 0;
+	media.ctotmsf = "";
+	media.dstate = "-";
+	media.sstate = "-";
+	media.writer = "-";
+	media.grec = 0.0;
 	media.rspeeds.clear();
 	media.wspeedsd.clear();
 	media.wspeedsm.clear();
@@ -306,8 +294,7 @@ void device::clearMinfo()
 #endif
 };
 
-bool device::start()
-{
+bool device::start() {
 #ifndef QT_NO_DEBUG
 	qDebug() << "STA: device::start(" << threadType << ")";
 #endif
@@ -318,8 +305,8 @@ bool device::start()
 #endif
 		return false;
 	}
-	stop=0;
-	running=1;
+	stop = 0;
+	running = 1;
 	switch (threadType) {
 		case threadDevice:
 		case threadMedia:
@@ -339,7 +326,7 @@ bool device::start()
 #ifndef QT_NO_DEBUG
 			qDebug() << "END: device::start()";
 #endif
-			running=0;
+			running = 0;
 			return false;
 	}
 
@@ -349,25 +336,22 @@ bool device::start()
 	return true;
 }
 
-bool device::start_update_info()
-{
+bool device::start_update_info() {
 #ifndef QT_NO_DEBUG
 	qDebug() << "STA: device::start_update_info(" << threadType << ")";
 #endif
-	if (threadType==threadMedia && !preserveMediaInfo) {
+	if (threadType == threadMedia && !preserveMediaInfo) {
 		clearMinfo();
-//		mwidget->update();
-// TODO: mwidget->clearMedia() call
+		//		mwidget->update();
+		// TODO: mwidget->clearMedia() call
 		//mwidget->clearMedia();
 	}
 
 	//if (devices.idx()<0 || devices.idx()>= devices.size() || (threadType!=infoDevice && threadType!=infoMedia)) {
-	if (type == DevtypeNone) {
-		goto update_info_err;
-	}
-//	if (threadType == infoDevice) {
-//		
-//	}
+	if (type == DevtypeNone) { goto update_info_err; }
+	//	if (threadType == infoDevice) {
+	//
+	//	}
 	if (proc) {
 		delete proc;
 		proc = NULL;
@@ -377,8 +361,7 @@ bool device::start_update_info()
 		sock = NULL;
 	}
 
-	QObject::connect(io, SIGNAL(readyReadLine()),
-		this, SLOT(qscan_process_info()));
+	QObject::connect(io, SIGNAL(readyReadLine()), this, SLOT(qscan_process_info()));
 
 	if (type == DevtypeLocal) {
 #ifndef QT_NO_DEBUG
@@ -390,66 +373,56 @@ bool device::start_update_info()
 #endif
 		io->setIODevice(proc);
 		proc->setReadChannel(QProcess::StandardOutput);
-		QObject::connect(proc, SIGNAL(readyReadStandardError()),
-				this, SLOT(readStderr()));
+		QObject::connect(proc, SIGNAL(readyReadStandardError()), this, SLOT(readStderr()));
 
-//		QObject::connect(proc, SIGNAL(readyReadStandardOutput()),
-//				this, SLOT(qscan_process_info()));
+		//		QObject::connect(proc, SIGNAL(readyReadStandardOutput()),
+		//				this, SLOT(qscan_process_info()));
 
 		switch (threadType) {
 			case threadDevice:
 				startProcess("qscan", QStringList() << "-d" << path << "-Ip");
 				break;
-			case threadMedia:
-				{
-					QStringList qopts;
-					qopts << "-d" << path;
-					if (!plugin.isEmpty())
-						qopts << "--force-plugin" << plugin;
-					if (liteon_force_old)
-						qopts << "--liteon-force-old";
-					if (hldtst_test_mode)
-						qopts << "--hldtst-test-mode";
-					if (force_probe)
-						qopts << "--force-probe";
-					qopts << "-m";
-					startProcess("qscan", qopts);
-				}
-				break;
+			case threadMedia: {
+				QStringList qopts;
+				qopts << "-d" << path;
+				if (!plugin.isEmpty()) qopts << "--force-plugin" << plugin;
+				if (liteon_force_old) qopts << "--liteon-force-old";
+				if (hldtst_test_mode) qopts << "--hldtst-test-mode";
+				if (force_probe) qopts << "--force-probe";
+				qopts << "-m";
+				startProcess("qscan", qopts);
+			} break;
 			case threadGetFeatures:
 				startProcess("cdvdcontrol", QStringList() << "-d" << path << "-c");
 				break;
 			case threadGetASDB:
 				startProcess("cdvdcontrol", QStringList() << "-d" << path << "--as-list");
 				break;
-			case threadMQCK:
-				{
-					QStringList cdvdopts;
-					cdvdopts << "-d" << path;
-					cdvdopts << "--mqck" << ((features.as_act_mode & ASMQCK_ADV) ? "advanced" : "quick");
-					cdvdopts << "--mqck-speed" << QString::number(features.as_mqckspd);
+			case threadMQCK: {
+				QStringList cdvdopts;
+				cdvdopts << "-d" << path;
+				cdvdopts << "--mqck" << ((features.as_act_mode & ASMQCK_ADV) ? "advanced" : "quick");
+				cdvdopts << "--mqck-speed" << QString::number(features.as_mqckspd);
 
 #ifndef QT_NO_DEBUG
-					qDebug() << cdvdopts;
+				qDebug() << cdvdopts;
 #endif
-					startProcess("cdvdcontrol", cdvdopts );
-				}
-				break;
-			case threadAScre:
-				{
-					QStringList cdvdopts;
-					cdvdopts << "-d" << path << "--as-create";
-					cdvdopts << ((features.as_act_mode & ASCRE_FULL) ? "f" : "q");
-					cdvdopts << ((features.as_act_mode & ASCRE_REPLACE) ? "r" : "a");
+				startProcess("cdvdcontrol", cdvdopts);
+			} break;
+			case threadAScre: {
+				QStringList cdvdopts;
+				cdvdopts << "-d" << path << "--as-create";
+				cdvdopts << ((features.as_act_mode & ASCRE_FULL) ? "f" : "q");
+				cdvdopts << ((features.as_act_mode & ASCRE_REPLACE) ? "r" : "a");
 
 #ifndef QT_NO_DEBUG
-					qDebug() << cdvdopts;
+				qDebug() << cdvdopts;
 #endif
-					startProcess("cdvdcontrol", cdvdopts );
-				}
-				break;
+				startProcess("cdvdcontrol", cdvdopts);
+			} break;
 			case threadDestruct:
-				startProcess("cdvdcontrol", QStringList() << "-d" << path << "--destruct" << (features.as_act_mode ? "full" : "quick"));
+				startProcess("cdvdcontrol", QStringList() << "-d" << path << "--destruct"
+				                                          << (features.as_act_mode ? "full" : "quick"));
 				break;
 			case threadTattoo:
 				startProcess("f1tattoo", QStringList() << "-d" << path << "--tattoo-raw" << features.tattoo_file);
@@ -463,15 +436,13 @@ bool device::start_update_info()
 #endif
 			goto update_info_err;
 		}
-		QObject::connect(proc, SIGNAL(finished(int, QProcess::ExitStatus)),
-				this, SLOT(qscan_callback_info()));
+		QObject::connect(proc, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(qscan_callback_info()));
 #ifndef QT_NO_DEBUG
 		qDebug("qscan (local) started");
 #endif
 		goto update_info_end;
 	} else if (type == device::DevtypeTCP) {
-		if ((threadType != threadDevice) && (threadType != threadMedia))
-			goto update_info_err;
+		if ((threadType != threadDevice) && (threadType != threadMedia)) goto update_info_err;
 
 #ifndef QT_NO_DEBUG
 		qDebug("device: TCP");
@@ -482,8 +453,8 @@ bool device::start_update_info()
 #endif
 		io->setIODevice(sock);
 
-//		QObject::connect(sock, SIGNAL(readyRead()),
-//			this, SLOT(qscan_process_info()));
+		//		QObject::connect(sock, SIGNAL(readyRead()),
+		//			this, SLOT(qscan_process_info()));
 
 		sock->connectToHost(host, port);
 		if (!sock->waitForConnected(5000)) {
@@ -506,8 +477,7 @@ bool device::start_update_info()
 			default:
 				goto update_info_err;
 		}
-		QObject::connect(sock, SIGNAL(disconnected()),
-				this, SLOT(qscan_callback_info()));
+		QObject::connect(sock, SIGNAL(disconnected()), this, SLOT(qscan_callback_info()));
 #ifndef QT_NO_DEBUG
 		qDebug("qscan (TCP) started");
 #endif
@@ -527,8 +497,7 @@ update_info_end:
 	return true;
 }
 
-void device::qscan_callback_info()
-{
+void device::qscan_callback_info() {
 	int xcode = 0;
 	ThreadType ttype = threadType;
 #ifndef QT_NO_DEBUG
@@ -536,12 +505,11 @@ void device::qscan_callback_info()
 #endif
 	io_mutex->lock();
 
-	QObject::disconnect(io, SIGNAL(readyReadLine()),
-		this, SLOT(qscan_process_info()));
+	QObject::disconnect(io, SIGNAL(readyReadLine()), this, SLOT(qscan_process_info()));
 
 	if (type == DevtypeLocal) {
-//		QObject::disconnect(proc, SIGNAL(finished(int, QProcess::ExitStatus)),
-//				this, SLOT(qscan_callback_info()));
+		//		QObject::disconnect(proc, SIGNAL(finished(int, QProcess::ExitStatus)),
+		//				this, SLOT(qscan_callback_info()));
 		xcode = proc->exitCode();
 #ifndef QT_NO_DEBUG
 		qDebug() << "qscan (local) finished: " << xcode;
@@ -550,11 +518,9 @@ void device::qscan_callback_info()
 		disconnect(proc);
 		io->setIODevice(NULL);
 	} else if (type == device::DevtypeTCP) {
-//		QObject::disconnect(sock, SIGNAL(disconnected()),
-//				this, SLOT(qscan_callback_info()));
-		if (sock != NULL) {
-			sock->disconnectFromHost();
-		}
+		//		QObject::disconnect(sock, SIGNAL(disconnected()),
+		//				this, SLOT(qscan_callback_info()));
+		if (sock != NULL) { sock->disconnectFromHost(); }
 #ifndef QT_NO_DEBUG
 		qDebug("qscan (TCP) finished");
 #endif
@@ -563,7 +529,7 @@ void device::qscan_callback_info()
 	}
 	io_mutex->unlock();
 	threadType = threadNone;
-	running=0;
+	running = 0;
 	mutex->unlock();
 
 	nprocess = "";
@@ -591,8 +557,7 @@ void device::qscan_callback_info()
 #endif
 }
 
-bool device::update_device_info()
-{
+bool device::update_device_info() {
 	if (running) return false;
 	plugin_names.clear();
 	plugin_infos.clear();
@@ -602,8 +567,7 @@ bool device::update_device_info()
 	return start();
 }
 
-bool device::update_media_info()
-{
+bool device::update_media_info() {
 #ifndef QT_NO_DEBUG
 	qDebug("device::update_media_info()");
 #endif
@@ -618,8 +582,7 @@ bool device::update_media_info()
 	return start();
 }
 
-void device::clear_media_info()
-{
+void device::clear_media_info() {
 #ifndef QT_NO_DEBUG
 	qDebug("device::clear_media_info()");
 #endif
@@ -627,60 +590,52 @@ void device::clear_media_info()
 	emit doneMInfo(0);
 }
 
-bool device::update_plugin_info()
-{
+bool device::update_plugin_info() {
 	if (running) return false;
 	preserveMediaInfo = true;
 	threadType = threadMedia;
 	return start();
 }
 
-bool device::getFeatures()
-{
+bool device::getFeatures() {
 	if (running) return false;
 	threadType = threadGetFeatures;
 	return start();
 }
 
-bool device::getASDB()
-{
+bool device::getASDB() {
 	if (running) return false;
 	threadType = threadGetASDB;
 	asdb.clear();
 	return start();
 }
 
-bool device::startMqck()
-{
+bool device::startMqck() {
 	if (running) return false;
 	threadType = threadMQCK;
 	return start();
 }
 
-bool device::startAScre()
-{
+bool device::startAScre() {
 	if (running) return false;
 	threadType = threadAScre;
 	return start();
 }
 
-bool device::startDestruct()
-{
+bool device::startDestruct() {
 	if (running) return false;
 	threadType = threadDestruct;
 	return start();
 }
 
-bool device::startTattoo()
-{
+bool device::startTattoo() {
 	if (running) return false;
 	threadType = threadTattoo;
 	return start();
 }
 
-bool device::setFeature(int f, bool en)
-{
-	int r=1;
+bool device::setFeature(int f, bool en) {
+	int r = 1;
 #ifndef QT_NO_DEBUG
 	qDebug() << "device::setFeature: " << f << en;
 #endif
@@ -697,7 +652,7 @@ bool device::setFeature(int f, bool en)
 		pauseWatcher();
 
 		cdvdopts << "-d" << path;
-		switch(f) {
+		switch (f) {
 			case FEATURE_LOEJ:
 				if (en) {
 					cdvdopts << "--load" << "--loej-immed";
@@ -757,7 +712,7 @@ bool device::setFeature(int f, bool en)
 		r = QProcess::execute("cdvdcontrol", cdvdopts);
 		unpauseWatcher();
 	} else if (type == device::DevtypeTCP) {
-		switch(f) {
+		switch (f) {
 			default:
 				mutex->unlock();
 				return false;
@@ -767,9 +722,8 @@ bool device::setFeature(int f, bool en)
 	return !!r;
 }
 
-bool device::setComplexFeature(int f, DevFeatures* data)
-{
-	int r=1;
+bool device::setComplexFeature(int f, DevFeatures* data) {
+	int r = 1;
 #ifndef QT_NO_DEBUG
 	qDebug() << "device::setComplexFeature: " << f;
 #endif
@@ -788,7 +742,7 @@ bool device::setComplexFeature(int f, DevFeatures* data)
 		QStringList cdvdopts;
 
 		cdvdopts << "-d" << path;
-		switch(f) {
+		switch (f) {
 			case FEATURE_GIGAREC:
 				if (data->enabled & FEATURE_GIGAREC) {
 					cdvdopts << "--gigarec" << QString("%1").arg(data->grec, 3, 'f', 1);
@@ -800,7 +754,7 @@ bool device::setComplexFeature(int f, DevFeatures* data)
 				if (data->enabled & FEATURE_VARIREC_CD) {
 					cdvdopts << "--varirec-cd" << QString::number(data->vrec_cd_pwr);
 					if (data->supported & FEATURE_VARIREC_CDEXT) {
-						cdvdopts << "--varirec-cd-strategy" << QString::number(data->vrec_cd_str-1);
+						cdvdopts << "--varirec-cd-strategy" << QString::number(data->vrec_cd_str - 1);
 					}
 				} else {
 					cdvdopts << "--varirec-cd" << "off";
@@ -809,7 +763,7 @@ bool device::setComplexFeature(int f, DevFeatures* data)
 			case FEATURE_VARIREC_DVD:
 				if (data->enabled & FEATURE_VARIREC_DVD) {
 					cdvdopts << "--varirec-dvd" << QString::number(data->vrec_dvd_pwr);
-					cdvdopts << "--varirec-dvd-strategy" << QString::number(data->vrec_dvd_str-1);
+					cdvdopts << "--varirec-dvd-strategy" << QString::number(data->vrec_dvd_str - 1);
 				} else {
 					cdvdopts << "--varirec-dvd" << "off";
 				}
@@ -828,7 +782,7 @@ bool device::setComplexFeature(int f, DevFeatures* data)
 					cdvdopts << "--sm-cd-wr" << QString::number(data->sm_cd_wr);
 					if (cap_rd & DEVICE_DVD) {
 						cdvdopts << "--sm-dvd-rd" << QString::number(data->sm_dvd_rd);
-//						cdvdopts << "--sm-dvd-wr" << QString::number(data->sm_dvd_wr);
+						//						cdvdopts << "--sm-dvd-wr" << QString::number(data->sm_dvd_wr);
 					}
 					cdvdopts << "--sm-access" << (data->sm_access ? "fast" : "slow");
 					cdvdopts << "--sm-load" << QString::number(data->sm_trayl);
@@ -879,7 +833,7 @@ bool device::setComplexFeature(int f, DevFeatures* data)
 				break;
 			case FEATURE_PIOQUIET:
 				cdvdopts << "--pio-quiet";
-				switch(data->pioq_quiet) {
+				switch (data->pioq_quiet) {
 					case PIOQ_QUIET:
 						cdvdopts << "quiet";
 						break;
@@ -894,9 +848,8 @@ bool device::setComplexFeature(int f, DevFeatures* data)
 						return 1;
 				}
 				cdvdopts << "--pio-limit";
-				cdvdopts << ((features.enabled & FEATURE_PIOLIMIT) ? "on" : "off");	
-				if (data->pioq_nosave)
-					cdvdopts << "--pio-nosave";
+				cdvdopts << ((features.enabled & FEATURE_PIOLIMIT) ? "on" : "off");
+				if (data->pioq_nosave) cdvdopts << "--pio-nosave";
 				break;
 			default:
 				mutex->unlock();
@@ -907,7 +860,7 @@ bool device::setComplexFeature(int f, DevFeatures* data)
 #endif
 		r = QProcess::execute("cdvdcontrol", cdvdopts);
 	} else if (type == device::DevtypeTCP) {
-		switch(f) {
+		switch (f) {
 			default:
 				mutex->unlock();
 				return 1;
@@ -917,16 +870,14 @@ bool device::setComplexFeature(int f, DevFeatures* data)
 	return !!r;
 }
 
-bool device::start_tests() 
-{
+bool device::start_tests() {
 	if (running) return false;
 	threadType = threadTest;
 	tests = test_req;
 	return start();
 }
-	
-bool device::stop_tests()
-{
+
+bool device::stop_tests() {
 	if (!running) {
 		qWarning() << "stop_tests(): not running, aborting";
 		return false;
@@ -937,8 +888,7 @@ bool device::stop_tests()
 			qWarning() << "stop_tests(): proc is null, aborting";
 			return false;
 		}
-		qWarning() << "stop_tests(): killing proc, pid=" << proc->processId()
-		           << "state=" << proc->state();
+		qWarning() << "stop_tests(): killing proc, pid=" << proc->processId() << "state=" << proc->state();
 		proc->kill();
 	} else if (type == device::DevtypeTCP) {
 		if (!sock) return false;
@@ -950,9 +900,8 @@ bool device::stop_tests()
 	return true;
 }
 
-bool device::next_test()
-{
-	ctest=0;
+bool device::next_test() {
+	ctest = 0;
 	QString stest;
 #ifndef QT_NO_DEBUG
 	qDebug("STA: device::next_test()");
@@ -993,26 +942,26 @@ bool device::next_test()
 		stest = "ta";
 		nprocess = tr("Time Analyser");
 		testData.clearTA();
-//		test_spd = tspeeds.ta;
+		//		test_spd = tspeeds.ta;
 	}
 
 	tests &= ~ctest;
 	if (!ctest) {
 		threadType = threadNone;
-		running=0;
+		running = 0;
 		mutex->unlock();
 #ifndef QT_NO_DEBUG
 		qDebug("END: device::next_test(): to tests remaining");
 #endif
-//		nprocess = "";
+		//		nprocess = "";
 		emit testsDone();
 		return false;
 	}
 
 #ifndef QT_NO_DEBUG
-		qDebug() << "device::next_test(): starting test " << stest << " at speed " << test_spd;
+	qDebug() << "device::next_test(): starting test " << stest << " at speed " << test_spd;
 #endif
-/*
+	/*
 	run_test("rt");
 	run_test("errc");
 	run_test("jb");
@@ -1020,9 +969,7 @@ bool device::next_test()
 	run_test("ta");
 */
 
-	if (type == DevtypeNone) {
-		goto next_test_err;
-	}
+	if (type == DevtypeNone) { goto next_test_err; }
 	if (proc) {
 		delete proc;
 		proc = NULL;
@@ -1034,8 +981,7 @@ bool device::next_test()
 
 	emit process_started();
 
-	QObject::connect(io, SIGNAL(readyReadLine()),
-		this, SLOT(qscan_process_test()));
+	QObject::connect(io, SIGNAL(readyReadLine()), this, SLOT(qscan_process_test()));
 
 	if (type == DevtypeLocal) {
 		QStringList qopts;
@@ -1048,28 +994,20 @@ bool device::next_test()
 #endif
 		io->setIODevice(proc);
 		proc->setReadChannel(QProcess::StandardOutput);
-		QObject::connect(proc, SIGNAL(readyReadStandardError()),
-				this, SLOT(readStderr()));
+		QObject::connect(proc, SIGNAL(readyReadStandardError()), this, SLOT(readStderr()));
 
-//		QObject::connect(proc, SIGNAL(readyReadStandardOutput()),
-//				this, SLOT(qscan_process_test()));
+		//		QObject::connect(proc, SIGNAL(readyReadStandardOutput()),
+		//				this, SLOT(qscan_process_test()));
 
 		qopts << "-d" << path << "-t" << stest << "-s" << QString::number(test_spd);
-		if (stest == "wt" && !WT_simul)
-			qopts << "-W";
-		if (stest != "rt" && stest != "wt" && !plugin.isEmpty()) {
-			qopts << "--force-plugin" << plugin;
-		}
-		if (liteon_force_old)
-			qopts << "--liteon-force-old";
-		if (hldtst_test_mode)
-			qopts << "--hldtst-test-mode";
-		if (force_probe)
-			qopts << "--force-probe";
+		if (stest == "wt" && !WT_simul) qopts << "-W";
+		if (stest != "rt" && stest != "wt" && !plugin.isEmpty()) { qopts << "--force-plugin" << plugin; }
+		if (liteon_force_old) qopts << "--liteon-force-old";
+		if (hldtst_test_mode) qopts << "--hldtst-test-mode";
+		if (force_probe) qopts << "--force-probe";
 
 #if (!defined(QT_NO_DEBUG) && 0)
-		for (int i=0;i<qopts.size();i++)
-			qDebug("[" + QString::number(i) + "] "+ qopts[i]);
+		for (int i = 0; i < qopts.size(); i++) qDebug("[" + QString::number(i) + "] " + qopts[i]);
 #endif
 		startProcess("qscan", qopts);
 
@@ -1079,8 +1017,7 @@ bool device::next_test()
 #endif
 			goto next_test_err;
 		}
-		QObject::connect(proc, SIGNAL(finished(int, QProcess::ExitStatus)),
-				this, SLOT(qscan_callback_test()));
+		QObject::connect(proc, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(qscan_callback_test()));
 		clock_gettime(CLOCK_MONOTONIC, &timeSta);
 #ifndef QT_NO_DEBUG
 		qDebug("qscan (local) started");
@@ -1096,8 +1033,8 @@ bool device::next_test()
 #endif
 		io->setIODevice(sock);
 
-//		QObject::connect(sock, SIGNAL(readyRead()),
-//			this, SLOT(qscan_process_test()));
+		//		QObject::connect(sock, SIGNAL(readyRead()),
+		//			this, SLOT(qscan_process_test()));
 
 		sock->connectToHost(host, port);
 		if (!sock->waitForConnected(5000)) {
@@ -1106,14 +1043,12 @@ bool device::next_test()
 #endif
 			goto next_test_err;
 		}
-		QObject::connect(sock, SIGNAL(disconnected()),
-				this, SLOT(qscan_callback_test()));
+		QObject::connect(sock, SIGNAL(disconnected()), this, SLOT(qscan_callback_test()));
 
 		sock->write("set dev=" + path.toLatin1() + "\n");
 		sock->write("set test=" + stest.toLatin1() + "\n");
 		sock->write("set speed=" + QString::number(test_spd).toLatin1() + "\n");
-		if (stest == "wt")
-			sock->write("set simul=" + QString::number(WT_simul).toLatin1() + "\n");
+		if (stest == "wt") sock->write("set simul=" + QString::number(WT_simul).toLatin1() + "\n");
 		sock->write("run\n");
 		sock->write("close\n");
 		clock_gettime(CLOCK_MONOTONIC, &timeSta);
@@ -1136,8 +1071,7 @@ next_test_end:
 	return true;
 }
 
-void device::qscan_process_info()
-{
+void device::qscan_process_info() {
 	QString qout;
 
 #ifndef QT_NO_DEBUG
@@ -1155,9 +1089,9 @@ void device::qscan_process_info()
 #endif
 		return;
 	}
-	while (io->linesAvailable() ) {
+	while (io->linesAvailable()) {
 		qout = io->readLine();
-//		qout.remove("\n");
+		//		qout.remove("\n");
 		emit outputLine(qout);
 		switch (threadType) {
 			case threadDevice:
@@ -1183,7 +1117,7 @@ void device::qscan_process_info()
 #endif
 				break;
 		}
-	//	qDebug(qout.remove("\n"));
+		//	qDebug(qout.remove("\n"));
 	} // while (io->bytesAvailable() )
 	io_mutex->unlock();
 #ifndef QT_NO_DEBUG
@@ -1191,39 +1125,38 @@ void device::qscan_process_info()
 #endif
 }
 
-void device::qscan_process_line(QString& qout)
-{
+void device::qscan_process_line(QString& qout) {
 	QStringList sl;
 #ifdef MINFO_TREE
-	QTreeWidgetItem *info;
+	QTreeWidgetItem* info;
 #endif
 	QIcon ico_ok(":images/ok.png");
-	QIcon ico_x (":images/x.png");
+	QIcon ico_x(":images/x.png");
 	QIcon ico_rd(":images/disc.png");
 	QIcon ico_wr(":images/cdwriter.png");
 
-	if (threadType==threadMedia && preserveMediaInfo) {
+	if (threadType == threadMedia && preserveMediaInfo) {
 		if (!qout.startsWith("IM:")) return;
 		// device inquiry string
-		qout.remove(0,4);
+		qout.remove(0, 4);
 #ifndef QT_NO_DEBUG
 		qDebug() << qout;
 #endif
 		sl = qout.split(':');
-		if (sl.size() <2 ) return;
+		if (sl.size() < 2) return;
 		sl[1].remove('\'');
-		while (!sl[1].isEmpty() && sl[1][0] == ' ') sl[1].remove(0,1);
+		while (!sl[1].isEmpty() && sl[1][0] == ' ') sl[1].remove(0, 1);
 
 
 		if (sl[0].contains("Available quality tests", Qt::CaseInsensitive)) {
-			if (sl.size()>=2) {
+			if (sl.size() >= 2) {
 				QStringList slt = sl[1].split(' ', Qt::SkipEmptyParts);
 				test_cap = 0;
-				for (int ii=0; ii<slt.size(); ii++) {
+				for (int ii = 0; ii < slt.size(); ii++) {
 					test_cap |= (slt[ii] == "errc") ? TEST_ERRC : 0;
-					test_cap |= (slt[ii] == "jb")   ? TEST_JB : 0;
-					test_cap |= (slt[ii] == "ft")   ? TEST_FT : 0;
-					test_cap |= (slt[ii] == "ta")   ? TEST_TA : 0;
+					test_cap |= (slt[ii] == "jb") ? TEST_JB : 0;
+					test_cap |= (slt[ii] == "ft") ? TEST_FT : 0;
+					test_cap |= (slt[ii] == "ta") ? TEST_TA : 0;
 				}
 			}
 		} else if (sl[0].contains("ERRC speeds", Qt::CaseInsensitive)) {
@@ -1231,42 +1164,58 @@ void device::qscan_process_line(QString& qout)
 		} else if (sl[0].contains("ERRC data", Qt::CaseInsensitive)) {
 			QStringList td = sl[1].split(" ", Qt::SkipEmptyParts);
 			media.tdata_errc = 0;
-			for (int ii=0; ii<td.size(); ii++) {
-				if (td[ii] == "BLER")     { media.tdata_errc |= GRAPH_BLER; }
-				else if (td[ii] == "E11") { media.tdata_errc |= GRAPH_E11; }
-				else if (td[ii] == "E21") { media.tdata_errc |= GRAPH_E21; }
-				else if (td[ii] == "E31") { media.tdata_errc |= GRAPH_E31; }
-				else if (td[ii] == "E12") { media.tdata_errc |= GRAPH_E12; }
-				else if (td[ii] == "E22") { media.tdata_errc |= GRAPH_E22; }
-				else if (td[ii] == "E32") { media.tdata_errc |= GRAPH_E32; }
-				else if (td[ii] == "PIE") { media.tdata_errc |= GRAPH_PIE; }
-				else if (td[ii] == "PI8") { media.tdata_errc |= GRAPH_PI8; }
-				else if (td[ii] == "PIF") { media.tdata_errc |= GRAPH_PIF; }
-				else if (td[ii] == "POE") { media.tdata_errc |= GRAPH_POE; }
-				else if (td[ii] == "PO8") { media.tdata_errc |= GRAPH_PO8; }
-				else if (td[ii] == "POF") { media.tdata_errc |= GRAPH_POF; }
-				else if (td[ii] == "LDC") { media.tdata_errc |= GRAPH_LDC; }
-				else if (td[ii] == "BIS") { media.tdata_errc |= GRAPH_BIS; }
-				else if (td[ii] == "UNCR"){ media.tdata_errc |= GRAPH_UNCR; }
+			for (int ii = 0; ii < td.size(); ii++) {
+				if (td[ii] == "BLER") {
+					media.tdata_errc |= GRAPH_BLER;
+				} else if (td[ii] == "E11") {
+					media.tdata_errc |= GRAPH_E11;
+				} else if (td[ii] == "E21") {
+					media.tdata_errc |= GRAPH_E21;
+				} else if (td[ii] == "E31") {
+					media.tdata_errc |= GRAPH_E31;
+				} else if (td[ii] == "E12") {
+					media.tdata_errc |= GRAPH_E12;
+				} else if (td[ii] == "E22") {
+					media.tdata_errc |= GRAPH_E22;
+				} else if (td[ii] == "E32") {
+					media.tdata_errc |= GRAPH_E32;
+				} else if (td[ii] == "PIE") {
+					media.tdata_errc |= GRAPH_PIE;
+				} else if (td[ii] == "PI8") {
+					media.tdata_errc |= GRAPH_PI8;
+				} else if (td[ii] == "PIF") {
+					media.tdata_errc |= GRAPH_PIF;
+				} else if (td[ii] == "POE") {
+					media.tdata_errc |= GRAPH_POE;
+				} else if (td[ii] == "PO8") {
+					media.tdata_errc |= GRAPH_PO8;
+				} else if (td[ii] == "POF") {
+					media.tdata_errc |= GRAPH_POF;
+				} else if (td[ii] == "LDC") {
+					media.tdata_errc |= GRAPH_LDC;
+				} else if (td[ii] == "BIS") {
+					media.tdata_errc |= GRAPH_BIS;
+				} else if (td[ii] == "UNCR") {
+					media.tdata_errc |= GRAPH_UNCR;
+				}
 			}
-//			qDebug() << "Available ERRC data: " << media.tdata_errc;
+			//			qDebug() << "Available ERRC data: " << media.tdata_errc;
 		} else if (sl[0].contains("JB speeds", Qt::CaseInsensitive)) {
 			media.tspeeds_jb = sl[1].split(" ", Qt::SkipEmptyParts);
 		}
 
-		
-		
+
 		return;
 	}
 
 
 	if (qout.startsWith("ID:")) {
 		// main device params
-		qout.remove(0,4);
+		qout.remove(0, 4);
 		sl = qout.split(':');
-		if (sl.size() >=2 ) {
+		if (sl.size() >= 2) {
 			sl[1].remove('\'');
-			while (!sl[1].isEmpty() && sl[1][0] == ' ') sl[1].remove(0,1);
+			while (!sl[1].isEmpty() && sl[1][0] == ' ') sl[1].remove(0, 1);
 
 			if (sl[0].contains("Device", Qt::CaseInsensitive) && !sl[0].contains("capabilities", Qt::CaseInsensitive)) {
 //				l_dev->setText(sl[1]);
@@ -1322,11 +1271,11 @@ void device::qscan_process_line(QString& qout)
 			} else if (sl[0].contains("Resets left", Qt::CaseInsensitive)) {
 				rpc_rst = sl[1].toInt();
 			} else if (sl[0].contains("Device Generic capabilities", Qt::CaseInsensitive)) {
-				cap =    sl[1].toULongLong(0,16);
+				cap = sl[1].toULongLong(0, 16);
 			} else if (sl[0].contains("Device Read capabilities", Qt::CaseInsensitive)) {
-				cap_rd = sl[1].toULongLong(0,16);
+				cap_rd = sl[1].toULongLong(0, 16);
 			} else if (sl[0].contains("Device Write capabilities", Qt::CaseInsensitive)) {
-				cap_wr = sl[1].toULongLong(0,16);
+				cap_wr = sl[1].toULongLong(0, 16);
 			}
 		}
 	} else if (qout.startsWith("CD:")) {
@@ -1356,15 +1305,15 @@ void device::qscan_process_line(QString& qout)
 			*/
 	} else if (qout.startsWith("IM:")) {
 		// device inquiry string
-		qout.remove(0,4);
+		qout.remove(0, 4);
 #ifndef QT_NO_DEBUG
 		qDebug() << qout;
 #endif
 
 		sl = qout.split(':');
-		if (sl.size() >=2 ) {
+		if (sl.size() >= 2) {
 			sl[1].remove('\'');
-			while (!sl[1].isEmpty() && sl[1][0] == ' ') sl[1].remove(0,1);
+			while (!sl[1].isEmpty() && sl[1][0] == ' ') sl[1].remove(0, 1);
 #ifndef QT_NO_DEBUG
 //			qDebug("|" + sl[0] + "|" + sl[1] + "|");
 #endif
@@ -1389,13 +1338,11 @@ void device::qscan_process_line(QString& qout)
 			} else if (sl[0].contains("Layers", Qt::CaseInsensitive)) {
 				media.layers = sl[1];
 				media.ilayers = sl[1].toInt();
-				if (media.ilayers <= 0)
-					media.ilayers = 1; 
+				if (media.ilayers <= 0) media.ilayers = 1;
 			} else if (sl[0].contains("GB Per Layer", Qt::CaseInsensitive)) {
 				media.gbpl = sl[1];
 				media.igbpl = sl[1].toInt();
-				if (media.igbpl <= 0)
-					media.igbpl = 25;
+				if (media.igbpl <= 0) media.igbpl = 25;
 			} else if (sl[0].contains("Protection", Qt::CaseInsensitive)) {
 				media.prot = sl[1];
 			} else if (sl[0].contains("Regions", Qt::CaseInsensitive)) {
@@ -1409,7 +1356,7 @@ void device::qscan_process_line(QString& qout)
 			} else if (sl[0].contains("Read capacity", Qt::CaseInsensitive)) {
 				sl.removeFirst();
 				QStringList sl2 = sl.join(":").split("/");
-				if (sl2.size()>=3) {
+				if (sl2.size() >= 3) {
 					media.creads = sl2[0].remove("sectors").toInt();
 					media.creadm = sl2[1].remove("MB").toInt();
 					media.creadmsf = sl2[2];
@@ -1417,7 +1364,7 @@ void device::qscan_process_line(QString& qout)
 			} else if (sl[0].contains("Free capacity", Qt::CaseInsensitive)) {
 				sl.removeFirst();
 				QStringList sl2 = sl.join(":").split("/");
-				if (sl2.size()>=3) {
+				if (sl2.size() >= 3) {
 					media.cfrees = sl2[0].remove("sectors").toInt();
 					media.cfreem = sl2[1].remove("MB").toInt();
 					media.cfreemsf = sl2[2];
@@ -1425,7 +1372,7 @@ void device::qscan_process_line(QString& qout)
 			} else if (sl[0].contains("Total capacity", Qt::CaseInsensitive)) {
 				sl.removeFirst();
 				QStringList sl2 = sl.join(":").split("/");
-				if (sl2.size()>=3) {
+				if (sl2.size() >= 3) {
 					media.ctots = sl2[0].remove("sectors").toInt();
 					media.ctotm = sl2[1].remove("MB").toInt();
 					media.ctotmsf = sl2[2];
@@ -1440,13 +1387,13 @@ void device::qscan_process_line(QString& qout)
 			} else if (sl[0].contains("RD speed max", Qt::CaseInsensitive)) {
 				l_rd_max->setText(sl[1]);
 			} else if (sl[0].contains("RD speed #", Qt::CaseInsensitive)) {
-				c_rd_lst->addItem(sl[1]);		
+				c_rd_lst->addItem(sl[1]);
 			} else if (sl[0].contains("D WR speed max", Qt::CaseInsensitive)) {
 				l_wr_max->setText(sl[1]);
 			} else if (sl[0].contains("D WR speed #", Qt::CaseInsensitive)) {
 				c_wr_lst->addItem(sl[1]);
 #endif
-/*
+				/*
 			} else if (sl[0].contains("Available quality tests", Qt::CaseInsensitive)) {
 				if (sl.size()>=2) {
 					QStringList slt = sl[1].split(' ', Qt::SkipEmptyParts);
@@ -1466,12 +1413,12 @@ void device::qscan_process_line(QString& qout)
 		info_media.append(info);
 #endif
 	} else if (qout.startsWith("SM:")) {
-		qout.remove(0,4);
+		qout.remove(0, 4);
 #ifndef QT_NO_DEBUG
 		qDebug() << qout;
 #endif
 		sl = qout.split(':');
-		if (sl.size() >=2 ) {
+		if (sl.size() >= 2) {
 			sl[1].remove('\'');
 			if (sl[0].contains("RD speed #", Qt::CaseInsensitive)) {
 				sl[1].remove(QRegularExpression("\\([a-z,A-Z,0-9, /]*\\)"));
@@ -1493,12 +1440,13 @@ void device::qscan_process_line(QString& qout)
 		}
 	} else if (qout.startsWith("Probed plugin:")) {
 		int spidx;
-		QString pn,pi;
+		QString pn, pi;
 		QString tmp = qout.mid(14).simplified();
 		spidx = tmp.indexOf(" ");
-		pn = tmp.mid(0,spidx).simplified();
-		pi = tmp.mid(spidx+1);
-		pi.remove("("); pi.remove(")");
+		pn = tmp.mid(0, spidx).simplified();
+		pi = tmp.mid(spidx + 1);
+		pi.remove("(");
+		pi.remove(")");
 
 		if (!preserveMediaInfo) {
 #ifndef QT_NO_DEBUG
@@ -1515,13 +1463,14 @@ void device::qscan_process_line(QString& qout)
 			detected_plugin.clear();
 	} else if (qout.startsWith("Found plugin:")) {
 		int spidx;
-		QString pn,pi;
-		qout.remove(0,13);
+		QString pn, pi;
+		qout.remove(0, 13);
 		qout = qout.simplified();
 		spidx = qout.indexOf(" ");
-		pn = qout.mid(0,spidx).simplified();
-		pi = qout.mid(spidx+1);
-		pi.remove("("); pi.remove(")");
+		pn = qout.mid(0, spidx).simplified();
+		pi = qout.mid(spidx + 1);
+		pi.remove("(");
+		pi.remove(")");
 
 		if (!preserveMediaInfo) {
 #ifndef QT_NO_DEBUG
@@ -1535,40 +1484,39 @@ void device::qscan_process_line(QString& qout)
 	}
 }
 
-void device::cdvdcontrol_process_line(QString& qout)
-{
+void device::cdvdcontrol_process_line(QString& qout) {
 	QStringList sl;
 	// vendor-specific device features
 #ifndef QT_NO_DEBUG
 	qDebug() << qout;
 #endif
 	sl = qout.split(':');
-	if (sl.size() >=2 ) {
+	if (sl.size() >= 2) {
 		sl[1] = sl[1].simplified();
 		if (sl[0].contains("Lock state", Qt::CaseInsensitive)) {
 			if (sl[1] != "-") {
 				features.supported |= FEATURE_LOCK;
-				features.enabled   |= (sl[1].contains("ON") ? FEATURE_LOCK : 0);
+				features.enabled |= (sl[1].contains("ON") ? FEATURE_LOCK : 0);
 			}
 		} else if (sl[0].contains("Hide-CDR", Qt::CaseInsensitive)) {
 			if (sl[1] != "-") {
 				features.supported |= FEATURE_HIDECDR;
-				features.enabled   |= (sl[1].contains("ON") ? FEATURE_HIDECDR : 0);
+				features.enabled |= (sl[1].contains("ON") ? FEATURE_HIDECDR : 0);
 			}
 		} else if (sl[0].contains("SingleSession", Qt::CaseInsensitive)) {
 			if (sl[1] != "-") {
 				features.supported |= FEATURE_SINGLESESSION;
-				features.enabled   |= (sl[1].contains("ON") ? FEATURE_SINGLESESSION : 0);
+				features.enabled |= (sl[1].contains("ON") ? FEATURE_SINGLESESSION : 0);
 			}
 		} else if (sl[0].contains("SpeedRead", Qt::CaseInsensitive)) {
 			if (sl[1] != "-") {
 				features.supported |= FEATURE_SPEEDREAD;
-				features.enabled   |= (sl[1].contains("ON") ? FEATURE_SPEEDREAD : 0);
+				features.enabled |= (sl[1].contains("ON") ? FEATURE_SPEEDREAD : 0);
 			}
 		} else if (sl[0].contains("PSM Silent State", Qt::CaseInsensitive)) {
 			if (sl[1] != "-") {
 				features.supported |= FEATURE_SILENT;
-				features.enabled   |= (sl[1].contains("ON") ? FEATURE_SILENT : 0);
+				features.enabled |= (sl[1].contains("ON") ? FEATURE_SILENT : 0);
 			}
 		} else if (sl[0].contains("PSM CD Read speed", Qt::CaseInsensitive)) {
 			features.psm_cd_rd = sl[1].remove("X").toInt();
@@ -1576,8 +1524,8 @@ void device::cdvdcontrol_process_line(QString& qout)
 			features.psm_cd_wr = sl[1].remove("X").toInt();
 		} else if (sl[0].contains("PSM DVD Read speed", Qt::CaseInsensitive)) {
 			features.psm_dvd_rd = sl[1].remove("X").toInt();
-//		} else if (sl[0].contains("SM DVD Write speed", Qt::CaseInsensitive)) {
-//			features.sm_dvd_wr = sl[1].toInt();
+			//		} else if (sl[0].contains("SM DVD Write speed", Qt::CaseInsensitive)) {
+			//			features.sm_dvd_wr = sl[1].toInt();
 		} else if (sl[0].contains("PSM Access time", Qt::CaseInsensitive)) {
 			features.psm_access = !!sl[1].contains("FAST");
 		} else if (sl[0].contains("PSM Load speed", Qt::CaseInsensitive)) {
@@ -1591,9 +1539,7 @@ void device::cdvdcontrol_process_line(QString& qout)
 				features.sm_cd_rd = sl[1].remove("X").toInt();
 			}
 		} else if (sl[0].contains("SM Write speed", Qt::CaseInsensitive)) {
-			if (!media.type.startsWith("DVD")) {
-				features.sm_cd_wr = sl[1].remove("X").toInt();
-			}
+			if (!media.type.startsWith("DVD")) { features.sm_cd_wr = sl[1].remove("X").toInt(); }
 		} else if (sl[0].contains("SM Access time", Qt::CaseInsensitive)) {
 			features.sm_access = !!sl[1].contains("FAST");
 		} else if (sl[0].contains("SM Load speed", Qt::CaseInsensitive)) {
@@ -1601,42 +1547,42 @@ void device::cdvdcontrol_process_line(QString& qout)
 		} else if (sl[0].contains("SM Eject speed", Qt::CaseInsensitive)) {
 			features.sm_traye = sl[1].toInt();
 
-		} else if (sl[0].contains("PoweRec", Qt::CaseInsensitive) && !sl[0].contains("Speed", Qt::CaseInsensitive) ) {
+		} else if (sl[0].contains("PoweRec", Qt::CaseInsensitive) && !sl[0].contains("Speed", Qt::CaseInsensitive)) {
 			if (sl[1] != "-") {
 				features.supported |= FEATURE_POWEREC;
-				features.enabled   |= (sl[1].contains("ON") ? FEATURE_POWEREC : 0);
+				features.enabled |= (sl[1].contains("ON") ? FEATURE_POWEREC : 0);
 			}
 		} else if (sl[0].contains("PoweRec Speed", Qt::CaseInsensitive)) {
 			features.prec_spd = sl[1].remove("X").remove("(CD)").remove("(DVD)").toInt();
 		} else if (sl[0].contains("VariRec CD  power", Qt::CaseInsensitive)) {
-			features.vrec_cd_pwr = (char) sl[1].toInt();
+			features.vrec_cd_pwr = (char)sl[1].toInt();
 		} else if (sl[0].contains("VariRec CD  strategy", Qt::CaseInsensitive)) {
 			int offs = sl[1].indexOf('[');
-			if (offs>=0) {
-				sl[1].remove(0,offs+1);
+			if (offs >= 0) {
+				sl[1].remove(0, offs + 1);
 				sl[1].remove(']');
-				features.vrec_cd_str = (char) sl[1].toInt();
+				features.vrec_cd_str = (char)sl[1].toInt();
 			}
 		} else if (sl[0].contains("VariRec CD", Qt::CaseInsensitive)) {
 			if (sl[1] != "-") {
 				features.supported |= FEATURE_VARIREC_CDBASE;
 				if (dev.startsWith("DVDR") || dev.startsWith("CD-R   PREMIUM"))
 					features.supported |= FEATURE_VARIREC_CDEXT;
-				features.enabled   |= (sl[1].contains("OFF") ? 0 : FEATURE_VARIREC_CD);
+				features.enabled |= (sl[1].contains("OFF") ? 0 : FEATURE_VARIREC_CD);
 			}
 		} else if (sl[0].contains("VariRec DVD power", Qt::CaseInsensitive)) {
-			features.vrec_dvd_pwr = (char) sl[1].toInt();
+			features.vrec_dvd_pwr = (char)sl[1].toInt();
 		} else if (sl[0].contains("VariRec DVD strategy", Qt::CaseInsensitive)) {
 			int offs = sl[1].indexOf('[');
-			if (offs>=0) {
-				sl[1].remove(0,offs+1);
+			if (offs >= 0) {
+				sl[1].remove(0, offs + 1);
 				sl[1].remove(']');
-				features.vrec_dvd_str = (char) sl[1].toInt();
+				features.vrec_dvd_str = (char)sl[1].toInt();
 			}
 		} else if (sl[0].contains("VariRec DVD", Qt::CaseInsensitive)) {
 			if (sl[1] != "-") {
 				features.supported |= FEATURE_VARIREC_DVD;
-				features.enabled   |= (sl[1].contains("OFF") ? 0 : FEATURE_VARIREC_DVD);
+				features.enabled |= (sl[1].contains("OFF") ? 0 : FEATURE_VARIREC_DVD);
 			}
 		} else if (sl[0].contains("GigaRec state", Qt::CaseInsensitive)) {
 			features.supported |= FEATURE_GIGAREC;
@@ -1656,22 +1602,22 @@ void device::cdvdcontrol_process_line(QString& qout)
 		} else if (sl[0].contains("SecuRec", Qt::CaseInsensitive)) {
 			if (sl[1] != "-") {
 				features.supported |= FEATURE_SECUREC;
-				features.enabled   |= (sl[1].contains("ON") ? FEATURE_SECUREC : 0);
+				features.enabled |= (sl[1].contains("ON") ? FEATURE_SECUREC : 0);
 			}
 		} else if (sl[0].contains("DVD+R bitset", Qt::CaseInsensitive)) {
 			if (sl[1] != "-") {
 				features.supported |= FEATURE_BITSETR;
-				features.enabled   |= (sl[1].contains("ON") ? FEATURE_BITSETR : 0);
+				features.enabled |= (sl[1].contains("ON") ? FEATURE_BITSETR : 0);
 			}
 		} else if (sl[0].contains("DVD+R DL bitset", Qt::CaseInsensitive)) {
 			if (sl[1] != "-") {
 				features.supported |= FEATURE_BITSETRDL;
-				features.enabled   |= (sl[1].contains("ON") ? FEATURE_BITSETRDL : 0);
+				features.enabled |= (sl[1].contains("ON") ? FEATURE_BITSETRDL : 0);
 			}
 		} else if (sl[0].contains("DVD+R(W) testwrite", Qt::CaseInsensitive)) {
 			if (sl[1] != "-") {
 				features.supported |= FEATURE_SIMULPLUS;
-				features.enabled   |= (sl[1].contains("ON") ? FEATURE_SIMULPLUS : 0);
+				features.enabled |= (sl[1].contains("ON") ? FEATURE_SIMULPLUS : 0);
 			}
 		} else if (sl[0].contains("AutoStrategy mode", Qt::CaseInsensitive)) {
 			features.supported |= FEATURE_AS_BASE;
@@ -1692,32 +1638,30 @@ void device::cdvdcontrol_process_line(QString& qout)
 				features.supported |= FEATURE_PIOLIMIT;
 			}
 		} else if (sl[0].contains("PlexEraser", Qt::CaseInsensitive)) {
-			if (sl[1] != "-") {
-				features.supported |= FEATURE_DESTRUCT;
-			}
+			if (sl[1] != "-") { features.supported |= FEATURE_DESTRUCT; }
 		} else if (sl[0].contains("Yamaha DiscT@2", Qt::CaseInsensitive)) {
 			sl[1].remove("inner");
 			sl[1].replace("outer", " ");
 			sl[1].replace("image", " ");
 			QStringList sl2 = sl[1].split(" ", Qt::SkipEmptyParts);
 #ifndef QT_NO_DEBUG
-			qDebug () << "*** DISC T@2 ***\nsl[1]: " << sl[1] << "\nsl2 size: " << sl2.size();
+			qDebug() << "*** DISC T@2 ***\nsl[1]: " << sl[1] << "\nsl2 size: " << sl2.size();
 #endif
 			if (sl2.size() >= 3) {
 				features.supported |= FEATURE_F1TATTOO;
 				features.tattoo_inner = sl2[0].toInt();
 				features.tattoo_outer = sl2[1].toInt();
-				qDebug() << "Yamaha DiscT@2 radius:  inner " <<  features.tattoo_inner << ", outer " << features.tattoo_outer;
+				qDebug() << "Yamaha DiscT@2 radius:  inner " << features.tattoo_inner << ", outer "
+				         << features.tattoo_outer;
 			}
-//		} else if (sl[0].contains("MQCK", Qt::CaseInsensitive)) {
+			//		} else if (sl[0].contains("MQCK", Qt::CaseInsensitive)) {
 		} else if (sl[0] == "MQCK") {
 			features.as_mqckres = sl[1];
 		}
 	}
 }
 
-void device::cdvdcontrol_process_asdb(QString& qout)
-{
+void device::cdvdcontrol_process_asdb(QString& qout) {
 	ASDB_item it;
 	QStringList sl;
 /*
@@ -1733,27 +1677,26 @@ void device::cdvdcontrol_process_asdb(QString& qout)
 	qDebug("process_asdb");
 #endif
 	if (!qout.startsWith("S#")) return;
-	qout.remove(0,2);
+	qout.remove(0, 2);
 	qout.remove(" ");
 
 	sl = qout.split('|');
-	if (sl.size() <6) return;
+	if (sl.size() < 6) return;
 
-	it.present=1;
+	it.present = 1;
 	it.active = sl[1] == "*";
-//	it.type   = sl[2].remove(QRegularExpression("[]"));
-	it.type   = sl[2].remove("[A1]").remove("[25]");
-	it.speed  = sl[3];
-	it.mid    = sl[4];
+	//	it.type   = sl[2].remove(QRegularExpression("[]"));
+	it.type = sl[2].remove("[A1]").remove("[25]");
+	it.speed = sl[3];
+	it.mid = sl[4];
 	it.writes = sl[5];
 
 	asdb.append(it);
 }
 
-void device::startProcess(const QString &program, const QStringList &args)
-{
+void device::startProcess(const QString& program, const QStringList& args) {
 	QStringList quoted;
-	for (const QString &a : args) {
+	for (const QString& a : args) {
 		if (a.contains(' '))
 			quoted << ("'" + a + "'");
 		else
@@ -1763,18 +1706,15 @@ void device::startProcess(const QString &program, const QStringList &args)
 	proc->start(program, args);
 }
 
-void device::readStderr()
-{
+void device::readStderr() {
 	if (!proc) return;
 	QByteArray data = proc->readAllStandardError();
 	QString text = QString::fromLocal8Bit(data);
 	const QStringList lines = text.split(QRegularExpression("[\r\n]"), Qt::SkipEmptyParts);
-	for (const QString &line : lines)
-		emit outputLine(line);
+	for (const QString& line : lines) emit outputLine(line);
 }
 
-void device::qscan_callback_test()
-{
+void device::qscan_callback_test() {
 	int xcode = 0;
 #ifndef QT_NO_DEBUG
 	qDebug("STA: qscan_callback_test()");
@@ -1785,12 +1725,11 @@ void device::qscan_callback_test()
 	qscan_process_test();
 	io_mutex->lock();
 
-	QObject::disconnect(io, SIGNAL(readyReadLine()),
-		this, SLOT(qscan_process_test()));
+	QObject::disconnect(io, SIGNAL(readyReadLine()), this, SLOT(qscan_process_test()));
 
 	if (type == DevtypeLocal) {
-//		QObject::disconnect(proc, SIGNAL(finished(int, QProcess::ExitStatus)),
-//				this, SLOT(qscan_callback_info()));
+		//		QObject::disconnect(proc, SIGNAL(finished(int, QProcess::ExitStatus)),
+		//				this, SLOT(qscan_callback_info()));
 		xcode = proc->exitCode();
 #ifndef QT_NO_DEBUG
 		qDebug() << "qscan (local) finished" << xcode;
@@ -1798,8 +1737,8 @@ void device::qscan_callback_test()
 		disconnect(proc);
 		io->setIODevice(NULL);
 	} else if (type == device::DevtypeTCP) {
-//		QObject::disconnect(sock, SIGNAL(disconnected()),
-//				this, SLOT(qscan_callback_info()));
+		//		QObject::disconnect(sock, SIGNAL(disconnected()),
+		//				this, SLOT(qscan_callback_info()));
 		sock->disconnectFromHost();
 #ifndef QT_NO_DEBUG
 		qDebug("qscan (TCP) finished");
@@ -1812,9 +1751,9 @@ void device::qscan_callback_test()
 	emit process_finished();
 
 	clock_gettime(CLOCK_MONOTONIC, &timeEnd);
-	time = (int) ((timeEnd.tv_sec - timeSta.tv_sec) + (timeEnd.tv_nsec - timeSta.tv_nsec)/1000000000.0);
+	time = (int)((timeEnd.tv_sec - timeSta.tv_sec) + (timeEnd.tv_nsec - timeSta.tv_nsec) / 1000000000.0);
 
-	switch(ctest) {
+	switch (ctest) {
 		case TEST_RT:
 			testData.rt_time = time;
 			emit block_RT();
@@ -1843,9 +1782,7 @@ void device::qscan_callback_test()
 			break;
 	}
 
-	if (xcode) {
-		emit testsError();
-	}
+	if (xcode) { emit testsError(); }
 
 	next_test();
 
@@ -1854,8 +1791,7 @@ void device::qscan_callback_test()
 #endif
 }
 
-void device::qscan_process_test()
-{
+void device::qscan_process_test() {
 	struct timespec timeEnd;
 	float time;
 	QString qout;
@@ -1884,28 +1820,28 @@ void device::qscan_process_test()
 		qDebug() << qout;
 #endif
 		clock_gettime(CLOCK_MONOTONIC, &timeEnd);
-		time = (timeEnd.tv_sec - timeSta.tv_sec) + (timeEnd.tv_nsec - timeSta.tv_nsec)/1000000000.0;
-		switch(ctest) {
+		time = (timeEnd.tv_sec - timeSta.tv_sec) + (timeEnd.tv_nsec - timeSta.tv_nsec) / 1000000000.0;
+		switch (ctest) {
 			case TEST_RT:
 #ifndef DISABLE_INTERNAL_WT
 			case TEST_WT:
 #endif
 				if (qout.startsWith("lba") && qout.contains("speed")) {
-//					qDebug("RT");
+					//					qDebug("RT");
 					DI_Transfer di;
 					sl = qout.split(" ", Qt::SkipEmptyParts);
-			//		for (int i=0; i<sl.size(); i++) qDebug(QString::number(i) + "  '" + sl[i] + "'");
-					if (sl.size()>=6) {
+					//		for (int i=0; i<sl.size(); i++) qDebug(QString::number(i) + "  '" + sl[i] + "'");
+					if (sl.size() >= 6) {
 						di.lba = sl[1].toLongLong();
 						di.spdx = sl[3].toDouble();
 						di.spdk = sl[5].toInt();
 #ifndef DISABLE_INTERNAL_WT
 						if (ctest == TEST_WT) {
-	 						testData.wt.append(di);
+							testData.wt.append(di);
 							testData.wt_time = time;
 							emit block_WT();
 
-							pprocess = 100.0 * (float) di.lba / media.ctots;
+							pprocess = 100.0 * (float)di.lba / media.ctots;
 							emit process_progress();
 						} else if (ctest == TEST_RT)
 #endif
@@ -1914,11 +1850,11 @@ void device::qscan_process_test()
 							testData.rt_time = time;
 							emit block_RT();
 
-							pprocess = 100.0 * (float) di.lba / media.creads;
+							pprocess = 100.0 * (float)di.lba / media.creads;
 							emit process_progress();
 						}
 					}
-			//		qDebug(QString("lba: %1, spdx: %2, spdk: %3").arg(di.lba).arg(di.spdx).arg(di.spdk));
+					//		qDebug(QString("lba: %1, spdx: %2, spdk: %3").arg(di.lba).arg(di.spdx).arg(di.spdk));
 				} else if (qout.startsWith("Reading blocks") || qout.startsWith("Starting write")) {
 					clock_gettime(CLOCK_MONOTONIC, &timeSta);
 				}
@@ -1928,11 +1864,11 @@ void device::qscan_process_test()
 				if (qout.startsWith("Track ") && qout.contains("MB written")) {
 					DI_Transfer di;
 					sl = qout.split(" ", Qt::SkipEmptyParts);
-			//		for (int i=0; i<sl.size(); i++) qDebug(QString::number(i) + "  '" + sl[i] + "'");
-					if (sl.size()>=10) {
+					//		for (int i=0; i<sl.size(); i++) qDebug(QString::number(i) + "  '" + sl[i] + "'");
+					if (sl.size() >= 10) {
 						di.lba = sl[2].toLongLong() << 9;
 						if (sl[3] == "of") {
-							if (sl.size() >=12) {
+							if (sl.size() >= 12) {
 								di.spdx = sl[11].remove("x.").toDouble();
 								di.spdk = (uint32_t)(di.spdx * media.spd1X);
 								testData.wt.append(di);
@@ -1940,7 +1876,7 @@ void device::qscan_process_test()
 								emit block_WT();
 							}
 						} else {
-							if (sl.size() >=10) {
+							if (sl.size() >= 10) {
 								di.spdx = sl[9].remove("x.").toDouble();
 								di.spdk = (uint32_t)(di.spdx * media.spd1X);
 								testData.wt.append(di);
@@ -1948,11 +1884,11 @@ void device::qscan_process_test()
 								emit block_WT();
 							}
 						}
-						pprocess = 100.0 * (float) di.lba / media.ctots;
+						pprocess = 100.0 * (float)di.lba / media.ctots;
 						emit process_progress();
-//						qDebug( sl[1] + " " + sl[3] + " " + sl[5] );
+						//						qDebug( sl[1] + " " + sl[3] + " " + sl[5] );
 					}
-			//		qDebug(QString("lba: %1, spdx: %2, spdk: %3").arg(di.lba).arg(di.spdx).arg(di.spdk));
+					//		qDebug(QString("lba: %1, spdx: %2, spdk: %3").arg(di.lba).arg(di.spdx).arg(di.spdk));
 				}
 				break;
 #endif
@@ -1962,39 +1898,39 @@ void device::qscan_process_test()
 					sl = qout.split(QRegularExpression("[:\\ |]"), Qt::SkipEmptyParts);
 					// for (int i=0; i<sl.size(); i++) qDebug(QString::number(i) + "  '" + sl[i] + "'");
 
-					if (media.type.startsWith("CD") && sl.size()>=14) {
+					if (media.type.startsWith("CD") && sl.size() >= 14) {
 						di.cd.lba = sl[1].toInt();
-						di.cd.spdx= sl[2].toFloat();
+						di.cd.spdx = sl[2].toFloat();
 
 						di.cd.bler = sl[6].toInt();
-						di.cd.e11  = sl[7].toInt();
-						di.cd.e21  = sl[8].toInt();
-						di.cd.e31  = sl[9].toInt();
-						di.cd.e12  = sl[10].toInt();
-						di.cd.e22  = sl[11].toInt();
-						di.cd.e32  = sl[12].toInt();
+						di.cd.e11 = sl[7].toInt();
+						di.cd.e21 = sl[8].toInt();
+						di.cd.e31 = sl[9].toInt();
+						di.cd.e12 = sl[10].toInt();
+						di.cd.e22 = sl[11].toInt();
+						di.cd.e32 = sl[12].toInt();
 						di.cd.uncr = sl[13].toInt();
 
 						ErrcADD(&testData.errcTOT, di);
 						ErrcMAX(&testData.errcMAX, di);
-						CDErrcAVG(&testData.errcAVG, &testData.errcTOT, di.cd.lba/75);
+						CDErrcAVG(&testData.errcAVG, &testData.errcTOT, di.cd.lba / 75);
 						testData.errc.append(di);
 						testData.errc_time = time;
 						emit block_ERRC();
 
-						pprocess = 100.0 * (float) di.cd.lba / media.creads;
+						pprocess = 100.0 * (float)di.cd.lba / media.creads;
 						emit process_progress();
-					} else if (media.type.startsWith("DVD") && sl.size()>=13) {
-						di.dvd.lba  = sl[1].toInt();
+					} else if (media.type.startsWith("DVD") && sl.size() >= 13) {
+						di.dvd.lba = sl[1].toInt();
 						di.dvd.spdx = sl[2].toFloat();
 
-						di.dvd.res  = 0;
-						di.dvd.pie  = sl[6].toInt();
-						di.dvd.pi8  = sl[7].toInt();
-						di.dvd.pif  = sl[8].toInt();
-						di.dvd.poe  = sl[9].toInt();
-						di.dvd.po8  = sl[10].toInt();
-						di.dvd.pof  = sl[11].toInt();
+						di.dvd.res = 0;
+						di.dvd.pie = sl[6].toInt();
+						di.dvd.pi8 = sl[7].toInt();
+						di.dvd.pif = sl[8].toInt();
+						di.dvd.poe = sl[9].toInt();
+						di.dvd.po8 = sl[10].toInt();
+						di.dvd.pof = sl[11].toInt();
 						di.dvd.uncr = sl[12].toInt();
 
 						ErrcADD(&testData.errcTOT, di);
@@ -2004,17 +1940,17 @@ void device::qscan_process_test()
 						testData.errc_time = time;
 						emit block_ERRC();
 
-						pprocess = 100.0 * (float) di.dvd.lba / media.creads;
+						pprocess = 100.0 * (float)di.dvd.lba / media.creads;
 						emit process_progress();
-					} else if (media.type.startsWith("BD") && sl.size()>=9) {
-						di.bd.lba  = sl[1].toInt();
+					} else if (media.type.startsWith("BD") && sl.size() >= 9) {
+						di.bd.lba = sl[1].toInt();
 						di.bd.spdx = sl[2].toFloat();
 
 						di.bd.res0 = 0;
-						di.bd.ldc  = sl[6].toInt();
+						di.bd.ldc = sl[6].toInt();
 						di.bd.res1 = 0;
 						di.bd.res2 = 0;
-						di.bd.bis  = sl[7].toInt();
+						di.bd.bis = sl[7].toInt();
 						di.bd.res3 = 0;
 						di.bd.res4 = 0;
 						di.bd.uncr = sl[8].toInt();
@@ -2026,7 +1962,7 @@ void device::qscan_process_test()
 						testData.errc_time = time;
 						emit block_ERRC();
 
-						pprocess = 100.0 * (float) di.bd.lba / media.creads;
+						pprocess = 100.0 * (float)di.bd.lba / media.creads;
 						emit process_progress();
 					}
 				}
@@ -2035,14 +1971,14 @@ void device::qscan_process_test()
 				if (qout.startsWith("cur")) {
 					DI_JB di;
 					sl = qout.split(QRegularExpression("[:\\ |]"), Qt::SkipEmptyParts);
-//					for (int i=0; i<sl.size(); i++) qDebug(QString::number(i) + "'" + sl[i] + "'");
+					//					for (int i=0; i<sl.size(); i++) qDebug(QString::number(i) + "'" + sl[i] + "'");
 
-					if (sl.size()>=8) {
-						di.lba    = sl[1].toInt();
-						di.spdx   = sl[2].toFloat();
+					if (sl.size() >= 8) {
+						di.lba = sl[1].toInt();
+						di.spdx = sl[2].toFloat();
 
 						di.jitter = sl[6].toFloat();
-						di.asymm  = sl[7].toFloat();
+						di.asymm = sl[7].toFloat();
 
 						if (!testData.jb.size()) {
 							testData.jbMM.jmin = di.jitter;
@@ -2052,15 +1988,15 @@ void device::qscan_process_test()
 						} else {
 							if (testData.jbMM.jmin > di.jitter) testData.jbMM.jmin = di.jitter;
 							if (testData.jbMM.jmax < di.jitter) testData.jbMM.jmax = di.jitter;
-							if (testData.jbMM.bmin > di.asymm)  testData.jbMM.bmin = di.asymm;
-							if (testData.jbMM.bmax < di.asymm)  testData.jbMM.bmin = di.asymm;
+							if (testData.jbMM.bmin > di.asymm) testData.jbMM.bmin = di.asymm;
+							if (testData.jbMM.bmax < di.asymm) testData.jbMM.bmin = di.asymm;
 						}
 
 						testData.jb.append(di);
 						testData.jb_time = time;
 						emit block_JB();
 
-						pprocess = 100.0 * (float) di.lba / media.creads;
+						pprocess = 100.0 * (float)di.lba / media.creads;
 						emit process_progress();
 					}
 				}
@@ -2069,14 +2005,14 @@ void device::qscan_process_test()
 				if (qout.startsWith("cur")) {
 					DI_FT di;
 					sl = qout.split(QRegularExpression("[:\\ |]"), Qt::SkipEmptyParts);
-//					for (int i=0; i<sl.size(); i++) qDebug(QString::number(i) + "'" + sl[i] + "'");
+					//					for (int i=0; i<sl.size(); i++) qDebug(QString::number(i) + "'" + sl[i] + "'");
 
-					if (sl.size()>=8) {
+					if (sl.size() >= 8) {
 						di.lba = sl[1].toInt();
-						di.spdx= sl[2].toFloat();
+						di.spdx = sl[2].toFloat();
 
-						di.fe  = sl[6].toInt();
-						di.te  = sl[7].toInt();
+						di.fe = sl[6].toInt();
+						di.te = sl[7].toInt();
 
 						if (testData.ftMAX.fe < di.fe) testData.ftMAX.fe = di.fe;
 						if (testData.ftMAX.te < di.te) testData.ftMAX.te = di.te;
@@ -2085,30 +2021,30 @@ void device::qscan_process_test()
 						testData.ft_time = time;
 						emit block_FT();
 
-						pprocess = 100.0 * (float) di.lba / media.ctots;
+						pprocess = 100.0 * (float)di.lba / media.ctots;
 						emit process_progress();
 					}
 				}
 				break;
 			case TEST_TA:
 				if (qout.startsWith("TA")) {
-					if (taIdx <0 || taIdx>5) break;
+					if (taIdx < 0 || taIdx > 5) break;
 					DI_TA di;
 					sl = qout.split(" ", Qt::SkipEmptyParts);
-					if (sl.size() >=4) {
-						di.idx  = sl[1].toInt();
-						di.pit  = sl[2].toInt();
+					if (sl.size() >= 4) {
+						di.idx = sl[1].toInt();
+						di.pit = sl[2].toInt();
 						di.land = sl[3].toInt();
-					//	if (!di.idx) testData.ta[taIdx].clear();
+						//	if (!di.idx) testData.ta[taIdx].clear();
 						testData.ta[taIdx].append(di);
 						testData.ta_time = time;
 						emit block_TA();
 					}
 				} else if (qout.startsWith("Running TA on")) {
-					int taLayer=0;
-					int taZone=0;
+					int taLayer = 0;
+					int taZone = 0;
 					sl = qout.split(" ", Qt::SkipEmptyParts);
-					if (sl.size() >=6) {
+					if (sl.size() >= 6) {
 						sl[3].remove("L");
 #ifndef QT_NO_DEBUG
 						qDebug() << "TA Layer: " << sl[3];
@@ -2121,9 +2057,9 @@ void device::qscan_process_test()
 						} else if (sl[4] == "outer") {
 							taZone = 2;
 						}
-						taIdx = taLayer*3 + taZone;
+						taIdx = taLayer * 3 + taZone;
 
-						pprocess = 100.0 * (float) taIdx / ( media.ilayers*3);
+						pprocess = 100.0 * (float)taIdx / (media.ilayers * 3);
 						emit process_progress();
 					}
 				}
@@ -2133,7 +2069,6 @@ void device::qscan_process_test()
 			default:
 				break;
 		}
-
 	}
 	io_mutex->unlock();
 #ifndef QT_NO_DEBUG
@@ -2141,8 +2076,7 @@ void device::qscan_process_test()
 #endif
 }
 
-void device::save(QIODevice *f)
-{
+void device::save(QIODevice* f) {
 #ifndef QT_NO_DEBUG
 	qDebug("device::save()");
 #endif
@@ -2153,8 +2087,7 @@ void device::save(QIODevice *f)
 bool device::isSaving() { return resWriter->isRunning(); };
 bool device::saveResult() { return resWriter->result(); };
 
-void device::load(QIODevice *f)
-{
+void device::load(QIODevice* f) {
 #ifndef QT_NO_DEBUG
 	qDebug("device::load()");
 #endif
@@ -2165,8 +2098,7 @@ void device::load(QIODevice *f)
 bool device::isLoading() { return resReader->isRunning(); };
 bool device::loadResult() { return resReader->result(); };
 
-void device::startWatcher()
-{
+void device::startWatcher() {
 	if (mwatcher) return;
 	mwatcher = new MediaWatcher(this);
 	connect(mwatcher, SIGNAL(started()), this, SLOT(watcherStarted()));
@@ -2174,31 +2106,34 @@ void device::startWatcher()
 
 	connect(mwatcher, SIGNAL(mediaLoading()), this, SLOT(watcherEventLoading()));
 	connect(mwatcher, SIGNAL(mediaRemoved()), this, SLOT(watcherEventRemoved()));
-	connect(mwatcher, SIGNAL(mediaNew()),     this, SLOT(watcherEventNew()));
+	connect(mwatcher, SIGNAL(mediaNew()), this, SLOT(watcherEventNew()));
 	connect(mwatcher, SIGNAL(mediaNoMedia()), this, SLOT(watcherEventNoMedia()));
 
 	mwatcher->start();
 }
 
-void device::stopWatcher()
-{
+void device::stopWatcher() {
 	if (!mwatcher) return;
 	mwatcher->stop();
 	mwatcher->wait(3000);
 }
 
-void device::pauseWatcher()   { if (!mwatcher) return; mwatcher->pause(); }
-void device::unpauseWatcher() { if (!mwatcher) return; mwatcher->unPause(); }
+void device::pauseWatcher() {
+	if (!mwatcher) return;
+	mwatcher->pause();
+}
+void device::unpauseWatcher() {
+	if (!mwatcher) return;
+	mwatcher->unPause();
+}
 
-void device::watcherStarted() 
-{
+void device::watcherStarted() {
 #ifndef QT_NO_DEBUG
 	qDebug() << "device: " << path << ": watcher started";
 #endif
 }
 
-void device::watcherStoped()
-{
+void device::watcherStoped() {
 #ifndef QT_NO_DEBUG
 	qDebug() << "device: " << path << ": watcher stoped";
 #endif
@@ -2207,14 +2142,12 @@ void device::watcherStoped()
 	mwatcher = NULL;
 }
 
-void device::watcherEventLoading()
-{
+void device::watcherEventLoading() {
 	nprocess = tr("Loading media...");
 	emit process_started();
 }
 
-void device::watcherEventRemoved()
-{
+void device::watcherEventRemoved() {
 #ifndef QT_NO_DEBUG
 	qDebug("device::watcherEventRemoved()");
 #endif
@@ -2222,17 +2155,15 @@ void device::watcherEventRemoved()
 	clear_media_info();
 }
 
-void device::watcherEventNew()
-{ 
+void device::watcherEventNew() {
 #ifndef QT_NO_DEBUG
 	qDebug("device::watcherEventNew()");
 #endif
 	autoupdate = 1;
-	update_media_info(); 
+	update_media_info();
 }
 
-void device::watcherEventNoMedia()
-{
+void device::watcherEventNoMedia() {
 	nprocess = "";
 	emit process_finished();
 }
@@ -2243,4 +2174,3 @@ void device::resLoaderDone() {
 	emit doneDInfo(0);
 	emit doneMInfo(0);
 };
-

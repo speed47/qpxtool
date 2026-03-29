@@ -18,10 +18,8 @@
 #include "tab_transfer.h"
 #include <QDebug>
 
-tabTransfer::tabTransfer(QPxSettings *iset, devlist *idev, QString iname, bool irw,
-		QWidget *p, Qt::WindowFlags fl)
-	: GraphTab(iset, idev, iname, irw ? TEST_WT : TEST_RT, p, fl)
-{
+tabTransfer::tabTransfer(QPxSettings* iset, devlist* idev, QString iname, bool irw, QWidget* p, Qt::WindowFlags fl)
+    : GraphTab(iset, idev, iname, irw ? TEST_WT : TEST_RT, p, fl) {
 #ifndef QT_NO_DEBUG
 	qDebug("STA: tabTransfer()");
 #endif
@@ -70,10 +68,9 @@ tabTransfer::tabTransfer(QPxSettings *iset, devlist *idev, QString iname, bool i
 	layout_info->addWidget(l_avg_kb);
 
 #ifdef __LEGEND_SHOW_SPEED
-	pl_spd = new ColorLabel(irw ? settings->col_wspeed : settings->col_rspeed,
-			irw ? tr("Write") : tr("Read"),
-			0, infow);
-	pl_spd->setMinimumSize(100,20);
+	pl_spd =
+	    new ColorLabel(irw ? settings->col_wspeed : settings->col_rspeed, irw ? tr("Write") : tr("Read"), 0, infow);
+	pl_spd->setMinimumSize(100, 20);
 	layout_info->addWidget(pl_spd);
 #endif
 
@@ -85,8 +82,7 @@ tabTransfer::tabTransfer(QPxSettings *iset, devlist *idev, QString iname, bool i
 #endif
 }
 
-tabTransfer::~tabTransfer()
-{
+tabTransfer::~tabTransfer() {
 #ifndef QT_NO_DEBUG
 	qDebug("STA: ~tabTransfer()");
 	qDebug("END: ~tabTransfer()");
@@ -101,53 +97,46 @@ void tabTransfer::clear()
 }
 */
 
-void tabTransfer::selectDevice()
-{
+void tabTransfer::selectDevice() {
 #ifndef QT_NO_DEBUG
 	qDebug("tabTransfer::selectDevice()");
 #endif
-	device *dev = devices->current();
-	float  time = rw ? dev->testData.wt_time : dev->testData.rt_time;
-//	graph->update();
+	device* dev = devices->current();
+	float time = rw ? dev->testData.wt_time : dev->testData.rt_time;
+	//	graph->update();
 	GraphTab::updateLast((int)time, NULL, 1);
 	updateSummary(dev, time);
 
-	QObject::connect( dev, SIGNAL(doneMInfo(int)), this, SLOT(updateLast()) );
+	QObject::connect(dev, SIGNAL(doneMInfo(int)), this, SLOT(updateLast()));
 	if (!rw) {
-		QObject::connect( dev, SIGNAL(block_RT()), this, SLOT(updateLast()) );
+		QObject::connect(dev, SIGNAL(block_RT()), this, SLOT(updateLast()));
 	} else {
-		QObject::connect( dev, SIGNAL(block_WT()), this, SLOT(updateLast()) );
+		QObject::connect(dev, SIGNAL(block_WT()), this, SLOT(updateLast()));
 	}
 }
 
-void tabTransfer::updateLast()
-{
+void tabTransfer::updateLast() {
 	bool show;
-	device *dev = devices->current();
-	float  time = rw ? dev->testData.wt_time : dev->testData.rt_time;
+	device* dev = devices->current();
+	float time = rw ? dev->testData.wt_time : dev->testData.rt_time;
 	GraphTab::updateLast((int)time, &show);
 	if (!show) return;
-	updateSummary(dev,time);
+	updateSummary(dev, time);
 }
 
-void tabTransfer::updateLegend()
-{
+void tabTransfer::updateLegend() {
 #ifdef __LEGEND_SHOW_SPEED
 	pl_spd->setColor(rw ? settings->col_wspeed : settings->col_rspeed);
 #endif
 }
 
-void tabTransfer::updateGraph()
-{
-	graph->update();
-}
+void tabTransfer::updateGraph() { graph->update(); }
 
-void tabTransfer::updateSummary(device* dev, float time)
-{
+void tabTransfer::updateSummary(device* dev, float time) {
 #ifndef QT_NO_DEBUG
 	qDebug() << "tabTransfer::updateSummary(): " << (rw ? "WT" : "RT") << " device@" << dev;
 #endif
-	float    avg_x;
+	float avg_x;
 	uint32_t avg_kb;
 	if (!(rw ? dev->testData.wt.size() : dev->testData.rt.size())) {
 		l_sta_x->clear();
@@ -158,25 +147,25 @@ void tabTransfer::updateSummary(device* dev, float time)
 		l_avg_kb->clear();
 		return;
 	}
-	if (!time) time=1;
+	if (!time) time = 1;
 
-	l_sta_x->setText( QString::number( rw ? dev->testData.wt.first().spdx : dev->testData.rt.first().spdx, 'f', 2 ) + " X");
-	l_sta_kb->setText( QString::number( rw ? dev->testData.wt.first().spdk : dev->testData.rt.first().spdk) + " kB/s");
+	l_sta_x->setText(QString::number(rw ? dev->testData.wt.first().spdx : dev->testData.rt.first().spdx, 'f', 2) +
+	                 " X");
+	l_sta_kb->setText(QString::number(rw ? dev->testData.wt.first().spdk : dev->testData.rt.first().spdk) + " kB/s");
 
-	l_end_x->setText( QString::number( rw ? dev->testData.wt.last().spdx  : dev->testData.rt.last().spdx,  'f', 2 ) + " X");
-	l_end_kb->setText( QString::number( rw ? dev->testData.wt.last().spdk  : dev->testData.rt.last().spdk) + " kB/s");
+	l_end_x->setText(QString::number(rw ? dev->testData.wt.last().spdx : dev->testData.rt.last().spdx, 'f', 2) + " X");
+	l_end_kb->setText(QString::number(rw ? dev->testData.wt.last().spdk : dev->testData.rt.last().spdk) + " kB/s");
 
-	avg_kb = (int) ((rw ? dev->testData.wt.last().lba : dev->testData.rt.last().lba) * 2 / time);
+	avg_kb = (int)((rw ? dev->testData.wt.last().lba : dev->testData.rt.last().lba) * 2 / time);
 	if (dev->media.spd1X)
-		avg_x  = (float)avg_kb / dev->media.spd1X;
+		avg_x = (float)avg_kb / dev->media.spd1X;
 	else
-		avg_x  = (float)avg_kb / 150.0;
+		avg_x = (float)avg_kb / 150.0;
 
 #ifndef QT_NO_DEBUG
 	printf("avg: %u KB, %.2f X, %d KB/X\n", avg_kb, avg_x, dev->media.spd1X);
 #endif
 
-	l_avg_x->setText( QString::number( avg_x, 'f', 2) + " X");
-	l_avg_kb->setText( QString::number(avg_kb) + " kB/s");
+	l_avg_x->setText(QString::number(avg_x, 'f', 2) + " X");
+	l_avg_kb->setText(QString::number(avg_kb) + " kB/s");
 }
-

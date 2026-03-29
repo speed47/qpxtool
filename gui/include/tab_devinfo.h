@@ -40,70 +40,38 @@ class device;
 class tabDevInfo : public QWidget {
 	Q_OBJECT
 public:
-	tabDevInfo(QPxSettings *iset, devlist *idev, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags());
+	tabDevInfo(QPxSettings* iset, devlist* idev, QWidget* p = 0, Qt::WindowFlags fl = Qt::WindowFlags());
 	~tabDevInfo();
 
 public slots:
 	void clear();
 	void selectDevice();
-	void updateData(int xcode=0);
+	void updateData(int xcode = 0);
 
 private:
-	devlist		*devices;
-	QPxSettings	*settings;
+	devlist* devices;
+	QPxSettings* settings;
 
-	QBoxLayout  *layout;
-	QGridLayout *layout_left;
+	QBoxLayout* layout;
+	QGridLayout* layout_left;
 
-// basic info
-	QLabel		*label_left;
+	// basic info
+	QLabel* label_left;
 
-	QLabel		*pl_vendor,
-				*l_vendor,
-				*pl_model,
-				*l_model,
-				*pl_fw,
-				*l_fw,
-				*pl_tla,
-				*l_tla,
-				*pl_buf,
-				*l_buf,
-				*pl_sn,
-				*l_sn;
+	QLabel *pl_vendor, *l_vendor, *pl_model, *l_model, *pl_fw, *l_fw, *pl_tla, *l_tla, *pl_buf, *l_buf, *pl_sn, *l_sn;
 
-	QLabel		*pl_iface,
-				*l_iface,
-				*pl_loader,
-				*l_loader;
+	QLabel *pl_iface, *l_iface, *pl_loader, *l_loader;
 
-// DVD RPC info
-	QLabel		*pl_rpc_phase,
-				*l_rpc_phase,
-				*pl_rpc_reg,
-				*l_rpc_reg,
-				*pl_rpc_ch,
-				*l_rpc_ch,
-				*pl_rpc_rst,
-				*l_rpc_rst;
-// Plextor Life
-	QFrame		*hline0;
-	QLabel		*pl_life_dn,
-				*l_life_dn,
-				*pl_life_cr,
-				*l_life_cr,
-				*pl_life_cw,
-				*l_life_cw,
-				*pl_life_dr,
-				*l_life_dr,
-				*pl_life_dw,
-				*l_life_dw;
+	// DVD RPC info
+	QLabel *pl_rpc_phase, *l_rpc_phase, *pl_rpc_reg, *l_rpc_reg, *pl_rpc_ch, *l_rpc_ch, *pl_rpc_rst, *l_rpc_rst;
+	// Plextor Life
+	QFrame* hline0;
+	QLabel *pl_life_dn, *l_life_dn, *pl_life_cr, *l_life_cr, *pl_life_cw, *l_life_cw, *pl_life_dr, *l_life_dr,
+	    *pl_life_dw, *l_life_dw;
 
-	QGridLayout		*cap_grid;
-	QLabel			*lc_media,
-					*lc_generic;
-	QList<MediaCapWidget*>	cap_media,
-							cap_generic;
+	QGridLayout* cap_grid;
+	QLabel *lc_media, *lc_generic;
+	QList<MediaCapWidget*> cap_media, cap_generic;
 };
 
 #endif
-

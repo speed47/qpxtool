@@ -28,51 +28,42 @@ class QCheckBox;
 class QComboBox;
 class QSpinBox;
 
-class prefReports : public QWidget
-{
+class prefReports : public QWidget {
 	Q_OBJECT
 
 public:
-	prefReports(QPxSettings *iset, QWidget *p=0, Qt::WindowFlags fl=Qt::WindowFlags());
+	prefReports(QPxSettings* iset, QWidget* p = 0, Qt::WindowFlags fl = Qt::WindowFlags());
 	~prefReports();
 
 private slots:
 	void select_rep_path();
 	void box_rep_toggled(bool);
 	void check_db_connection();
+
 private:
-	QVBoxLayout	*layout;
+	QVBoxLayout* layout;
 
-	QGroupBox	*box_rep;
-	QVBoxLayout	*layout_rep;
-	QHBoxLayout	*layout_rep_path;
+	QGroupBox* box_rep;
+	QVBoxLayout* layout_rep;
+	QHBoxLayout* layout_rep_path;
 
-	QLabel		*l_rep_path;
-	QLineEdit	*e_rep_path;
-	QPushButton	*pb_rep_path;
+	QLabel* l_rep_path;
+	QLineEdit* e_rep_path;
+	QPushButton* pb_rep_path;
 
-// database settings
-	QGroupBox	*box_rep_db;
-	QGridLayout *layout_db;
-	QLabel		*ldb_driver,
-				*ldb_host,
-				*ldb_port,
-				*ldb_name,
-				*ldb_user,
-				*ldb_pass;
-	QComboBox	*db_driver;
-	QLineEdit	*db_host,
-				*db_name,
-				*db_user,
-				*db_pass;
-	QSpinBox	*db_port;
-	QPushButton *pb_db_check;
-	QCheckBox	*ck_autosave_db;
+	// database settings
+	QGroupBox* box_rep_db;
+	QGridLayout* layout_db;
+	QLabel *ldb_driver, *ldb_host, *ldb_port, *ldb_name, *ldb_user, *ldb_pass;
+	QComboBox* db_driver;
+	QLineEdit *db_host, *db_name, *db_user, *db_pass;
+	QSpinBox* db_port;
+	QPushButton* pb_db_check;
+	QCheckBox* ck_autosave_db;
 
-	QCheckBox	*ck_eject;
+	QCheckBox* ck_eject;
 
-	QPxSettings *set;
+	QPxSettings* set;
 };
 
 #endif // PREF_REPORTS_H
-

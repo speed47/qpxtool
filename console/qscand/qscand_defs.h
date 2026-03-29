@@ -13,7 +13,7 @@
 #ifndef QSCAND_DEFS_H
 #define QSCAND_DEFS_H
 
-#if defined (__unix) || defined (__unix__)
+#if defined(__unix) || defined(__unix__)
 #include <fcntl.h>
 #include <sys/select.h>
 #include <sys/socket.h>
@@ -42,9 +42,8 @@
 #define PROMPT_LEN sizeof(PROMPT)
 
 extern pid_t pid;
-extern bool	 daemonized;
-extern bool	 debug;
-extern bool	 term;
+extern bool daemonized;
+extern bool debug;
+extern bool term;
 
 #endif // QSCAND_DEFS_H
-

@@ -8,7 +8,6 @@
 #ifndef __READERDISC_H
 #define __READERDISC_H
 
-void *read_disc(void* arg);
+void* read_disc(void* arg);
 
 #endif
-

@@ -20,14 +20,13 @@ class QLabel;
 class QLayout;
 class QBoxLayout;
 
-class ImageLabel : public QWidget
-{
+class ImageLabel : public QWidget {
 	Q_OBJECT
 
 public:
-	ImageLabel(int minW, QString label, QImage image, int idx, QWidget *parent);
-	ImageLabel(int minW, QSize is, QString label, QImage image, int idx, QWidget *parent);
-	ImageLabel(int minW, int iw, int ih, QString label, QImage image, int idx, QWidget *parent);
+	ImageLabel(int minW, QString label, QImage image, int idx, QWidget* parent);
+	ImageLabel(int minW, QSize is, QString label, QImage image, int idx, QWidget* parent);
+	ImageLabel(int minW, int iw, int ih, QString label, QImage image, int idx, QWidget* parent);
 	~ImageLabel();
 	inline void setLabel(QString label) { name = label; };
 	inline void setImage(QImage image) { img = image; };
@@ -48,16 +47,15 @@ protected:
 	void paintEvent(QPaintEvent*);
 
 private:
-	bool	ck;
+	bool ck;
 #ifdef HIGHLIGHT_FOCUSED
-	bool	focus;
+	bool focus;
 #endif
 	QString name;
-	QImage	img;
+	QImage img;
 	int id;
 	int iconw, iconh;
 	int minW;
 };
 
 #endif
-

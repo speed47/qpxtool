@@ -23,30 +23,29 @@ class QPxSettings;
 
 #include <QWidget>
 
-class tabConsole : public QWidget
-{
+class tabConsole : public QWidget {
 	Q_OBJECT
 public:
-	tabConsole(QPxSettings *iset, devlist *idev, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags());
+	tabConsole(QPxSettings* iset, devlist* idev, QWidget* p = 0, Qt::WindowFlags fl = Qt::WindowFlags());
 	~tabConsole();
 
 public slots:
 	void selectDevice();
 	void reconfig();
-	void appendLine(const QString &line);
-	void appendSeparator(const QString &cmdline);
+	void appendLine(const QString& line);
+	void appendSeparator(const QString& cmdline);
 	void clear();
 
 private:
-	devlist		*devices;
-	QPxSettings	*settings;
+	devlist* devices;
+	QPxSettings* settings;
 
-	QBoxLayout		*layout;
-	QPlainTextEdit	*textEdit;
-	QPushButton		*clearButton;
+	QBoxLayout* layout;
+	QPlainTextEdit* textEdit;
+	QPushButton* clearButton;
 
-	device *connectedDev;
-	void connectToDevice(device *dev);
+	device* connectedDev;
+	void connectToDevice(device* dev);
 	void disconnectFromDevice();
 };
 

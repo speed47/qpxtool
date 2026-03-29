@@ -24,11 +24,10 @@ class QLineEdit;
 
 class ColorLabel;
 
-class prefColors : public QWidget
-{
+class prefColors : public QWidget {
 	Q_OBJECT
 public:
-	prefColors(QPxSettings *iset, QWidget *p=0, Qt::WindowFlags fl=Qt::WindowFlags());
+	prefColors(QPxSettings* iset, QWidget* p = 0, Qt::WindowFlags fl = Qt::WindowFlags());
 	~prefColors();
 
 private slots:
@@ -41,38 +40,34 @@ private slots:
 	void presetNameValidate(QString);
 
 private:
-	QGridLayout *layout;
+	QGridLayout* layout;
 
-	ColorLabel	*lc_bg;
-	ColorLabel	*lc_grid;
+	ColorLabel* lc_bg;
+	ColorLabel* lc_grid;
 
-	ColorLabel	*lc_rspeed;
-	ColorLabel	*lc_wspeed;
+	ColorLabel* lc_rspeed;
+	ColorLabel* lc_wspeed;
 
-	ColorLabel	*lc_errc[8];
+	ColorLabel* lc_errc[8];
 
-	ColorLabel	*lc_jitter;
-	ColorLabel	*lc_asymm;
+	ColorLabel* lc_jitter;
+	ColorLabel* lc_asymm;
 
-	ColorLabel	*lc_fe;
-	ColorLabel	*lc_te;
+	ColorLabel* lc_fe;
+	ColorLabel* lc_te;
 
-	ColorLabel	*lc_tapit;
-	ColorLabel	*lc_taland;
+	ColorLabel* lc_tapit;
+	ColorLabel* lc_taland;
 
-	QBoxLayout	*layout_presets;
-	QPushButton *pb_preset,
-				*pb_replace,
-				*pb_add,
-				*pb_del;
-	QLineEdit	*e_preset;
-	QMenu		*menu_preset;
-	QAction		*act_default;
+	QBoxLayout* layout_presets;
+	QPushButton *pb_preset, *pb_replace, *pb_add, *pb_del;
+	QLineEdit* e_preset;
+	QMenu* menu_preset;
+	QAction* act_default;
 	QList<QAction*> act_presets;
-	QList<colorSet> presets; 
+	QList<colorSet> presets;
 
-	QPxSettings *set;
+	QPxSettings* set;
 };
 
 #endif
-

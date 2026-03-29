@@ -22,9 +22,7 @@
 
 #include <QDebug>
 
-tabConsole::tabConsole(QPxSettings *iset, devlist *idev, QWidget *p, Qt::WindowFlags fl)
-	: QWidget(p, fl)
-{
+tabConsole::tabConsole(QPxSettings* iset, devlist* idev, QWidget* p, Qt::WindowFlags fl) : QWidget(p, fl) {
 #ifndef QT_NO_DEBUG
 	qDebug("STA: tabConsole()");
 #endif
@@ -45,7 +43,7 @@ tabConsole::tabConsole(QPxSettings *iset, devlist *idev, QWidget *p, Qt::WindowF
 	textEdit->setFont(font);
 	layout->addWidget(textEdit);
 
-	QHBoxLayout *buttonLayout = new QHBoxLayout();
+	QHBoxLayout* buttonLayout = new QHBoxLayout();
 	buttonLayout->addStretch();
 	clearButton = new QPushButton(tr("Clear"), this);
 	connect(clearButton, SIGNAL(clicked()), this, SLOT(clear()));
@@ -57,60 +55,42 @@ tabConsole::tabConsole(QPxSettings *iset, devlist *idev, QWidget *p, Qt::WindowF
 #endif
 }
 
-tabConsole::~tabConsole()
-{
+tabConsole::~tabConsole() {
 #ifndef QT_NO_DEBUG
 	qDebug("STA: ~tabConsole()");
 	qDebug("END: ~tabConsole()");
 #endif
 }
 
-void tabConsole::selectDevice()
-{
-	device *dev = devices->current();
+void tabConsole::selectDevice() {
+	device* dev = devices->current();
 	if (dev == connectedDev) return;
 	disconnectFromDevice();
 	connectToDevice(dev);
 }
 
-void tabConsole::reconfig()
-{
-}
+void tabConsole::reconfig() {}
 
-void tabConsole::appendLine(const QString &line)
-{
-	textEdit->appendPlainText(line);
-}
+void tabConsole::appendLine(const QString& line) { textEdit->appendPlainText(line); }
 
-void tabConsole::appendSeparator(const QString &cmdline)
-{
+void tabConsole::appendSeparator(const QString& cmdline) {
 	textEdit->appendPlainText(QString("════════════════════════════════════════════════════════════════"));
 	textEdit->appendPlainText(QString("$ %1").arg(cmdline));
 	textEdit->appendPlainText(QString("════════════════════════════════════════════════════════════════"));
 }
 
-void tabConsole::clear()
-{
-	textEdit->clear();
-}
+void tabConsole::clear() { textEdit->clear(); }
 
-void tabConsole::connectToDevice(device *dev)
-{
-	if (!dev || dev->type == device::DevtypeNone || dev->type == device::DevtypeVirtual)
-		return;
+void tabConsole::connectToDevice(device* dev) {
+	if (!dev || dev->type == device::DevtypeNone || dev->type == device::DevtypeVirtual) return;
 	connectedDev = dev;
-	connect(dev, SIGNAL(outputLine(const QString&)),
-			this, SLOT(appendLine(const QString&)));
-	connect(dev, SIGNAL(processCommand(const QString&)),
-			this, SLOT(appendSeparator(const QString&)));
+	connect(dev, SIGNAL(outputLine(const QString&)), this, SLOT(appendLine(const QString&)));
+	connect(dev, SIGNAL(processCommand(const QString&)), this, SLOT(appendSeparator(const QString&)));
 }
 
-void tabConsole::disconnectFromDevice()
-{
+void tabConsole::disconnectFromDevice() {
 	if (!connectedDev) return;
-	disconnect(connectedDev, SIGNAL(outputLine(const QString&)),
-			this, SLOT(appendLine(const QString&)));
-	disconnect(connectedDev, SIGNAL(processCommand(const QString&)),
-			this, SLOT(appendSeparator(const QString&)));
+	disconnect(connectedDev, SIGNAL(outputLine(const QString&)), this, SLOT(appendLine(const QString&)));
+	disconnect(connectedDev, SIGNAL(processCommand(const QString&)), this, SLOT(appendSeparator(const QString&)));
 	connectedDev = NULL;
 }

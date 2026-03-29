@@ -17,39 +17,35 @@
 #define SHOW_X
 #define MAX_ICON_SIZE 16
 
-MediaCapWidget::MediaCapWidget(QString itext, bool tri, quint64 df, QWidget *p, Qt::WindowFlags f)
-	: QWidget(p,f)
-{
+MediaCapWidget::MediaCapWidget(QString itext, bool tri, quint64 df, QWidget* p, Qt::WindowFlags f) : QWidget(p, f) {
 	tristate = tri;
 	text = itext;
 	cf = df;
-	rd=0, wr=0;
-	setMinimumSize(128, MAX_ICON_SIZE+4);
+	rd = 0, wr = 0;
+	setMinimumSize(128, MAX_ICON_SIZE + 4);
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 };
 
 MediaCapWidget::~MediaCapWidget() {};
 
-void MediaCapWidget::setText(QString itext)
-{
-	text=itext;
+void MediaCapWidget::setText(QString itext) {
+	text = itext;
 	update();
 };
 
-QSize MediaCapWidget::sizeHint() const
-{
-	return QSize( MAX_ICON_SIZE + 20 + fontMetrics().horizontalAdvance(text), MAX_ICON_SIZE+2);
+QSize MediaCapWidget::sizeHint() const {
+	return QSize(MAX_ICON_SIZE + 20 + fontMetrics().horizontalAdvance(text), MAX_ICON_SIZE + 2);
 }
 
 void MediaCapWidget::setR(quint64 r) {
 	if (!tristate) return;
-	rd= ((cf & r));
+	rd = ((cf & r));
 	setRW();
 };
 
 void MediaCapWidget::setW(quint64 w) {
 	if (!tristate) return;
-	wr= ((cf & w));
+	wr = ((cf & w));
 	setRW();
 };
 
@@ -66,13 +62,13 @@ void MediaCapWidget::setRW() {
 #endif
 	}
 
-	icon = icon.scaled( QSize(MAX_ICON_SIZE, MAX_ICON_SIZE), Qt::KeepAspectRatio, Qt::SmoothTransformation );
+	icon = icon.scaled(QSize(MAX_ICON_SIZE, MAX_ICON_SIZE), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	update();
 };
 
 void MediaCapWidget::setCap(quint64 s) {
 	if (tristate) return;
-	rd= (( cf & s));
+	rd = ((cf & s));
 
 	if (rd) {
 		icon.load(":images/ok.png");
@@ -87,7 +83,7 @@ void MediaCapWidget::setCap(quint64 s) {
 #endif
 	}
 
-	icon = icon.scaled( QSize(MAX_ICON_SIZE, MAX_ICON_SIZE), Qt::KeepAspectRatio, Qt::SmoothTransformation );
+	icon = icon.scaled(QSize(MAX_ICON_SIZE, MAX_ICON_SIZE), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	update();
 };
 
@@ -97,10 +93,9 @@ void MediaCapWidget::clear() {
 	update();
 };
 
-void MediaCapWidget::paintEvent(QPaintEvent*)
-{
+void MediaCapWidget::paintEvent(QPaintEvent*) {
 	QPainter p(this);
-	if (cf) p.drawImage( 4, ((height()-icon.height()) >> 1) + 2, icon);
-	p.drawText(MAX_ICON_SIZE + 9, 4, width()-MAX_ICON_SIZE-13, height()-4, Qt::AlignLeft | Qt::AlignVCenter, text);
+	if (cf) p.drawImage(4, ((height() - icon.height()) >> 1) + 2, icon);
+	p.drawText(MAX_ICON_SIZE + 9, 4, width() - MAX_ICON_SIZE - 13, height() - 4, Qt::AlignLeft | Qt::AlignVCenter,
+	           text);
 };
-

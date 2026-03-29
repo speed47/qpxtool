@@ -16,20 +16,19 @@
 
 #include "qpx_scan.h"
 
-#if defined (__unix) || defined (__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#if defined(__unix) || defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <dlfcn.h>
-#elif defined (_WIN32) || defined (_WIN64)
+#elif defined(_WIN32) || defined(_WIN64)
 // Removed include for <windows.h>, since it's already included via
 // <qpx_scan.h> --> <qpx_mmc.h> --> <qpx_transport.h>
 // The aliased functions below reside in:  <libloaderapi.h> in Win32 and mingw-w64, or
-#define dlopen(n,f) LoadLibraryA(n)    //  <winbase.h>      in legacy mingw32.
-#define dlsym(l,n)  GetProcAddress(l,n)  
-#define dlclose(l)  FreeLibrary(l)       
+#define dlopen(n, f) LoadLibraryA(n) //  <winbase.h>      in legacy mingw32.
+#define dlsym(l, n) GetProcAddress(l, n)
+#define dlclose(l) FreeLibrary(l)
 
 char serr[255];
 
-char* dlerror()
-{
+char* dlerror() {
 	int err = GetLastError();
 	if (!err) return 0;
 	sprintf(serr, "Library load error %d", err);
@@ -49,18 +48,18 @@ char* dlerror()
 const char* FALLBACK_PLUGIN_NAME = "C2P"; // modernization
 
 qscanner::qscanner(drive_info* idev) {
-	dev=idev;
-	writer=NULL;
-	plugin=NULL;
-	pluginlib=NULL;
-	plugin_create=NULL;
-	plugin_destroy=NULL;
-	attached=0;
+	dev = idev;
+	writer = NULL;
+	plugin = NULL;
+	pluginlib = NULL;
+	plugin_create = NULL;
+	plugin_destroy = NULL;
+	attached = 0;
 	listed = 0;
 	speed = -1;
-	lba_sta=0;
-	lba_end=-1;
-	tchar=-1;
+	lba_sta = 0;
+	lba_end = -1;
+	tchar = -1;
 }
 
 qscanner::~qscanner() {
@@ -72,7 +71,7 @@ void qscanner::setTestSpeed(int ispeed) { speed = ispeed; }
 bool qscanner::setTestWrite(bool simul) {
 	if (dev->media.type & DISC_DVDplus) {
 		if (isPlextor(dev)) {
-			if (isPlextorLockPresent(dev) || !plextor_px755_do_auth(dev) ) {
+			if (isPlextorLockPresent(dev) || !plextor_px755_do_auth(dev)) {
 				printf("Turning PLEXTOR DVD+R(W) TestWrite %s\n", simul ? "ON" : "OFF");
 				WT_simul = 0;
 				dev->plextor.testwrite_dvdplus = simul;
@@ -105,7 +104,7 @@ bool qscanner::setTestWrite(bool simul) {
 			if (simul) {
 				if ((dev->media.type & DISC_DVDRAM)) {
 					printf("DVD-RAM media doesn't support TestWrite!\n");
-				} else {				
+				} else {
 					printf("Drive doesn't support TestWrite on this media!\n");
 				}
 				return 1;
@@ -117,19 +116,17 @@ bool qscanner::setTestWrite(bool simul) {
 }
 
 void qscanner::stop() {
-	stop_req=1;
+	stop_req = 1;
 	if (writer) writer->stop();
 };
 
-void qscanner::stat() {
-	stat_req=1;
-};
+void qscanner::stat() { stat_req = 1; };
 
 
-int qscanner::run(char *test) {
-	int r=-1;
-	stop_req=0;
-	stat_req=0;
+int qscanner::run(char* test) {
+	int r = -1;
+	stop_req = 0;
+	stat_req = 0;
 	if (!dev->media.type) {
 		printf("No media detected!\n");
 		return 1;
@@ -138,37 +135,37 @@ int qscanner::run(char *test) {
 		printf("Unsupported media!\n");
 		return 2;
 	}
-//	set_speed(dev,speed);
+	//	set_speed(dev,speed);
 	if (!strcmp(test, "rt")) {
-		if (lba_end<0 || lba_end>dev->media.capacity) lba_end = dev->media.capacity-1;
-		r=run_rd_transfer();
+		if (lba_end < 0 || lba_end > dev->media.capacity) lba_end = dev->media.capacity - 1;
+		r = run_rd_transfer();
 	} else if (!strcmp(test, "wt")) {
-		if (lba_end<0 || lba_end>dev->media.capacity_total) lba_end = dev->media.capacity_total-1;
-		r=run_wr_transfer();
+		if (lba_end < 0 || lba_end > dev->media.capacity_total) lba_end = dev->media.capacity_total - 1;
+		r = run_wr_transfer();
 	} else if (!strcmp(test, "errc")) {
-		if (lba_end<0 || lba_end>dev->media.capacity) lba_end = dev->media.capacity-1;
+		if (lba_end < 0 || lba_end > dev->media.capacity) lba_end = dev->media.capacity - 1;
 		if (dev->media.type & DISC_CD) {
-			r=run_cd_errc();
+			r = run_cd_errc();
 		} else if (dev->media.type & DISC_DVD) {
-			r=run_dvd_errc();
+			r = run_dvd_errc();
 		} else if (dev->media.type & DISC_BD) {
-			r=run_bd_errc();
+			r = run_bd_errc();
 		}
 	} else if (!strcmp(test, "jb")) {
-		if (lba_end<0 || lba_end>dev->media.capacity) lba_end = dev->media.capacity-1;
+		if (lba_end < 0 || lba_end > dev->media.capacity) lba_end = dev->media.capacity - 1;
 		if (dev->media.type & DISC_CD) {
-			r=run_cd_jb();
+			r = run_cd_jb();
 		} else if (dev->media.type & DISC_DVD) {
-			r=run_dvd_jb();
+			r = run_dvd_jb();
 		}
 	} else if (!strcmp(test, "ft")) {
-		if (lba_end<0 || lba_end>dev->media.capacity_total) lba_end = dev->media.capacity_total-1;
-		r=run_fete();
+		if (lba_end < 0 || lba_end > dev->media.capacity_total) lba_end = dev->media.capacity_total - 1;
+		r = run_fete();
 	} else if (!strcmp(test, "ta")) {
 		if (dev->media.type & DISC_CD) {
-			r=run_cd_ta();
+			r = run_cd_ta();
 		} else if (dev->media.type & DISC_DVD) {
-			r=run_dvd_ta();
+			r = run_dvd_ta();
 		}
 	}
 	return r;
@@ -188,40 +185,39 @@ int* qscanner::get_test_speeds(unsigned int test) {
 	if (!attached) return NULL;
 	return plugin->get_test_speeds(test);
 }
-	
+
 int qscanner::plugins_probe(bool test, bool probe_enable) {
-	char *pname;
-	char *ppath;
-	DIR  *dir;
-	struct dirent *dentry;
+	char* pname;
+	char* ppath;
+	DIR* dir;
+	struct dirent* dentry;
 	int i;
-	int r=1;
-	for (i=0; strlen(ppaths[i]) && !attached; i++) {
-		ppath = (char*) ppaths[i];
-		if (!dev->silent)
-			printf("Looking for plugins in %s...\n", ppath);
+	int r = 1;
+	for (i = 0; strlen(ppaths[i]) && !attached; i++) {
+		ppath = (char*)ppaths[i];
+		if (!dev->silent) printf("Looking for plugins in %s...\n", ppath);
 		dir = opendir(ppath);
 		if (dir) {
 			dentry = readdir(dir);
-			while(dentry && !attached) {
-				if (!strncmp(dentry->d_name,"libqscan_",9)) {
+			while (dentry && !attached) {
+				if (!strncmp(dentry->d_name, "libqscan_", 9)) {
 					if (!dev->silent) printf("FOUND: %s\n", dentry->d_name);
-					pname = (char*) malloc (strlen(dentry->d_name) + strlen(ppath) +2 );
-#if defined (_WIN32) || defined (_WIN64)
+					pname = (char*)malloc(strlen(dentry->d_name) + strlen(ppath) + 2);
+#if defined(_WIN32) || defined(_WIN64)
 					sprintf(pname, "%s\\%s", ppath, dentry->d_name);
 #else
 					sprintf(pname, "%s/%s", ppath, dentry->d_name);
 #endif
 					plugin_attach(pname, probe_enable, 0, !test);
 					if (attached) {
-						r=0;
+						r = 0;
 						if (test) {
 							plugin_detach();
 						} else {
 							if (!strcmp(plugin->name(), FALLBACK_PLUGIN_NAME)) {
-							//	printf("Found fallback plugin, return...\n");
+								//	printf("Found fallback plugin, return...\n");
 								plugin_detach();
-								r=1;
+								r = 1;
 							}
 						}
 					}
@@ -236,25 +232,24 @@ int qscanner::plugins_probe(bool test, bool probe_enable) {
 }
 
 int qscanner::plugins_probe_all(probe_result* results, int max_results) {
-	char *pname;
-	char *ppath;
-	DIR  *dir;
-	struct dirent *dentry;
+	char* pname;
+	char* ppath;
+	DIR* dir;
+	struct dirent* dentry;
 	int i;
 	int count = 0;
 	bool was_silent = dev->silent;
 
-	for (i=0; strlen(ppaths[i]) && count < max_results; i++) {
-		ppath = (char*) ppaths[i];
-		if (!dev->silent)
-			printf("Looking for plugins in %s...\n", ppath);
+	for (i = 0; strlen(ppaths[i]) && count < max_results; i++) {
+		ppath = (char*)ppaths[i];
+		if (!dev->silent) printf("Looking for plugins in %s...\n", ppath);
 		dir = opendir(ppath);
 		if (dir) {
 			dentry = readdir(dir);
-			while(dentry && count < max_results) {
-				if (!strncmp(dentry->d_name,"libqscan_",9)) {
-					pname = (char*) malloc (strlen(dentry->d_name) + strlen(ppath) +2 );
-#if defined (_WIN32) || defined (_WIN64)
+			while (dentry && count < max_results) {
+				if (!strncmp(dentry->d_name, "libqscan_", 9)) {
+					pname = (char*)malloc(strlen(dentry->d_name) + strlen(ppath) + 2);
+#if defined(_WIN32) || defined(_WIN64)
 					sprintf(pname, "%s\\%s", ppath, dentry->d_name);
 #else
 					sprintf(pname, "%s/%s", ppath, dentry->d_name);
@@ -294,25 +289,25 @@ int qscanner::plugins_probe_all(probe_result* results, int max_results) {
 int qscanner::plugin_attach_fallback() { return plugin_attach(FALLBACK_PLUGIN_NAME); }
 
 int qscanner::plugin_attach(const char* name) { // modernization
-	char *pname;
-	char *ppath;
-	DIR  *dir;
-	struct dirent *dentry;
+	char* pname;
+	char* ppath;
+	DIR* dir;
+	struct dirent* dentry;
 	int i;
-	int r=1;
+	int r = 1;
 	if (attached || !name) return 2;
 
-	for (i=0; strlen(ppaths[i]) && !attached; i++) {
-		ppath = (char*) ppaths[i];
+	for (i = 0; strlen(ppaths[i]) && !attached; i++) {
+		ppath = (char*)ppaths[i];
 		if (!dev->silent) printf("Looking for plugins in %s...\n", ppath);
 		dir = opendir(ppath);
 		if (dir) {
 			dentry = readdir(dir);
-			while(dentry && !attached) {
-				if (!strncmp(dentry->d_name,"libqscan_",9)) {
+			while (dentry && !attached) {
+				if (!strncmp(dentry->d_name, "libqscan_", 9)) {
 					if (!dev->silent) printf("FOUND: %s\n", dentry->d_name);
-					pname = (char*) malloc (strlen(dentry->d_name) + strlen(ppath) +2 );
-#if defined (_WIN32) || defined (_WIN64)
+					pname = (char*)malloc(strlen(dentry->d_name) + strlen(ppath) + 2);
+#if defined(_WIN32) || defined(_WIN64)
 					sprintf(pname, "%s\\%s", ppath, dentry->d_name);
 #else
 					sprintf(pname, "%s/%s", ppath, dentry->d_name);
@@ -320,8 +315,10 @@ int qscanner::plugin_attach(const char* name) { // modernization
 					plugin_attach(pname, 0, 1, 1);
 
 					if (attached) {
-						if ( strcmp(plugin->name(), name)) plugin_detach();
-						else r=0;
+						if (strcmp(plugin->name(), name))
+							plugin_detach();
+						else
+							r = 0;
 					}
 					free(pname);
 				}
@@ -332,49 +329,48 @@ int qscanner::plugin_attach(const char* name) { // modernization
 	}
 	if (!attached)
 		printf("Can't find plugin '%s'\n", name);
-	else
-		if (!strcmp(plugin->name(), FALLBACK_PLUGIN_NAME)) {
-			printf("Fallback plugin loaded: '%s'\n", name);
-		} else {
-			printf("Forced plugin loaded: '%s'\n", name);
-		}
+	else if (!strcmp(plugin->name(), FALLBACK_PLUGIN_NAME)) {
+		printf("Fallback plugin loaded: '%s'\n", name);
+	} else {
+		printf("Forced plugin loaded: '%s'\n", name);
+	}
 	return r;
 }
 
 int qscanner::plugin_attach(char* pname, bool probe_enable, bool no_detach, bool silent) {
-	bool blacklisted=0;
-	drivedesc* devlist; 
+	bool blacklisted = 0;
+	drivedesc* devlist;
 	if (attached) return 2;
-	listed=0;
+	listed = 0;
 
-//	pluginlib = dlopen( pname, RTLD_NOW | RTLD_GLOBAL);
-	pluginlib = dlopen( pname, RTLD_LAZY | RTLD_GLOBAL);
+	//	pluginlib = dlopen( pname, RTLD_NOW | RTLD_GLOBAL);
+	pluginlib = dlopen(pname, RTLD_LAZY | RTLD_GLOBAL);
 	if (!pluginlib) {
-		printf("0 dlopen err: %s\n",dlerror());
-//		printf("can't open library!\n");
+		printf("0 dlopen err: %s\n", dlerror());
+		//		printf("can't open library!\n");
 		goto plugin_attach_liberr;
 	}
 //	if (!dev->silent) printf("pluginlib = %p\n", pluginlib);
-#if !defined (_WIN32) && !defined (_WIN64)
+#if !defined(_WIN32) && !defined(_WIN64)
 	if (dlerror()) {
-		printf("1 dlopen err: %s\n",dlerror());
+		printf("1 dlopen err: %s\n", dlerror());
 		goto plugin_attach_err;
 	}
 #endif
-	if (!dev->silent) printf("plugin lib opened: %s\n",pname);
-	plugin_create = (scan_plugin* (*) (drive_info*)) dlsym(pluginlib, "plugin_create");
-#if !defined (_WIN32) && !defined (_WIN64)
+	if (!dev->silent) printf("plugin lib opened: %s\n", pname);
+	plugin_create = (scan_plugin * (*)(drive_info*)) dlsym(pluginlib, "plugin_create");
+#if !defined(_WIN32) && !defined(_WIN64)
 	if (dlerror()) {
 #else
 	if (!plugin_create) {
 #endif
-		printf("error searching symbol \"plugin_create\" : %s\n",dlerror());
+		printf("error searching symbol \"plugin_create\" : %s\n", dlerror());
 		goto plugin_attach_err;
 	}
-//	printf("symbol \"plugin_create\" found!\n");
+	//	printf("symbol \"plugin_create\" found!\n");
 	//*(void **) (&plugin_destroy) = dlsym(pluginlib, "plugin_destroy");
-	plugin_destroy = (void (*) (scan_plugin*)) dlsym(pluginlib, "plugin_destroy");
-#if !defined (_WIN32) && !defined (_WIN64)
+	plugin_destroy = (void (*)(scan_plugin*))dlsym(pluginlib, "plugin_destroy");
+#if !defined(_WIN32) && !defined(_WIN64)
 	if (dlerror()) {
 #else
 	if (!plugin_destroy) {
@@ -382,8 +378,8 @@ int qscanner::plugin_attach(char* pname, bool probe_enable, bool no_detach, bool
 		printf("error searching symbol \"plugin_destroy\" : %s\n", dlerror());
 		goto plugin_attach_err;
 	}
-//	printf("symbol \"plugin_destroy\" found!\n");
-/*
+	//	printf("symbol \"plugin_destroy\" found!\n");
+	/*
 	slist = (drivedesc*) dlsym(pluginlib, "devlist");
 	e = dlerror();
 	if (e){
@@ -391,29 +387,29 @@ int qscanner::plugin_attach(char* pname, bool probe_enable, bool no_detach, bool
 		goto plugin_attach_err;
 	}
 */
-//	printf("creating plugin\n");
+	//	printf("creating plugin\n");
 	plugin = plugin_create(dev);
-//	printf("plugin info\n");
-	if (!silent) printf("Found plugin: %s (%s)\n",plugin->name(),plugin->desc());
+	//	printf("plugin info\n");
+	if (!silent) printf("Found plugin: %s (%s)\n", plugin->name(), plugin->desc());
 
 	if (plugin->blklist && !dev->force_probe) {
 		devlist = plugin->blklist;
 		if (!dev->silent) {
 			printf("Devices in blacklist:\n");
-			for(int d=0; devlist[d].ven_ID>0; d++) {
-				printf("  %s %s*\n",devlist[d].ven,devlist[d].dev);
-			}
+			for (int d = 0; devlist[d].ven_ID > 0; d++) { printf("  %s %s*\n", devlist[d].ven, devlist[d].dev); }
 		}
 
-		for(int d=0; !blacklisted && devlist[d].ven_ID>0; d++) {
-			if (!strncmp(dev->ven, devlist[d].ven, strlen(devlist[d].ven)) && !strncmp(dev->dev,devlist[d].dev, strlen(devlist[d].dev)))
-				blacklisted=1;
+		for (int d = 0; !blacklisted && devlist[d].ven_ID > 0; d++) {
+			if (!strncmp(dev->ven, devlist[d].ven, strlen(devlist[d].ven)) &&
+			    !strncmp(dev->dev, devlist[d].dev, strlen(devlist[d].dev)))
+				blacklisted = 1;
 		}
 
 		devlist = NULL;
 		if (blacklisted) {
-			printf("Plugin %s: device '%s' '%s' blacklisted! Detaching plugin...\n", plugin->name(), dev->ven, dev->dev);
-			attached=1;
+			printf("Plugin %s: device '%s' '%s' blacklisted! Detaching plugin...\n", plugin->name(), dev->ven,
+			       dev->dev);
+			attached = 1;
 			plugin_detach();
 			return 1;
 		}
@@ -427,18 +423,19 @@ int qscanner::plugin_attach(char* pname, bool probe_enable, bool no_detach, bool
 
 		if (!dev->silent) {
 			printf("Devices supported by this plugin:\n");
-			for(int d=0; devlist[d].ven_ID>0 && devlist[d].dev_ID>0;d++) {
-				printf("  %s %s\n",devlist[d].ven,devlist[d].dev);
+			for (int d = 0; devlist[d].ven_ID > 0 && devlist[d].dev_ID > 0; d++) {
+				printf("  %s %s\n", devlist[d].ven, devlist[d].dev);
 			}
 		}
 
-		for(int d=0; !listed && devlist[d].ven_ID>0 && devlist[d].dev_ID>0;d++) {
-			if (!strncmp(dev->ven, devlist[d].ven, strlen(devlist[d].ven)) && !strncmp(dev->dev,devlist[d].dev, strlen(devlist[d].dev))) {
+		for (int d = 0; !listed && devlist[d].ven_ID > 0 && devlist[d].dev_ID > 0; d++) {
+			if (!strncmp(dev->ven, devlist[d].ven, strlen(devlist[d].ven)) &&
+			    !strncmp(dev->dev, devlist[d].dev, strlen(devlist[d].dev))) {
 				dev->ven_ID = devlist[d].ven_ID;
 				dev->dev_ID = devlist[d].dev_ID;
 				dev->chk_features = devlist[d].tests;
 				listed = 1;
-				if (!silent) printf("device listed as: %s %s\n",devlist[d].ven,devlist[d].dev);
+				if (!silent) printf("device listed as: %s %s\n", devlist[d].ven, devlist[d].dev);
 			}
 		}
 	}
@@ -450,11 +447,11 @@ int qscanner::plugin_attach(char* pname, bool probe_enable, bool no_detach, bool
 			else
 				printf("Device not listed! detaching plugin\n");
 		}
-		attached=1;
+		attached = 1;
 		plugin_detach();
 		return 1;
 	}
-	attached=1;
+	attached = 1;
 	if (!dev->silent) printf("plugin attached: %s\n", pname);
 	return 0;
 
@@ -462,26 +459,26 @@ plugin_attach_err:
 	dlclose(pluginlib);
 
 plugin_attach_liberr:
-	attached=0;
+	attached = 0;
 	printf("error attaching scan plugin %s\n", pname);
-	plugin=NULL;
-	plugin_create=NULL;
-	plugin_destroy=NULL;
-	listed=0;
+	plugin = NULL;
+	plugin_create = NULL;
+	plugin_destroy = NULL;
+	listed = 0;
 	return -1;
 }
 
 void qscanner::plugin_detach() {
 	if (!dev->silent) printf("detaching plugin...\n");
 	if (!attached) return;
-//	if (plugin_destroy!=NULL && plugin!=NULL)
-	(*plugin_destroy) (plugin);
-	attached=0;
+	//	if (plugin_destroy!=NULL && plugin!=NULL)
+	(*plugin_destroy)(plugin);
+	attached = 0;
 	dlclose(pluginlib);
-	plugin=NULL;
-	pluginlib=NULL;
-	plugin_create=NULL;
-	plugin_destroy=NULL;
+	plugin = NULL;
+	pluginlib = NULL;
+	plugin_create = NULL;
+	plugin_destroy = NULL;
 }
 
 //int qscanner::plugin_info() {}
@@ -495,4 +492,3 @@ const char* qscanner::plugin_desc() {
 	if (!attached) return NULL;
 	return plugin->desc();
 }
-

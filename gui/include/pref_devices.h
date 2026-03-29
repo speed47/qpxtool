@@ -22,11 +22,10 @@ class QTreeWidget;
 class QBoxLayout;
 class QPxSettings;
 
-class prefDevices : public QWidget
-{
+class prefDevices : public QWidget {
 	Q_OBJECT
 public:
-	prefDevices(QPxSettings *iset, QWidget *p=0, Qt::WindowFlags f=Qt::WindowFlags());
+	prefDevices(QPxSettings* iset, QWidget* p = 0, Qt::WindowFlags f = Qt::WindowFlags());
 	virtual ~prefDevices();
 
 protected:
@@ -39,17 +38,16 @@ private slots:
 	void hostRemove();
 
 private:
-	QBoxLayout  *layout;
+	QBoxLayout* layout;
 
-	QCheckBox	*ck_local;
-	QCheckBox	*ck_remote;
+	QCheckBox* ck_local;
+	QCheckBox* ck_remote;
 
-//	QGroupBox	*g_hosts;
-//	QBoxLayout	*l_hosts;
-	QTreeWidget	*lst_hosts;
+	//	QGroupBox	*g_hosts;
+	//	QBoxLayout	*l_hosts;
+	QTreeWidget* lst_hosts;
 
-	QPxSettings *set;
+	QPxSettings* set;
 };
 
 #endif
-

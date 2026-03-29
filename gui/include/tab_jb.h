@@ -19,39 +19,37 @@ class QBoxLayout;
 
 #include <graphtab.h>
 
-class tabJB : public GraphTab
-{
+class tabJB : public GraphTab {
 	Q_OBJECT
 public:
-	tabJB(QPxSettings *iset, devlist *idev, QString iname, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags());
+	tabJB(QPxSettings* iset, devlist* idev, QString iname, QWidget* p = 0, Qt::WindowFlags fl = Qt::WindowFlags());
 	~tabJB();
 
 public slots:
-//	void clear();
+	//	void clear();
 	void selectDevice();
 	void updateLast();
 	void updateAll();
 	void updateSummary();
-//	void setDevice(device *idev);
-//	void update() { graph->update(); };
+	//	void setDevice(device *idev);
+	//	void update() { graph->update(); };
 
 protected:
 	virtual void updateLegend();
 	virtual void updateGraph();
 
 private:
-	QBoxLayout	*layout_info;
+	QBoxLayout* layout_info;
 
 #ifdef __LEGEND_SHOW_SPEED
-	ColorLabel	*pl_spd;
+	ColorLabel* pl_spd;
 #endif
-	ColorLabel	*pl_jitter;
-	QLabel		*l_jmax;
-	QLabel		*l_jmin;
-	ColorLabel	*pl_asymm;
-	QLabel		*l_amax;
-	QLabel		*l_amin;
+	ColorLabel* pl_jitter;
+	QLabel* l_jmax;
+	QLabel* l_jmin;
+	ColorLabel* pl_asymm;
+	QLabel* l_amax;
+	QLabel* l_amin;
 };
 
 #endif
-

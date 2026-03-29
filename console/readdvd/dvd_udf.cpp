@@ -28,7 +28,7 @@
  * 02111-1307, USA.  Or, point your browser to
  * http://www.gnu.org/copyleft/gpl.html
  */
- 
+
 //#include "config.h"
 
 #include <stdio.h>
@@ -59,18 +59,17 @@
 //typedef unsigned long uintptr_t;
 #endif
 
-#define DVD_ALIGN(ptr) (void *)((((uintptr_t)(ptr)) + (DVD_VIDEO_LB_LEN-1)) \
-                                / DVD_VIDEO_LB_LEN * DVD_VIDEO_LB_LEN)
+#define DVD_ALIGN(ptr) (void*)((((uintptr_t)(ptr)) + (DVD_VIDEO_LB_LEN - 1)) / DVD_VIDEO_LB_LEN * DVD_VIDEO_LB_LEN)
 
 typedef struct {
-  void *start;
-  void *aligned;
+	void* start;
+	void* aligned;
 } dvdalign_ptrs_t;
 
 typedef struct {
-  dvdalign_ptrs_t *ptrs;
-  uint32_t ptrs_in_use;
-  uint32_t ptrs_max;
+	dvdalign_ptrs_t* ptrs;
+	uint32_t ptrs_in_use;
+	uint32_t ptrs_max;
 } dvdalign_t;
 
 #if 0
@@ -232,71 +231,69 @@ static int DVDReadLBUDF( dvd_reader_t *device, uint32_t lb_number,
 #endif
 
 #ifndef NULL
-#define NULL ((void *)0)
+#define NULL ((void*)0)
 #endif
 
 struct Partition {
-  int valid;
-  char VolumeDesc[128];
-  uint16_t Flags;
-  uint16_t Number;
-  char Contents[32];
-  uint32_t AccessType;
-  uint32_t Start;
-  uint32_t Length;
+	int valid;
+	char VolumeDesc[128];
+	uint16_t Flags;
+	uint16_t Number;
+	char Contents[32];
+	uint32_t AccessType;
+	uint32_t Start;
+	uint32_t Length;
 };
 
 struct AD {
-  uint32_t Location;
-  uint32_t Length;
-  uint8_t  Flags;
-  uint16_t Partition;
+	uint32_t Location;
+	uint32_t Length;
+	uint8_t Flags;
+	uint16_t Partition;
 };
 
 struct extent_ad {
-  uint32_t location;
-  uint32_t length;
+	uint32_t location;
+	uint32_t length;
 };
 
 struct avdp_t {
-  struct extent_ad mvds;
-  struct extent_ad rvds;
+	struct extent_ad mvds;
+	struct extent_ad rvds;
 };
 
 struct pvd_t {
-  uint8_t VolumeIdentifier[32];
-  uint8_t VolumeSetIdentifier[128];
+	uint8_t VolumeIdentifier[32];
+	uint8_t VolumeSetIdentifier[128];
 };
 
 struct lbudf {
-  uint32_t lb;
-  uint8_t *data;
+	uint32_t lb;
+	uint8_t* data;
 };
 
 struct icbmap {
-  uint32_t lbn;
-  struct AD file;
-  uint8_t filetype;
+	uint32_t lbn;
+	struct AD file;
+	uint8_t filetype;
 };
 
 struct udf_cache {
-  int avdp_valid;
-  struct avdp_t avdp;
-  int pvd_valid;
-  struct pvd_t pvd;
-  int partition_valid;
-  struct Partition partition;
-  int rooticb_valid;
-  struct AD rooticb;
-  int lb_num;
-  struct lbudf *lbs;
-  int map_num;
-  struct icbmap *maps;
+	int avdp_valid;
+	struct avdp_t avdp;
+	int pvd_valid;
+	struct pvd_t pvd;
+	int partition_valid;
+	struct Partition partition;
+	int rooticb_valid;
+	struct AD rooticb;
+	int lb_num;
+	struct lbudf* lbs;
+	int map_num;
+	struct icbmap* maps;
 };
 
-typedef enum {
-  PartitionCache, RootICBCache, LBUDFCache, MapCache, AVDPCache, PVDCache
-} UDFCacheType;
+typedef enum { PartitionCache, RootICBCache, LBUDFCache, MapCache, AVDPCache, PVDCache } UDFCacheType;
 
 #if 0
 
@@ -305,350 +302,335 @@ extern void SetUDFCacheHandle(dvd_reader_t *device, void *cache);
 
 #endif
 
-void FreeUDFCache(udf_t *udf, void *cache)
-{
-  int n;
-  
-  struct udf_cache *c = (struct udf_cache *)cache;
-  if(c == NULL) {
-    return;
-  }
+void FreeUDFCache(udf_t* udf, void* cache) {
+	int n;
 
-  for(n = 0; n < c->lb_num; n++) {
-    if(c->lbs[n].data) {
-      /* free data */
-      //dvdalign_lbfree(device, c->lbs[n].data);
-      free(c->lbs[n].data);
-    }
-  }
-  c->lb_num = 0;
+	struct udf_cache* c = (struct udf_cache*)cache;
+	if (c == NULL) { return; }
 
-  if(c->lbs) {
-    free(c->lbs);
-  }
-  if(c->maps) {
-    free(c->maps);
-  }
-  free(c);
+	for (n = 0; n < c->lb_num; n++) {
+		if (c->lbs[n].data) {
+			/* free data */
+			//dvdalign_lbfree(device, c->lbs[n].data);
+			free(c->lbs[n].data);
+		}
+	}
+	c->lb_num = 0;
+
+	if (c->lbs) { free(c->lbs); }
+	if (c->maps) { free(c->maps); }
+	free(c);
 }
 
-static int GetUDFCache(udf_t *udf, UDFCacheType type,
-                       uint32_t nr, void *data)
-{
-  int n;
-  struct udf_cache *c;
-/*
+static int GetUDFCache(udf_t* udf, UDFCacheType type, uint32_t nr, void* data) {
+	int n;
+	struct udf_cache* c;
+	/*
   if(DVDUDFCacheLevel(device, -1) <= 0) {
     return 0;
   }
 */
-  //c = (struct udf_cache *)GetUDFCacheHandle(device);
-  c = (struct udf_cache *) udf->cache;
-  
-  if(c == NULL) {
-    return 0;
-  }
-  
-  switch(type) {
-  case AVDPCache:
-    if(c->avdp_valid) {
-      *(struct avdp_t *)data = c->avdp;
-      return 1;
-    }    
-    break;
-  case PVDCache:
-    if(c->pvd_valid) {
-      *(struct pvd_t *)data = c->pvd;
-      return 1;
-    }    
-    break;
-  case PartitionCache:
-    if(c->partition_valid) {
-      *(struct Partition *)data = c->partition;
-      return 1;
-    }
-    break;
-  case RootICBCache:
-    if(c->rooticb_valid) {
-      *(struct AD *)data = c->rooticb;
-      return 1;
-    }
-    break;
-  case LBUDFCache:
-    for(n = 0; n < c->lb_num; n++) {
-      if(c->lbs[n].lb == nr) {
-        *(uint8_t **)data = c->lbs[n].data;
-        return 1;
-      }
-    }
-    break;
-  case MapCache:
-    for(n = 0; n < c->map_num; n++) {
-      if(c->maps[n].lbn == nr) {
-        *(struct icbmap *)data = c->maps[n];
-        return 1;
-      }
-    }
-    break;
-  default:
-    break;
-  }
-  
-  return 0;
+	//c = (struct udf_cache *)GetUDFCacheHandle(device);
+	c = (struct udf_cache*)udf->cache;
+
+	if (c == NULL) { return 0; }
+
+	switch (type) {
+		case AVDPCache:
+			if (c->avdp_valid) {
+				*(struct avdp_t*)data = c->avdp;
+				return 1;
+			}
+			break;
+		case PVDCache:
+			if (c->pvd_valid) {
+				*(struct pvd_t*)data = c->pvd;
+				return 1;
+			}
+			break;
+		case PartitionCache:
+			if (c->partition_valid) {
+				*(struct Partition*)data = c->partition;
+				return 1;
+			}
+			break;
+		case RootICBCache:
+			if (c->rooticb_valid) {
+				*(struct AD*)data = c->rooticb;
+				return 1;
+			}
+			break;
+		case LBUDFCache:
+			for (n = 0; n < c->lb_num; n++) {
+				if (c->lbs[n].lb == nr) {
+					*(uint8_t**)data = c->lbs[n].data;
+					return 1;
+				}
+			}
+			break;
+		case MapCache:
+			for (n = 0; n < c->map_num; n++) {
+				if (c->maps[n].lbn == nr) {
+					*(struct icbmap*)data = c->maps[n];
+					return 1;
+				}
+			}
+			break;
+		default:
+			break;
+	}
+
+	return 0;
 }
 
-static int SetUDFCache(udf_t *udf, UDFCacheType type,
-                       uint32_t nr, void *data)
-{
-  int n;
-  struct udf_cache *c;
-/*
+static int SetUDFCache(udf_t* udf, UDFCacheType type, uint32_t nr, void* data) {
+	int n;
+	struct udf_cache* c;
+	/*
   if(DVDUDFCacheLevel(dev, -1) <= 0) {
     return 0;
   }
 */
-  //c = (struct udf_cache *)GetUDFCacheHandle(dev);
-  c = (struct udf_cache *) udf->cache;
-  
-  if(c == NULL) {
-    c = (struct udf_cache*) calloc(1, sizeof(struct udf_cache));
-    //    fprintf(stderr, "calloc: %d\n", sizeof(struct udf_cache));    
-    if(c == NULL) {
-      return 0;
-    }
-    //SetUDFCacheHandle(udf, c);
-    udf->cache = (void*) c;
-  }
-  
-  
-  switch(type) {
-  case AVDPCache:
-    c->avdp = *(struct avdp_t *)data; 
-    c->avdp_valid = 1;
-    break;
-  case PVDCache:
-    c->pvd = *(struct pvd_t *)data; 
-    c->pvd_valid = 1;
-    break;
-  case PartitionCache:
-    c->partition = *(struct Partition *)data; 
-    c->partition_valid = 1;
-    break;
-  case RootICBCache:
-    c->rooticb = *(struct AD *)data; 
-    c->rooticb_valid = 1;
-    break;
-  case LBUDFCache:
-    for(n = 0; n < c->lb_num; n++) {
-      if(c->lbs[n].lb == nr) {
-        /* replace with new data */
-        c->lbs[n].data = *(uint8_t **)data;
-        c->lbs[n].lb = nr;
-        return 1;
-      }
-    }
-    c->lb_num++;
-    c->lbs = (lbudf*) realloc(c->lbs, c->lb_num * sizeof(struct lbudf));
-    /*
+	//c = (struct udf_cache *)GetUDFCacheHandle(dev);
+	c = (struct udf_cache*)udf->cache;
+
+	if (c == NULL) {
+		c = (struct udf_cache*)calloc(1, sizeof(struct udf_cache));
+		//    fprintf(stderr, "calloc: %d\n", sizeof(struct udf_cache));
+		if (c == NULL) { return 0; }
+		//SetUDFCacheHandle(udf, c);
+		udf->cache = (void*)c;
+	}
+
+
+	switch (type) {
+		case AVDPCache:
+			c->avdp = *(struct avdp_t*)data;
+			c->avdp_valid = 1;
+			break;
+		case PVDCache:
+			c->pvd = *(struct pvd_t*)data;
+			c->pvd_valid = 1;
+			break;
+		case PartitionCache:
+			c->partition = *(struct Partition*)data;
+			c->partition_valid = 1;
+			break;
+		case RootICBCache:
+			c->rooticb = *(struct AD*)data;
+			c->rooticb_valid = 1;
+			break;
+		case LBUDFCache:
+			for (n = 0; n < c->lb_num; n++) {
+				if (c->lbs[n].lb == nr) {
+					/* replace with new data */
+					c->lbs[n].data = *(uint8_t**)data;
+					c->lbs[n].lb = nr;
+					return 1;
+				}
+			}
+			c->lb_num++;
+			c->lbs = (lbudf*)realloc(c->lbs, c->lb_num * sizeof(struct lbudf));
+			/*
       fprintf(stderr, "realloc lb: %d * %d = %d\n",
       c->lb_num, sizeof(struct lbudf),
       c->lb_num * sizeof(struct lbudf));
     */
-    if(c->lbs == NULL) {
-      c->lb_num = 0;
-      return 0;
-    }
-    c->lbs[n].data = *(uint8_t **)data;
-    c->lbs[n].lb = nr;
-    break;
-  case MapCache:
-    for(n = 0; n < c->map_num; n++) {
-      if(c->maps[n].lbn == nr) {
-        /* replace with new data */
-        c->maps[n] = *(struct icbmap *)data;
-        c->maps[n].lbn = nr;
-        return 1;
-      }
-    }
-    c->map_num++;
-    c->maps = (icbmap*) realloc(c->maps, c->map_num * sizeof(struct icbmap));
-    /*
+			if (c->lbs == NULL) {
+				c->lb_num = 0;
+				return 0;
+			}
+			c->lbs[n].data = *(uint8_t**)data;
+			c->lbs[n].lb = nr;
+			break;
+		case MapCache:
+			for (n = 0; n < c->map_num; n++) {
+				if (c->maps[n].lbn == nr) {
+					/* replace with new data */
+					c->maps[n] = *(struct icbmap*)data;
+					c->maps[n].lbn = nr;
+					return 1;
+				}
+			}
+			c->map_num++;
+			c->maps = (icbmap*)realloc(c->maps, c->map_num * sizeof(struct icbmap));
+			/*
       fprintf(stderr, "realloc maps: %d * %d = %d\n",
       c->map_num, sizeof(struct icbmap),
       c->map_num * sizeof(struct icbmap));
     */
-    if(c->maps == NULL) {
-      c->map_num = 0;
-      return 0;
-    }
-    c->maps[n] = *(struct icbmap *)data;
-    c->maps[n].lbn = nr;
-    break;
-  default:
-    return 0;
-  }
-    
-  return 1;
+			if (c->maps == NULL) {
+				c->map_num = 0;
+				return 0;
+			}
+			c->maps[n] = *(struct icbmap*)data;
+			c->maps[n].lbn = nr;
+			break;
+		default:
+			return 0;
+	}
+
+	return 1;
 }
 
 /* For direct data access, LSB first */
 #define GETN1(p) ((uint8_t)data[p])
 #define GETN2(p) ((uint16_t)data[p] | ((uint16_t)data[(p) + 1] << 8))
-#define GETN3(p) ((uint32_t)data[p] | ((uint32_t)data[(p) + 1] << 8)    \
-                  | ((uint32_t)data[(p) + 2] << 16))
-#define GETN4(p) ((uint32_t)data[p]                     \
-                  | ((uint32_t)data[(p) + 1] << 8)      \
-                  | ((uint32_t)data[(p) + 2] << 16)     \
-                  | ((uint32_t)data[(p) + 3] << 24))
+#define GETN3(p) ((uint32_t)data[p] | ((uint32_t)data[(p) + 1] << 8) | ((uint32_t)data[(p) + 2] << 16))
+#define GETN4(p)                                                                            \
+	((uint32_t)data[p] | ((uint32_t)data[(p) + 1] << 8) | ((uint32_t)data[(p) + 2] << 16) | \
+	 ((uint32_t)data[(p) + 3] << 24))
 /* This is wrong with regard to endianess */
 #define GETN(p, n, target) memcpy(target, &data[p], n)
 
-static int Unicodedecode( uint8_t *data, int len, char *target ) 
-{
-  int p = 1, i = 0;
+static int Unicodedecode(uint8_t* data, int len, char* target) {
+	int p = 1, i = 0;
 
-  if( ( data[ 0 ] == 8 ) || ( data[ 0 ] == 16 ) ) do {
-    if( data[ 0 ] == 16 ) p++;  /* Ignore MSB of unicode16 */
-    if( p < len ) {
-      target[ i++ ] = data[ p++ ];
-    }
-  } while( p < len );
+	if ((data[0] == 8) || (data[0] == 16)) do {
+			if (data[0] == 16) p++; /* Ignore MSB of unicode16 */
+			if (p < len) { target[i++] = data[p++]; }
+		} while (p < len);
 
-  target[ i ] = '\0';
-  return 0;
+	target[i] = '\0';
+	return 0;
 }
 
-static int UDFDescriptor( uint8_t *data, uint16_t *TagID ) 
-{
-  *TagID = GETN2(0);
-  // TODO: check CRC 'n stuff
-  return 0;
+static int UDFDescriptor(uint8_t* data, uint16_t* TagID) {
+	*TagID = GETN2(0);
+	// TODO: check CRC 'n stuff
+	return 0;
 }
 
-static int UDFExtentAD( uint8_t *data, uint32_t *Length, uint32_t *Location ) 
-{
-  *Length   = GETN4(0);
-  *Location = GETN4(4);
-  return 0;
+static int UDFExtentAD(uint8_t* data, uint32_t* Length, uint32_t* Location) {
+	*Length = GETN4(0);
+	*Location = GETN4(4);
+	return 0;
 }
 
-static int UDFShortAD( uint8_t *data, struct AD *ad, 
-                       struct Partition *partition ) 
-{
-  ad->Length = GETN4(0);
-  ad->Flags = ad->Length >> 30;
-  ad->Length &= 0x3FFFFFFF;
-  ad->Location = GETN4(4);
-  ad->Partition = partition->Number; // use number of current partition
-  return 0;
+static int UDFShortAD(uint8_t* data, struct AD* ad, struct Partition* partition) {
+	ad->Length = GETN4(0);
+	ad->Flags = ad->Length >> 30;
+	ad->Length &= 0x3FFFFFFF;
+	ad->Location = GETN4(4);
+	ad->Partition = partition->Number; // use number of current partition
+	return 0;
 }
 
-static int UDFLongAD( uint8_t *data, struct AD *ad )
-{
-  ad->Length = GETN4(0);
-  ad->Flags = ad->Length >> 30;
-  ad->Length &= 0x3FFFFFFF;
-  ad->Location = GETN4(4);
-  ad->Partition = GETN2(8);
-  //GETN(10, 6, Use);
-  return 0;
+static int UDFLongAD(uint8_t* data, struct AD* ad) {
+	ad->Length = GETN4(0);
+	ad->Flags = ad->Length >> 30;
+	ad->Length &= 0x3FFFFFFF;
+	ad->Location = GETN4(4);
+	ad->Partition = GETN2(8);
+	//GETN(10, 6, Use);
+	return 0;
 }
 
-static int UDFExtAD( uint8_t *data, struct AD *ad )
-{
-  ad->Length = GETN4(0);
-  ad->Flags = ad->Length >> 30;
-  ad->Length &= 0x3FFFFFFF;
-  ad->Location = GETN4(12);
-  ad->Partition = GETN2(16);
-  //GETN(10, 6, Use);
-  return 0;
+static int UDFExtAD(uint8_t* data, struct AD* ad) {
+	ad->Length = GETN4(0);
+	ad->Flags = ad->Length >> 30;
+	ad->Length &= 0x3FFFFFFF;
+	ad->Location = GETN4(12);
+	ad->Partition = GETN2(16);
+	//GETN(10, 6, Use);
+	return 0;
 }
 
-static int UDFICB( uint8_t *data, uint8_t *FileType, uint16_t *Flags )
-{
-  *FileType = GETN1(11);
-  *Flags = GETN2(18);
-  return 0;
+static int UDFICB(uint8_t* data, uint8_t* FileType, uint16_t* Flags) {
+	*FileType = GETN1(11);
+	*Flags = GETN2(18);
+	return 0;
 }
 
-static int UDFPartition( uint8_t *data, uint16_t *Flags, uint16_t *Number,
-                         char *Contents, uint32_t *Start, uint32_t *Length )
-{
-  *Flags = GETN2(20);
-  *Number = GETN2(22);
-  GETN(24, 32, Contents);
-  *Start = GETN4(188);
-  *Length = GETN4(192);
-  return 0;
+static int UDFPartition(uint8_t* data, uint16_t* Flags, uint16_t* Number, char* Contents, uint32_t* Start,
+                        uint32_t* Length) {
+	*Flags = GETN2(20);
+	*Number = GETN2(22);
+	GETN(24, 32, Contents);
+	*Start = GETN4(188);
+	*Length = GETN4(192);
+	return 0;
 }
 
 /**
  * Reads the volume descriptor and checks the parameters.  Returns 0 on OK, 1
  * on error.
  */
-static int UDFLogVolume( uint8_t *data, char *VolumeDescriptor )
-{
-  uint32_t lbsize, MT_L, N_PM;
-  Unicodedecode(&data[84], 128, VolumeDescriptor);
-  lbsize = GETN4(212);  // should be 2048
-  MT_L = GETN4(264);    // should be 6
-  N_PM = GETN4(268);    // should be 1
-  if (lbsize != DVD_VIDEO_LB_LEN) return 1;
-  return 0;
+static int UDFLogVolume(uint8_t* data, char* VolumeDescriptor) {
+	uint32_t lbsize, MT_L, N_PM;
+	Unicodedecode(&data[84], 128, VolumeDescriptor);
+	lbsize = GETN4(212); // should be 2048
+	MT_L = GETN4(264);   // should be 6
+	N_PM = GETN4(268);   // should be 1
+	if (lbsize != DVD_VIDEO_LB_LEN) return 1;
+	return 0;
 }
 
-static int UDFFileEntry( uint8_t *data, uint8_t *FileType, 
-                         struct Partition *partition, struct AD *ad )
-{
-  uint16_t flags;
-  uint32_t L_EA, L_AD;
-  uint32_t p;
+static int UDFFileEntry(uint8_t* data, uint8_t* FileType, struct Partition* partition, struct AD* ad) {
+	uint16_t flags;
+	uint32_t L_EA, L_AD;
+	uint32_t p;
 
-  UDFICB( &data[ 16 ], FileType, &flags );
-   
-  /* Init ad for an empty file (i.e. there isn't a AD, L_AD == 0 ) */
-  ad->Length = GETN4( 60 ); // Really 8 bytes a 56
-  ad->Flags = 0;
-  ad->Location = 0; // what should we put here? 
-  ad->Partition = partition->Number; // use number of current partition
+	UDFICB(&data[16], FileType, &flags);
 
-  L_EA = GETN4( 168 );
-  L_AD = GETN4( 172 );
-  p = 176 + L_EA;
-  while( p < 176 + L_EA + L_AD ) {
-    switch( flags & 0x0007 ) {
-    case 0: UDFShortAD( &data[ p ], ad, partition ); p += 8;  break;
-    case 1: UDFLongAD( &data[ p ], ad );  p += 16; break;
-    case 2: UDFExtAD( &data[ p ], ad );   p += 20; break;
-    case 3:
-      switch( L_AD ) {
-      case 8:  UDFShortAD( &data[ p ], ad, partition ); break;
-      case 16: UDFLongAD( &data[ p ], ad );  break;
-      case 20: UDFExtAD( &data[ p ], ad );   break;
-      }
-      p += L_AD;
-      break;
-    default:
-      p += L_AD; break;
-    }
-  }
-  return 0;
+	/* Init ad for an empty file (i.e. there isn't a AD, L_AD == 0 ) */
+	ad->Length = GETN4(60); // Really 8 bytes a 56
+	ad->Flags = 0;
+	ad->Location = 0;                  // what should we put here?
+	ad->Partition = partition->Number; // use number of current partition
+
+	L_EA = GETN4(168);
+	L_AD = GETN4(172);
+	p = 176 + L_EA;
+	while (p < 176 + L_EA + L_AD) {
+		switch (flags & 0x0007) {
+			case 0:
+				UDFShortAD(&data[p], ad, partition);
+				p += 8;
+				break;
+			case 1:
+				UDFLongAD(&data[p], ad);
+				p += 16;
+				break;
+			case 2:
+				UDFExtAD(&data[p], ad);
+				p += 20;
+				break;
+			case 3:
+				switch (L_AD) {
+					case 8:
+						UDFShortAD(&data[p], ad, partition);
+						break;
+					case 16:
+						UDFLongAD(&data[p], ad);
+						break;
+					case 20:
+						UDFExtAD(&data[p], ad);
+						break;
+				}
+				p += L_AD;
+				break;
+			default:
+				p += L_AD;
+				break;
+		}
+	}
+	return 0;
 }
 
-static int UDFFileIdentifier( uint8_t *data, uint8_t *FileCharacteristics,
-                              char *FileName, struct AD *FileICB )
-{
-  uint8_t L_FI;
-  uint16_t L_IU;
+static int UDFFileIdentifier(uint8_t* data, uint8_t* FileCharacteristics, char* FileName, struct AD* FileICB) {
+	uint8_t L_FI;
+	uint16_t L_IU;
 
-  *FileCharacteristics = GETN1(18);
-  L_FI = GETN1(19);
-  UDFLongAD(&data[20], FileICB);
-  L_IU = GETN2(36);
-  if (L_FI) Unicodedecode(&data[38 + L_IU], L_FI, FileName);
-  else FileName[0] = '\0';
-  return 4 * ((38 + L_FI + L_IU + 3) / 4);
+	*FileCharacteristics = GETN1(18);
+	L_FI = GETN1(19);
+	UDFLongAD(&data[20], FileICB);
+	L_IU = GETN2(36);
+	if (L_FI)
+		Unicodedecode(&data[38 + L_IU], L_FI, FileName);
+	else
+		FileName[0] = '\0';
+	return 4 * ((38 + L_FI + L_IU + 3) / 4);
 }
 
 /**
@@ -658,51 +640,46 @@ static int UDFFileIdentifier( uint8_t *data, uint8_t *FileCharacteristics,
  * File: Location of file the ICB is pointing to
  * return 1 on success, 0 on error;
  */
-static int UDFMapICB( udf_t *udf, struct AD ICB, uint8_t *FileType,
-                      struct Partition *partition, struct AD *File ) 
-{
-  uint8_t *LogBlock;
-  uint32_t lbnum;
-  uint16_t TagID;
-  struct icbmap tmpmap;
+static int UDFMapICB(udf_t* udf, struct AD ICB, uint8_t* FileType, struct Partition* partition, struct AD* File) {
+	uint8_t* LogBlock;
+	uint32_t lbnum;
+	uint16_t TagID;
+	struct icbmap tmpmap;
 
-  lbnum = partition->Start + ICB.Location;
-  tmpmap.lbn = lbnum;
-  if(GetUDFCache(udf, MapCache, lbnum, &tmpmap)) {
-    *FileType = tmpmap.filetype;
-    *File = tmpmap.file;
-    return 1;
-  }
+	lbnum = partition->Start + ICB.Location;
+	tmpmap.lbn = lbnum;
+	if (GetUDFCache(udf, MapCache, lbnum, &tmpmap)) {
+		*FileType = tmpmap.filetype;
+		*File = tmpmap.file;
+		return 1;
+	}
 
-  //LogBlock = dvdalign_lbmalloc(device, 1);
-  LogBlock = (uint8_t*) malloc(2048);
-  if(!LogBlock) {
-    return 0;
-  }
-    
-  do {
-    //if( DVDReadLBUDF( device, lbnum++, 1, LogBlock, 0 ) <= 0 ) {
-    if( read ( udf->dev, LogBlock, lbnum++, 1, 0 ) ) {
-      TagID = 0;
-    } else {
-      UDFDescriptor( LogBlock, &TagID );
-    }
+	//LogBlock = dvdalign_lbmalloc(device, 1);
+	LogBlock = (uint8_t*)malloc(2048);
+	if (!LogBlock) { return 0; }
 
-    if( TagID == 261 ) {
-      UDFFileEntry( LogBlock, FileType, partition, File );
-      tmpmap.file = *File;
-      tmpmap.filetype = *FileType;
-      SetUDFCache(udf, MapCache, tmpmap.lbn, &tmpmap);
-      //dvdalign_lbfree(device, LogBlock);
-      free(LogBlock);
-      return 1;
-    };
-  } while( ( lbnum <= partition->Start + ICB.Location + ( ICB.Length - 1 )
-             / DVD_VIDEO_LB_LEN ) && ( TagID != 261 ) );
+	do {
+		//if( DVDReadLBUDF( device, lbnum++, 1, LogBlock, 0 ) <= 0 ) {
+		if (read(udf->dev, LogBlock, lbnum++, 1, 0)) {
+			TagID = 0;
+		} else {
+			UDFDescriptor(LogBlock, &TagID);
+		}
 
-  //dvdalign_lbfree(device, LogBlock);
-  free(LogBlock);
-  return 0;
+		if (TagID == 261) {
+			UDFFileEntry(LogBlock, FileType, partition, File);
+			tmpmap.file = *File;
+			tmpmap.filetype = *FileType;
+			SetUDFCache(udf, MapCache, tmpmap.lbn, &tmpmap);
+			//dvdalign_lbfree(device, LogBlock);
+			free(LogBlock);
+			return 1;
+		};
+	} while ((lbnum <= partition->Start + ICB.Location + (ICB.Length - 1) / DVD_VIDEO_LB_LEN) && (TagID != 261));
+
+	//dvdalign_lbfree(device, LogBlock);
+	free(LogBlock);
+	return 0;
 }
 
 /**
@@ -711,221 +688,199 @@ static int UDFMapICB( udf_t *udf, struct AD ICB, uint8_t *FileType,
  * FileICB: Location of ICB of the found file
  * return 1 on success, 0 on error;
  */
-static int UDFScanDir( udf_t *udf, struct AD Dir, char *FileName,
-                       struct Partition *partition, struct AD *FileICB,
-                       int cache_file_info) 
-{
-  char filename[ MAX_UDF_FILE_NAME_LEN ];
-  uint8_t *directory;
-  uint32_t lbnum;
-  uint16_t TagID;
-  uint8_t filechar;
-  uint32_t p;
-  uint8_t *cached_dir = NULL;
-  uint32_t dir_lba;
-  struct AD tmpICB;
-  int found = 0;
-  int in_cache = 0;
+static int UDFScanDir(udf_t* udf, struct AD Dir, char* FileName, struct Partition* partition, struct AD* FileICB,
+                      int cache_file_info) {
+	char filename[MAX_UDF_FILE_NAME_LEN];
+	uint8_t* directory;
+	uint32_t lbnum;
+	uint16_t TagID;
+	uint8_t filechar;
+	uint32_t p;
+	uint8_t* cached_dir = NULL;
+	uint32_t dir_lba;
+	struct AD tmpICB;
+	int found = 0;
+	int in_cache = 0;
 
-  /* Scan dir for ICB of file */
-  lbnum = partition->Start + Dir.Location;
-    
-//  if(DVDUDFCacheLevel(device, -1) > 0) {
-    /* caching */
-      
-    //if(!GetUDFCache(device, LBUDFCache, lbnum, &cached_dir)) {
-    if(!GetUDFCache(udf, LBUDFCache, lbnum, &cached_dir)) {
-      dir_lba = (Dir.Length + DVD_VIDEO_LB_LEN) / DVD_VIDEO_LB_LEN;
-      //if((cached_dir = dvdalign_lbmalloc(device, dir_lba)) == NULL) {
-      if((cached_dir = (uint8_t*) malloc(2048 * dir_lba)) == NULL) {
-        return 0;
-      }
-      //if( DVDReadLBUDF( device, lbnum, dir_lba, cached_dir, 0) <= 0 ) {
-      if( read( udf->dev, cached_dir, lbnum, dir_lba, 0) ) {
-        //dvdalign_lbfree(device, cached_dir);
-		free(cached_dir);
-        cached_dir = NULL;
-      }
-      SetUDFCache(udf, LBUDFCache, lbnum, &cached_dir);
-    } else {
-      in_cache = 1;
-    }
-      
-    if(cached_dir == NULL) {
-      return 0;
-    }
-      
-    p = 0;
-      
-    while( p < Dir.Length ) {
-      UDFDescriptor( &cached_dir[ p ], &TagID );
-      if( TagID == 257 ) {
-        p += UDFFileIdentifier( &cached_dir[ p ], &filechar,
-                                filename, &tmpICB );
-        if(cache_file_info && !in_cache) {
-          uint8_t tmpFiletype;
-          struct AD tmpFile;
-            
-          if( !strcasecmp( FileName, filename ) ) {
-            *FileICB = tmpICB;
-            found = 1;
-              
-          }
-          UDFMapICB(udf, tmpICB, &tmpFiletype,
-                    partition, &tmpFile);
-        } else {
-          if( !strcasecmp( FileName, filename ) ) {
-            *FileICB = tmpICB;
-            return 1;
-          }
-        }
-      } else {
-        if(cache_file_info && (!in_cache) && found) {
-          return 1;
-        }
-        return 0;
-      }
-    }
-    if(cache_file_info && (!in_cache) && found) {
-      return 1;
-    }
-    return 0;
-//  }
+	/* Scan dir for ICB of file */
+	lbnum = partition->Start + Dir.Location;
 
-  //directory = dvdalign_lbmalloc(device, 2);
-  directory = (uint8_t*) malloc(2 * 2048);
-  if(!directory) {
-    return 0;
-  }
-/*
+	//  if(DVDUDFCacheLevel(device, -1) > 0) {
+	/* caching */
+
+	//if(!GetUDFCache(device, LBUDFCache, lbnum, &cached_dir)) {
+	if (!GetUDFCache(udf, LBUDFCache, lbnum, &cached_dir)) {
+		dir_lba = (Dir.Length + DVD_VIDEO_LB_LEN) / DVD_VIDEO_LB_LEN;
+		//if((cached_dir = dvdalign_lbmalloc(device, dir_lba)) == NULL) {
+		if ((cached_dir = (uint8_t*)malloc(2048 * dir_lba)) == NULL) { return 0; }
+		//if( DVDReadLBUDF( device, lbnum, dir_lba, cached_dir, 0) <= 0 ) {
+		if (read(udf->dev, cached_dir, lbnum, dir_lba, 0)) {
+			//dvdalign_lbfree(device, cached_dir);
+			free(cached_dir);
+			cached_dir = NULL;
+		}
+		SetUDFCache(udf, LBUDFCache, lbnum, &cached_dir);
+	} else {
+		in_cache = 1;
+	}
+
+	if (cached_dir == NULL) { return 0; }
+
+	p = 0;
+
+	while (p < Dir.Length) {
+		UDFDescriptor(&cached_dir[p], &TagID);
+		if (TagID == 257) {
+			p += UDFFileIdentifier(&cached_dir[p], &filechar, filename, &tmpICB);
+			if (cache_file_info && !in_cache) {
+				uint8_t tmpFiletype;
+				struct AD tmpFile;
+
+				if (!strcasecmp(FileName, filename)) {
+					*FileICB = tmpICB;
+					found = 1;
+				}
+				UDFMapICB(udf, tmpICB, &tmpFiletype, partition, &tmpFile);
+			} else {
+				if (!strcasecmp(FileName, filename)) {
+					*FileICB = tmpICB;
+					return 1;
+				}
+			}
+		} else {
+			if (cache_file_info && (!in_cache) && found) { return 1; }
+			return 0;
+		}
+	}
+	if (cache_file_info && (!in_cache) && found) { return 1; }
+	return 0;
+	//  }
+
+	//directory = dvdalign_lbmalloc(device, 2);
+	directory = (uint8_t*)malloc(2 * 2048);
+	if (!directory) { return 0; }
+	/*
 	if( DVDReadLBUDF( device, lbnum, 2, directory, 0 ) <= 0 ) {
     dvdalign_lbfree(device, directory);
     return 0;
   }
 */
 
-  if( read( udf->dev, directory, lbnum, 2, 0 ) <= 0 ) {
-    free(directory);
-    return 0;
-  }
+	if (read(udf->dev, directory, lbnum, 2, 0) <= 0) {
+		free(directory);
+		return 0;
+	}
 
-  p = 0;
-  while( p < Dir.Length ) {
-    if( p > DVD_VIDEO_LB_LEN ) {
-      ++lbnum;
-      p -= DVD_VIDEO_LB_LEN;
-      Dir.Length -= DVD_VIDEO_LB_LEN;
-/*
+	p = 0;
+	while (p < Dir.Length) {
+		if (p > DVD_VIDEO_LB_LEN) {
+			++lbnum;
+			p -= DVD_VIDEO_LB_LEN;
+			Dir.Length -= DVD_VIDEO_LB_LEN;
+			/*
       if( DVDReadLBUDF( device, lbnum, 2, directory, 0 ) <= 0 ) {
         dvdalign_lbfree(device, directory);
         return 0;
       }
 */
-      if( read( udf->dev, directory, lbnum, 2, 0 ) <= 0 ) {
-       free(directory);
-       return 0;
-      }
-    }
-    UDFDescriptor( &directory[ p ], &TagID );
-    if( TagID == 257 ) {
-      p += UDFFileIdentifier( &directory[ p ], &filechar,
-                              filename, FileICB );
-      if( !strcasecmp( FileName, filename ) ) {
-        //dvdalign_lbfree(device, directory);
-        free(directory);
-        return 1;
-      }
-    } else {
-      //dvdalign_lbfree(device, directory);
-      free(directory);
-      return 0;
-    }
-  }
+			if (read(udf->dev, directory, lbnum, 2, 0) <= 0) {
+				free(directory);
+				return 0;
+			}
+		}
+		UDFDescriptor(&directory[p], &TagID);
+		if (TagID == 257) {
+			p += UDFFileIdentifier(&directory[p], &filechar, filename, FileICB);
+			if (!strcasecmp(FileName, filename)) {
+				//dvdalign_lbfree(device, directory);
+				free(directory);
+				return 1;
+			}
+		} else {
+			//dvdalign_lbfree(device, directory);
+			free(directory);
+			return 0;
+		}
+	}
 
-  //dvdalign_lbfree(device, directory);
-  free(directory);
-  return 0;
+	//dvdalign_lbfree(device, directory);
+	free(directory);
+	return 0;
 }
 
-static int UDFGetAVDP( udf_t *udf,
-                       struct avdp_t *avdp)
-{
-  uint8_t *Anchor;
-  uint32_t lbnum, MVDS_location, MVDS_length;
-  uint16_t TagID;
-  uint32_t lastsector;
-  int terminate;
-  struct avdp_t; 
-  
-  if(GetUDFCache(udf, AVDPCache, 0, avdp)) {
-    return 1;
-  }
-  
-  /* Find Anchor */
-  lastsector = 0;
-  lbnum = 256;   /* Try #1, prime anchor */
-  terminate = 0;
-  
-  //Anchor = dvdalign_lbmalloc(device, 1);
-  Anchor = (uint8_t*) malloc(2048);
-  if(!Anchor) {
-    return 0;
-  }
-  for(;;) {
-    //if( DVDReadLBUDF( device, lbnum, 1, Anchor, 0 ) > 0 ) {
-    if( ! read( udf->dev, Anchor, lbnum, 1, 0 ) ) {
-      UDFDescriptor( Anchor, &TagID );
-    } else {
-      TagID = 0;
-    }
-    if (TagID != 2) {
-      /* Not an anchor */
-      if( terminate ) {
-        //dvdalign_lbfree(device, Anchor);
-        free(Anchor);
-        errno = EMEDIUMTYPE;
-        return 0; /* Final try failed */
-      } 
-      
-      if( lastsector ) {
-        /* We already found the last sector.  Try #3, alternative
+static int UDFGetAVDP(udf_t* udf, struct avdp_t* avdp) {
+	uint8_t* Anchor;
+	uint32_t lbnum, MVDS_location, MVDS_length;
+	uint16_t TagID;
+	uint32_t lastsector;
+	int terminate;
+	struct avdp_t;
+
+	if (GetUDFCache(udf, AVDPCache, 0, avdp)) { return 1; }
+
+	/* Find Anchor */
+	lastsector = 0;
+	lbnum = 256; /* Try #1, prime anchor */
+	terminate = 0;
+
+	//Anchor = dvdalign_lbmalloc(device, 1);
+	Anchor = (uint8_t*)malloc(2048);
+	if (!Anchor) { return 0; }
+	for (;;) {
+		//if( DVDReadLBUDF( device, lbnum, 1, Anchor, 0 ) > 0 ) {
+		if (!read(udf->dev, Anchor, lbnum, 1, 0)) {
+			UDFDescriptor(Anchor, &TagID);
+		} else {
+			TagID = 0;
+		}
+		if (TagID != 2) {
+			/* Not an anchor */
+			if (terminate) {
+				//dvdalign_lbfree(device, Anchor);
+				free(Anchor);
+				errno = EMEDIUMTYPE;
+				return 0; /* Final try failed */
+			}
+
+			if (lastsector) {
+				/* We already found the last sector.  Try #3, alternative
          * backup anchor.  If that fails, don't try again.
          */
-        lbnum = lastsector;
-        terminate = 1;
-      } else {
-        /* TODO: Find last sector of the disc (this is optional). */
-        if( lastsector ) {
-          /* Try #2, backup anchor */
-          lbnum = lastsector - 256;
-        } else {
-          /* Unable to find last sector */
-          //dvdalign_lbfree(device, Anchor);
-          free(Anchor);
-          errno = EMEDIUMTYPE;
-          return 0;
-        }
-      }
-    } else {
-      /* It's an anchor! We can leave */
-      break;
-    }
-  }
-  /* Main volume descriptor */
-  UDFExtentAD( &Anchor[ 16 ], &MVDS_length, &MVDS_location );
-  avdp->mvds.location = MVDS_location;
-  avdp->mvds.length = MVDS_length;
-  
-  /* Backup volume descriptor */
-  UDFExtentAD( &Anchor[ 24 ], &MVDS_length, &MVDS_location );
-  avdp->rvds.location = MVDS_location;
-  avdp->rvds.length = MVDS_length;
-  
-  SetUDFCache(udf, AVDPCache, 0, avdp);
-  
-  //dvdalign_lbfree(device, Anchor);
-  free(Anchor);
-  return 1;
+				lbnum = lastsector;
+				terminate = 1;
+			} else {
+				/* TODO: Find last sector of the disc (this is optional). */
+				if (lastsector) {
+					/* Try #2, backup anchor */
+					lbnum = lastsector - 256;
+				} else {
+					/* Unable to find last sector */
+					//dvdalign_lbfree(device, Anchor);
+					free(Anchor);
+					errno = EMEDIUMTYPE;
+					return 0;
+				}
+			}
+		} else {
+			/* It's an anchor! We can leave */
+			break;
+		}
+	}
+	/* Main volume descriptor */
+	UDFExtentAD(&Anchor[16], &MVDS_length, &MVDS_location);
+	avdp->mvds.location = MVDS_location;
+	avdp->mvds.length = MVDS_length;
+
+	/* Backup volume descriptor */
+	UDFExtentAD(&Anchor[24], &MVDS_length, &MVDS_location);
+	avdp->rvds.location = MVDS_location;
+	avdp->rvds.length = MVDS_length;
+
+	SetUDFCache(udf, AVDPCache, 0, avdp);
+
+	//dvdalign_lbfree(device, Anchor);
+	free(Anchor);
+	return 1;
 }
 
 /**
@@ -933,180 +888,142 @@ static int UDFGetAVDP( udf_t *udf,
  *   partnum: Number of the partition, starting at 0.
  *   part: structure to fill with the partition information
  */
-static int UDFFindPartition( udf_t *udf, int partnum,
-                             struct Partition *part ) 
-{
-  uint8_t *LogBlock;
-  uint32_t lbnum, MVDS_location, MVDS_length;
-  uint16_t TagID;
-  int i, volvalid;
-  struct avdp_t avdp;
+static int UDFFindPartition(udf_t* udf, int partnum, struct Partition* part) {
+	uint8_t* LogBlock;
+	uint32_t lbnum, MVDS_location, MVDS_length;
+	uint16_t TagID;
+	int i, volvalid;
+	struct avdp_t avdp;
 
-  if(!UDFGetAVDP(udf, &avdp)) {
-    return 0;
-  }
+	if (!UDFGetAVDP(udf, &avdp)) { return 0; }
 
-  //LogBlock = dvdalign_lbmalloc(device, 1);
-  LogBlock = (uint8_t*) malloc(2048);
-  if(!LogBlock) {
-    return 0;
-  }
-  /* Main volume descriptor */
-  MVDS_location = avdp.mvds.location;
-  MVDS_length = avdp.mvds.length;
+	//LogBlock = dvdalign_lbmalloc(device, 1);
+	LogBlock = (uint8_t*)malloc(2048);
+	if (!LogBlock) { return 0; }
+	/* Main volume descriptor */
+	MVDS_location = avdp.mvds.location;
+	MVDS_length = avdp.mvds.length;
 
-  part->valid = 0;
-  volvalid = 0;
-  part->VolumeDesc[ 0 ] = '\0';
-  i = 1;
-  do {
-    /* Find Volume Descriptor */
-    lbnum = MVDS_location;
-    do {
+	part->valid = 0;
+	volvalid = 0;
+	part->VolumeDesc[0] = '\0';
+	i = 1;
+	do {
+		/* Find Volume Descriptor */
+		lbnum = MVDS_location;
+		do {
+			//if( DVDReadLBUDF( device, lbnum++, 1, LogBlock, 0 ) <= 0 ) {
+			if (read(udf->dev, LogBlock, lbnum++, 1, 0)) {
+				TagID = 0;
+			} else {
+				UDFDescriptor(LogBlock, &TagID);
+			}
 
-      //if( DVDReadLBUDF( device, lbnum++, 1, LogBlock, 0 ) <= 0 ) {
-      if( read( udf->dev, LogBlock, lbnum++, 1, 0 ) ) {
-        TagID = 0;
-      } else {
-        UDFDescriptor( LogBlock, &TagID );
-      }
+			if ((TagID == 5) && (!part->valid)) {
+				/* Partition Descriptor */
+				UDFPartition(LogBlock, &part->Flags, &part->Number, part->Contents, &part->Start, &part->Length);
+				part->valid = (partnum == part->Number);
+			} else if ((TagID == 6) && (!volvalid)) {
+				/* Logical Volume Descriptor */
+				if (UDFLogVolume(LogBlock, part->VolumeDesc)) {
+					/* TODO: sector size wrong! */
+				} else {
+					volvalid = 1;
+				}
+			}
 
-      if( ( TagID == 5 ) && ( !part->valid ) ) {
-        /* Partition Descriptor */
-        UDFPartition( LogBlock, &part->Flags, &part->Number,
-                      part->Contents, &part->Start, &part->Length );
-        part->valid = ( partnum == part->Number );
-      } else if( ( TagID == 6 ) && ( !volvalid ) ) {
-        /* Logical Volume Descriptor */
-        if( UDFLogVolume( LogBlock, part->VolumeDesc ) ) {  
-          /* TODO: sector size wrong! */
-        } else {
-          volvalid = 1;
-        }
-      }
+		} while ((lbnum <= MVDS_location + (MVDS_length - 1) / DVD_VIDEO_LB_LEN) && (TagID != 8) &&
+		         ((!part->valid) || (!volvalid)));
 
-    } while( ( lbnum <= MVDS_location + ( MVDS_length - 1 )
-               / DVD_VIDEO_LB_LEN ) && ( TagID != 8 )
-             && ( ( !part->valid ) || ( !volvalid ) ) );
+		if ((!part->valid) || (!volvalid)) {
+			/* Backup volume descriptor */
+			MVDS_location = avdp.mvds.location;
+			MVDS_length = avdp.mvds.length;
+		}
+	} while (i-- && ((!part->valid) || (!volvalid)));
 
-    if( ( !part->valid) || ( !volvalid ) ) {
-      /* Backup volume descriptor */
-      MVDS_location = avdp.mvds.location;
-      MVDS_length = avdp.mvds.length;
-    }
-  } while( i-- && ( ( !part->valid ) || ( !volvalid ) ) );
-
-  //dvdalign_lbfree(device, LogBlock);
-  free(LogBlock);
-  /* We only care for the partition, not the volume */
-  return part->valid;
+	//dvdalign_lbfree(device, LogBlock);
+	free(LogBlock);
+	/* We only care for the partition, not the volume */
+	return part->valid;
 }
 
-uint32_t UDFFindFile( udf_t *udf, char *filename,
-                      uint32_t *filesize )
-{
-  uint8_t *LogBlock;
-  uint32_t lbnum;
-  uint16_t TagID;
-  struct Partition partition;
-  struct AD RootICB, File, ICB;
-  char tokenline[ MAX_UDF_FILE_NAME_LEN ];
-  char *token;
-  uint8_t filetype;
-  
-  if(filesize) {
-    *filesize = 0;
-  }
-  tokenline[0] = '\0';
-  strcat( tokenline, filename );
+uint32_t UDFFindFile(udf_t* udf, char* filename, uint32_t* filesize) {
+	uint8_t* LogBlock;
+	uint32_t lbnum;
+	uint16_t TagID;
+	struct Partition partition;
+	struct AD RootICB, File, ICB;
+	char tokenline[MAX_UDF_FILE_NAME_LEN];
+	char* token;
+	uint8_t filetype;
 
-    
-  if(!(GetUDFCache(udf, PartitionCache, 0, &partition) &&
-       GetUDFCache(udf, RootICBCache, 0, &RootICB))) {
-    /* Find partition, 0 is the standard location for DVD Video.*/
-    if( !UDFFindPartition( udf, 0, &partition ) ) {
-      return 0;
-    }
-    SetUDFCache(udf, PartitionCache, 0, &partition);
-    
-    //LogBlock = dvdalign_lbmalloc(device, 1);
-    LogBlock = (uint8_t*) malloc(2048);
-    if(!LogBlock) {
-      return 0;
-    }
-    /* Find root dir ICB */
-    lbnum = partition.Start;
-    do {
-      //if( DVDReadLBUDF( device, lbnum++, 1, LogBlock, 0 ) <= 0 ) {
-      if( read( udf->dev, LogBlock, lbnum++, 1, 0 ) ) {
-        TagID = 0;
-      } else {
-        UDFDescriptor( LogBlock, &TagID );
-      }
+	if (filesize) { *filesize = 0; }
+	tokenline[0] = '\0';
+	strcat(tokenline, filename);
 
-      /* File Set Descriptor */
-      if( TagID == 256 ) {  // File Set Descriptor
-        UDFLongAD( &LogBlock[ 400 ], &RootICB );
-      }
-    } while( ( lbnum < partition.Start + partition.Length )
-             && ( TagID != 8 ) && ( TagID != 256 ) );
 
-    //dvdalign_lbfree(device, LogBlock);
-	free(LogBlock);
-      
-    /* Sanity checks. */
-    if( TagID != 256 ) {
-      return 0;
-    }
-    if( RootICB.Partition != 0 ) {
-      return 0;
-    }
-    SetUDFCache(udf, RootICBCache, 0, &RootICB);
-  }
+	if (!(GetUDFCache(udf, PartitionCache, 0, &partition) && GetUDFCache(udf, RootICBCache, 0, &RootICB))) {
+		/* Find partition, 0 is the standard location for DVD Video.*/
+		if (!UDFFindPartition(udf, 0, &partition)) { return 0; }
+		SetUDFCache(udf, PartitionCache, 0, &partition);
 
-  /* Find root dir */
-  if( !UDFMapICB( udf, RootICB, &filetype, &partition, &File ) ) {
-    return 0;
-  }
-  if( filetype != 4 ) {
-    return 0;  /* Root dir should be dir */
-  }
-  {
-    int cache_file_info = 0;
-    /* Tokenize filepath */
-    token = strtok(tokenline, "/");
-    
-    while( token != NULL ) {
-      ICB.Length = 0;
-      if( !UDFScanDir( udf, File, token, &partition, &ICB,
-                       cache_file_info)) {
-        return 0;
-      }
-      if (!ICB.Length) return 0; // make gcc happy (-Wmaybe-uninitialized)
-      if( !UDFMapICB( udf, ICB, &filetype, &partition, &File ) ) {
-        return 0;
-      }
-      if(!strcmp(token, "VIDEO_TS")) {
-        cache_file_info = 1;
-      }
-      token = strtok( NULL, "/" );
-    }
-  } 
+		//LogBlock = dvdalign_lbmalloc(device, 1);
+		LogBlock = (uint8_t*)malloc(2048);
+		if (!LogBlock) { return 0; }
+		/* Find root dir ICB */
+		lbnum = partition.Start;
+		do {
+			//if( DVDReadLBUDF( device, lbnum++, 1, LogBlock, 0 ) <= 0 ) {
+			if (read(udf->dev, LogBlock, lbnum++, 1, 0)) {
+				TagID = 0;
+			} else {
+				UDFDescriptor(LogBlock, &TagID);
+			}
 
-  /* Sanity check. */
-  if( File.Partition != 0 ) {
-    return 0;
-  }
+			/* File Set Descriptor */
+			if (TagID == 256) { // File Set Descriptor
+				UDFLongAD(&LogBlock[400], &RootICB);
+			}
+		} while ((lbnum < partition.Start + partition.Length) && (TagID != 8) && (TagID != 256));
 
-  if(filesize) {
-    *filesize = File.Length;
-  }
-  /* Hack to not return partition.Start for empty files. */
-  if( !File.Location ) {
-    return 0;
-  } else {
-    return partition.Start + File.Location;
-  }
+		//dvdalign_lbfree(device, LogBlock);
+		free(LogBlock);
+
+		/* Sanity checks. */
+		if (TagID != 256) { return 0; }
+		if (RootICB.Partition != 0) { return 0; }
+		SetUDFCache(udf, RootICBCache, 0, &RootICB);
+	}
+
+	/* Find root dir */
+	if (!UDFMapICB(udf, RootICB, &filetype, &partition, &File)) { return 0; }
+	if (filetype != 4) { return 0; /* Root dir should be dir */ }
+	{
+		int cache_file_info = 0;
+		/* Tokenize filepath */
+		token = strtok(tokenline, "/");
+
+		while (token != NULL) {
+			ICB.Length = 0;
+			if (!UDFScanDir(udf, File, token, &partition, &ICB, cache_file_info)) { return 0; }
+			if (!ICB.Length) return 0; // make gcc happy (-Wmaybe-uninitialized)
+			if (!UDFMapICB(udf, ICB, &filetype, &partition, &File)) { return 0; }
+			if (!strcmp(token, "VIDEO_TS")) { cache_file_info = 1; }
+			token = strtok(NULL, "/");
+		}
+	}
+
+	/* Sanity check. */
+	if (File.Partition != 0) { return 0; }
+
+	if (filesize) { *filesize = File.Length; }
+	/* Hack to not return partition.Start for empty files. */
+	if (!File.Location) {
+		return 0;
+	} else {
+		return partition.Start + File.Location;
+	}
 }
 
 /**
@@ -1116,87 +1033,73 @@ uint32_t UDFFindFile( udf_t *udf, char *filename,
  * bufsize, size of BlockBuf (must be >= DVD_VIDEO_LB_LEN)
  * and aligned for raw/O_DIRECT read.
  */
-static int UDFGetDescriptor( udf_t *udf, int id,
-                             uint8_t *descriptor, int bufsize) 
-{
-  uint32_t lbnum, MVDS_location, MVDS_length;
-  struct avdp_t avdp;
-  uint16_t TagID;
-  int i;
-  int desc_found = 0;
-  /* Find Anchor */
-  lbnum = 256;   /* Try #1, prime anchor */
-  if(bufsize < DVD_VIDEO_LB_LEN) {
-    return 0;
-  }
-  
-  if(!UDFGetAVDP(udf, &avdp)) {
-    return 0;
-  }
+static int UDFGetDescriptor(udf_t* udf, int id, uint8_t* descriptor, int bufsize) {
+	uint32_t lbnum, MVDS_location, MVDS_length;
+	struct avdp_t avdp;
+	uint16_t TagID;
+	int i;
+	int desc_found = 0;
+	/* Find Anchor */
+	lbnum = 256; /* Try #1, prime anchor */
+	if (bufsize < DVD_VIDEO_LB_LEN) { return 0; }
 
-  /* Main volume descriptor */
-  MVDS_location = avdp.mvds.location;
-  MVDS_length = avdp.mvds.length;
-  
-  i = 1;
-  do {
-    /* Find  Descriptor */
-    lbnum = MVDS_location;
-    do {
-      
-      //if( DVDReadLBUDF( device, lbnum++, 1, descriptor, 0 ) <= 0 ) {
-      if( read( udf->dev, descriptor, lbnum++, 1, 0 ) ) {
-        TagID = 0;
-      } else {
-        UDFDescriptor( descriptor, &TagID );
-      }
-      
-      if( (TagID == id) && ( !desc_found ) ) {
-        /* Descriptor */
-        desc_found = 1;
-      }
-    } while( ( lbnum <= MVDS_location + ( MVDS_length - 1 )
-               / DVD_VIDEO_LB_LEN ) && ( TagID != 8 )
-             && ( !desc_found) );
-    
-    if( !desc_found ) {
-      /* Backup volume descriptor */
-      MVDS_location = avdp.rvds.location;
-      MVDS_length = avdp.rvds.length;
-    }
-  } while( i-- && ( !desc_found )  );
+	if (!UDFGetAVDP(udf, &avdp)) { return 0; }
 
-  
-  return desc_found;
+	/* Main volume descriptor */
+	MVDS_location = avdp.mvds.location;
+	MVDS_length = avdp.mvds.length;
+
+	i = 1;
+	do {
+		/* Find  Descriptor */
+		lbnum = MVDS_location;
+		do {
+			//if( DVDReadLBUDF( device, lbnum++, 1, descriptor, 0 ) <= 0 ) {
+			if (read(udf->dev, descriptor, lbnum++, 1, 0)) {
+				TagID = 0;
+			} else {
+				UDFDescriptor(descriptor, &TagID);
+			}
+
+			if ((TagID == id) && (!desc_found)) {
+				/* Descriptor */
+				desc_found = 1;
+			}
+		} while ((lbnum <= MVDS_location + (MVDS_length - 1) / DVD_VIDEO_LB_LEN) && (TagID != 8) && (!desc_found));
+
+		if (!desc_found) {
+			/* Backup volume descriptor */
+			MVDS_location = avdp.rvds.location;
+			MVDS_length = avdp.rvds.length;
+		}
+	} while (i-- && (!desc_found));
+
+
+	return desc_found;
 }
 
-static int UDFGetPVD(udf_t *udf, struct pvd_t *pvd)
-{
-  uint8_t *pvd_buf;
-  
-  if(GetUDFCache(udf, PVDCache, 0, pvd)) {
-    return 1;
-  }
-  
-  //pvd_buf = dvdalign_lbmalloc(device, 1);
-  pvd_buf = (uint8_t*) malloc(2048);
-  if(!pvd_buf) {
-    return 0;
-  }
-  if(!UDFGetDescriptor( udf, 1, pvd_buf, 1*DVD_VIDEO_LB_LEN)) {
-    //dvdalign_lbfree(device, pvd_buf);
-    free(pvd_buf);
-    return 0;
-  }
-  
-  memcpy(pvd->VolumeIdentifier, &pvd_buf[24], 32);
-  memcpy(pvd->VolumeSetIdentifier, &pvd_buf[72], 128);
-  SetUDFCache(udf, PVDCache, 0, pvd);
-  
-  //dvdalign_lbfree(device, pvd_buf);
-  free(pvd_buf);
+static int UDFGetPVD(udf_t* udf, struct pvd_t* pvd) {
+	uint8_t* pvd_buf;
 
-  return 1;
+	if (GetUDFCache(udf, PVDCache, 0, pvd)) { return 1; }
+
+	//pvd_buf = dvdalign_lbmalloc(device, 1);
+	pvd_buf = (uint8_t*)malloc(2048);
+	if (!pvd_buf) { return 0; }
+	if (!UDFGetDescriptor(udf, 1, pvd_buf, 1 * DVD_VIDEO_LB_LEN)) {
+		//dvdalign_lbfree(device, pvd_buf);
+		free(pvd_buf);
+		return 0;
+	}
+
+	memcpy(pvd->VolumeIdentifier, &pvd_buf[24], 32);
+	memcpy(pvd->VolumeSetIdentifier, &pvd_buf[72], 128);
+	SetUDFCache(udf, PVDCache, 0, pvd);
+
+	//dvdalign_lbfree(device, pvd_buf);
+	free(pvd_buf);
+
+	return 1;
 }
 
 /**
@@ -1205,28 +1108,22 @@ static int UDFGetPVD(udf_t *udf, struct pvd_t *pvd)
  * volid_size, size of the buffer volid points to
  * returns the size of buffer needed for all data
  */
-int UDFGetVolumeIdentifier(udf_t *udf, char *volid,
-                           uint32_t volid_size)
-{
-  struct pvd_t pvd;
-  uint32_t volid_len;
+int UDFGetVolumeIdentifier(udf_t* udf, char* volid, uint32_t volid_size) {
+	struct pvd_t pvd;
+	uint32_t volid_len;
 
-  /* get primary volume descriptor */
-  if(!UDFGetPVD(udf, &pvd)) {
-    return 0;
-  }
+	/* get primary volume descriptor */
+	if (!UDFGetPVD(udf, &pvd)) { return 0; }
 
-  volid_len = pvd.VolumeIdentifier[31];
-  if(volid_len > 31) {
-    /* this field is only 32 bytes something is wrong */
-    volid_len = 31;
-  }
-  if(volid_size > volid_len) {
-    volid_size = volid_len;
-  }
-  Unicodedecode(pvd.VolumeIdentifier, volid_size, volid);
-  
-  return volid_len;
+	volid_len = pvd.VolumeIdentifier[31];
+	if (volid_len > 31) {
+		/* this field is only 32 bytes something is wrong */
+		volid_len = 31;
+	}
+	if (volid_size > volid_len) { volid_size = volid_len; }
+	Unicodedecode(pvd.VolumeIdentifier, volid_size, volid);
+
+	return volid_len;
 }
 
 /**
@@ -1238,23 +1135,16 @@ int UDFGetVolumeIdentifier(udf_t *udf, char *volid,
  * returns the size of the available volsetid information (128)
  * or 0 on error
  */
-int UDFGetVolumeSetIdentifier(udf_t *udf, uint8_t *volsetid,
-                              uint32_t volsetid_size)
-{
-  struct pvd_t pvd;
+int UDFGetVolumeSetIdentifier(udf_t* udf, uint8_t* volsetid, uint32_t volsetid_size) {
+	struct pvd_t pvd;
 
-  /* get primary volume descriptor */
-  if(!UDFGetPVD(udf, &pvd)) {
-    return 0;
-  }
+	/* get primary volume descriptor */
+	if (!UDFGetPVD(udf, &pvd)) { return 0; }
 
 
-  if(volsetid_size > 128) {
-    volsetid_size = 128;
-  }
-  
-  memcpy(volsetid, pvd.VolumeSetIdentifier, volsetid_size);
-  
-  return 128;
+	if (volsetid_size > 128) { volsetid_size = 128; }
+
+	memcpy(volsetid, pvd.VolumeSetIdentifier, volsetid_size);
+
+	return 128;
 }
-

@@ -18,12 +18,11 @@ class drive_info;
 
 #include <QThread>
 
-class MediaWatcher: public QThread
-{
+class MediaWatcher : public QThread {
 	Q_OBJECT
 
 public:
-	MediaWatcher(device *qdev);
+	MediaWatcher(device* qdev);
 	~MediaWatcher();
 
 	void stop();
@@ -40,9 +39,8 @@ protected:
 	virtual void run();
 
 private:
-	bool preq,sreq;
-	drive_info	*dev;
+	bool preq, sreq;
+	drive_info* dev;
 };
 
 #endif
-

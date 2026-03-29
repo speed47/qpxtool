@@ -17,9 +17,7 @@
 
 #include "hostedit_dialog.h"
 
-hostEditDialog::hostEditDialog(QString host, int port, QWidget* p, Qt::WindowFlags f)
-	: QDialog(p,f)
-{
+hostEditDialog::hostEditDialog(QString host, int port, QWidget* p, Qt::WindowFlags f) : QDialog(p, f) {
 	setWindowTitle(tr("Add host"));
 
 	layout = new QGridLayout(this);
@@ -31,7 +29,7 @@ hostEditDialog::hostEditDialog(QString host, int port, QWidget* p, Qt::WindowFla
 
 	e_host = new QLineEdit(this);
 	e_host->setText(host);
-//	e_host->setInputMask("000.000.000.000; ");
+	//	e_host->setInputMask("000.000.000.000; ");
 	layout->addWidget(e_host, 0, 1, 1, 2);
 
 	l_port = new QLabel(tr("Port:"), this);
@@ -44,37 +42,29 @@ hostEditDialog::hostEditDialog(QString host, int port, QWidget* p, Qt::WindowFla
 	layout->addWidget(e_port, 1, 1);
 
 	bdef = new QPushButton(this);
-	bdef->setMaximumSize(22,22);
+	bdef->setMaximumSize(22, 22);
 	bdef->setIcon(QIcon(":images/edit-undo.png"));
 	layout->addWidget(bdef, 1, 2);
 
-	bbox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal , this);
+	bbox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
 	layout->addWidget(bbox, 2, 1, 1, 2);
 
-	layout->setColumnStretch(0,2);
-	layout->setColumnStretch(1,20);
-	layout->setColumnStretch(2,1);
+	layout->setColumnStretch(0, 2);
+	layout->setColumnStretch(1, 20);
+	layout->setColumnStretch(2, 1);
 
 	connect(e_host, SIGNAL(textChanged(QString)), this, SLOT(hostChanged(QString)));
-	connect(bdef, SIGNAL(clicked()), this,  SLOT(setPortDfl()));
+	connect(bdef, SIGNAL(clicked()), this, SLOT(setPortDfl()));
 	connect(bbox, SIGNAL(accepted()), this, SLOT(accept()));
 	connect(bbox, SIGNAL(rejected()), this, SLOT(reject()));
 }
 
-hostEditDialog::~hostEditDialog()
-{
+hostEditDialog::~hostEditDialog() {}
 
-}
+void hostEditDialog::setPortDfl() { e_port->setValue(46660); }
 
-void hostEditDialog::setPortDfl()
-{
-	e_port->setValue(46660);
-}
-
-void hostEditDialog::hostChanged(const QString& h)
-{
-	QPushButton *pb = bbox->button(QDialogButtonBox::Ok);
+void hostEditDialog::hostChanged(const QString& h) {
+	QPushButton* pb = bbox->button(QDialogButtonBox::Ok);
 	if (!pb) return;
 	pb->setEnabled(!h.isEmpty());
 }
-

@@ -13,11 +13,9 @@
 #include <QPainter>
 #include "splitbutton.h"
 
-SplitButton::SplitButton(Qt::Orientation o, QWidget *p, Qt::WindowFlags f)
-	: QWidget(p,f)
-{
+SplitButton::SplitButton(Qt::Orientation o, QWidget* p, Qt::WindowFlags f) : QWidget(p, f) {
 	orient = o;
-	mouseFocus=0;
+	mouseFocus = 0;
 	if (orient == Qt::Vertical) {
 		setMinimumWidth(6);
 		setMaximumWidth(6);
@@ -29,9 +27,8 @@ SplitButton::SplitButton(Qt::Orientation o, QWidget *p, Qt::WindowFlags f)
 
 SplitButton::~SplitButton() {}
 
-void SplitButton::paintEvent(QPaintEvent*)
-{
-//	wDebug("SplitButton::paintEvent()");
+void SplitButton::paintEvent(QPaintEvent*) {
+	//	wDebug("SplitButton::paintEvent()");
 	QPainter p(this);
 	p.setRenderHint(QPainter::Antialiasing, true);
 
@@ -40,28 +37,25 @@ void SplitButton::paintEvent(QPaintEvent*)
 	} else {
 		p.fillRect(0, 0, width(), height(), QBrush(palette().color(QPalette::Button)));
 	}
-	p.setPen(QPen(palette().color(QPalette::Dark),1));
+	p.setPen(QPen(palette().color(QPalette::Dark), 1));
 	p.drawRect(0, 0, width(), height());
 }
 
-void SplitButton::mousePressEvent(QMouseEvent*)
-{
-//	wDebug("SplitButton::mousePressEvent()");
+void SplitButton::mousePressEvent(QMouseEvent*) {
+	//	wDebug("SplitButton::mousePressEvent()");
 	emit clicked();
 }
 
-void SplitButton::mouseReleaseEvent(QMouseEvent*)
-{
-
-}
+void SplitButton::mouseReleaseEvent(QMouseEvent*) {}
 
 void SplitButton::enterEvent(QEvent*) {
-//	wDebug("SplitButton::enterEvent()");
-	mouseFocus=1; update();
+	//	wDebug("SplitButton::enterEvent()");
+	mouseFocus = 1;
+	update();
 }
 
 void SplitButton::leaveEvent(QEvent*) {
-//	wDebug("SplitButton::leaveEvent()");
-	mouseFocus=0; update();
+	//	wDebug("SplitButton::leaveEvent()");
+	mouseFocus = 0;
+	update();
 }
-

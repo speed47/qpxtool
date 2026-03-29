@@ -16,24 +16,14 @@
 #include <QWidget>
 #include <QTimer>
 
-class ProgressWidget: public QWidget
-{
+class ProgressWidget : public QWidget {
 	Q_OBJECT
 
 public:
-	enum Direction {
-		DirectionForward = 0,
-		DirectionBackward = 1,
-		DirectionBoth = 2
-	};
-	enum ProgressColor {
-		BgColor    = 0,
-		FrameColor = 1,
-		TextColor  = 2,
-		RectColor  = 3
-	};
+	enum Direction { DirectionForward = 0, DirectionBackward = 1, DirectionBoth = 2 };
+	enum ProgressColor { BgColor = 0, FrameColor = 1, TextColor = 2, RectColor = 3 };
 
-	ProgressWidget(int, int, QWidget *p);
+	ProgressWidget(int, int, QWidget* p);
 	~ProgressWidget();
 	void setDirection(ProgressWidget::Direction);
 	void setText(QString);
@@ -56,11 +46,8 @@ private:
 
 	QString text;
 
-	QTimer  timer;
-	QColor  col_frame,
-			col_bg,
-			col_text,
-			col_rect;
+	QTimer timer;
+	QColor col_frame, col_bg, col_text, col_rect;
 };
 
 #endif

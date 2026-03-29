@@ -23,17 +23,16 @@
 typedef char path[128];
 
 static const path ppaths[] = {
-#if defined (__unix) || defined (__unix__) || (defined(__APPLE__) && defined(__MACH__))
-	"./usr/lib64/qpxtool", // for AppImage builds
-	"/usr/lib/qpxtool",
-	"/usr/local/lib/qpxtool",
-	"/usr/lib64/qpxtool",
-	"/usr/local/lib64/qpxtool",
-#elif defined (_WIN32) || defined (_WIN64)
-	"plugins",
+#if defined(__unix) || defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+    "./usr/lib64/qpxtool", // for AppImage builds
+    "/usr/lib/qpxtool",
+    "/usr/local/lib/qpxtool",
+    "/usr/lib64/qpxtool",
+    "/usr/local/lib64/qpxtool",
+#elif defined(_WIN32) || defined(_WIN64)
+    "plugins",
 #endif
-	""
-};
+    ""};
 
 class qpxwriter;
 
@@ -44,84 +43,86 @@ class qpxwriter;
 struct probe_result {
 	char name[64];
 	char desc[256];
-	int  chk_features;
+	int chk_features;
 };
 
 class qscanner {
 public:
 	qscanner(drive_info* idev);
 	~qscanner();
-	drive_info*	device() { return dev; };
+	drive_info* device() { return dev; };
 	void setTestSpeed(int);
 	bool setTestWrite(bool);
-	int  run(char*);
-	int  check_test(unsigned int);
-    int  errc_data();
+	int run(char*);
+	int check_test(unsigned int);
+	int errc_data();
 	int* get_test_speeds(unsigned int);
-//	int  plugins_probe();
-	int  plugins_probe(bool test, bool probe_enable);
-	int  plugins_probe_all(probe_result* results, int max_results);
-	int  plugin_attach_fallback();
-	int  plugin_attach(const char* name);
-	int  plugin_attach(char* pname, bool probe_enable, bool no_detach, bool silent=1);
+	//	int  plugins_probe();
+	int plugins_probe(bool test, bool probe_enable);
+	int plugins_probe_all(probe_result* results, int max_results);
+	int plugin_attach_fallback();
+	int plugin_attach(const char* name);
+	int plugin_attach(char* pname, bool probe_enable, bool no_detach, bool silent = 1);
 	void plugin_detach();
-//	int  plugin_info();
+	//	int  plugin_info();
 	const char* plugin_name();
 	const char* plugin_desc();
 	bool is_plugin_attached() { return attached; };
-//		int detect_check_capabilities();
-	inline void setInterval(int sta, int end) { lba_sta = sta; lba_end = end; };
+	//		int detect_check_capabilities();
+	inline void setInterval(int sta, int end) {
+		lba_sta = sta;
+		lba_end = end;
+	};
 	void stop();
 	void stat();
 
 private:
-	bool	stop_req, stat_req;
-	struct timespec	s,e,blks,blke;
-	uint32_t        lba_sta, lba_end;
-	int		spd1X;
-	int		spdKB;
-	float   spdX;
-	bool	WT_simul;
+	bool stop_req, stat_req;
+	struct timespec s, e, blks, blke;
+	uint32_t lba_sta, lba_end;
+	int spd1X;
+	int spdKB;
+	float spdX;
+	bool WT_simul;
 
 	//void	show_avg(struct timespec s, struct timespec e, long lba);
-	void	show_avg_speed(uint32_t lba);
+	void show_avg_speed(uint32_t lba);
 	//void	calc_cur_speed(long sects, int* spdKB, float* spdX);
-	void	calc_cur_speed(long sects);
+	void calc_cur_speed(long sects);
 
-	int	readline(int fd, char *buf, int maxlen);
+	int readline(int fd, char* buf, int maxlen);
 
-	int	run_rd_transfer();
-	int	run_wr_transfer();
-	int	run_fete();
+	int run_rd_transfer();
+	int run_wr_transfer();
+	int run_fete();
 
-	int	run_cd_errc();
-	int	run_cd_jb();
-	int	run_cd_ta();
+	int run_cd_errc();
+	int run_cd_jb();
+	int run_cd_ta();
 
-	int	run_dvd_errc();
-	int	run_dvd_jb();
-	int	run_dvd_ta();
+	int run_dvd_errc();
+	int run_dvd_jb();
+	int run_dvd_ta();
 
-	int	run_bd_errc();
+	int run_bd_errc();
 
-	int				speed;
-	bool			attached;
-	drive_info		*dev;
-	scan_plugin		*plugin;
-	qpxwriter		*writer;
+	int speed;
+	bool attached;
+	drive_info* dev;
+	scan_plugin* plugin;
+	qpxwriter* writer;
 
-#if defined (_WIN32) || defined (_WIN64)
-	HINSTANCE__     *pluginlib;
+#if defined(_WIN32) || defined(_WIN64)
+	HINSTANCE__* pluginlib;
 #else
-	void			*pluginlib;
+	void* pluginlib;
 #endif
 
-	scan_plugin*	(*plugin_create)  (drive_info*);
-	void			(*plugin_destroy) (scan_plugin*);
-	bool			listed; 
+	scan_plugin* (*plugin_create)(drive_info*);
+	void (*plugin_destroy)(scan_plugin*);
+	bool listed;
 	//		unsigned int chk_features; // media check features
-	char			tchar;
+	char tchar;
 };
 
 #endif // __QPX_SCAN_H
-

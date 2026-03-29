@@ -39,9 +39,7 @@
 
 #include <qpx_mmc_defs.h>
 
-TestDialog::TestDialog(QPxSettings *iset, device *idev, QWidget *p, Qt::WindowFlags f)
-	: QDialog(p,f)
-{
+TestDialog::TestDialog(QPxSettings* iset, device* idev, QWidget* p, Qt::WindowFlags f) : QDialog(p, f) {
 	settings = iset;
 	dev = idev;
 	setWindowTitle(tr("Select tests..."));
@@ -50,171 +48,164 @@ TestDialog::TestDialog(QPxSettings *iset, device *idev, QWidget *p, Qt::WindowFl
 	checkSimul();
 	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
-// setting default selection for tests autostart
+	// setting default selection for tests autostart
 	dev->test_req = 0;
-	if(!dev->media.creads || dev->media.type.startsWith("DVD+RW") || dev->media.type.startsWith("DVD-RAM")) {
-		dev->test_req |=  (settings->actions_flags & AFLAG_DTEST_WT) ? TEST_WT : 0;
-		dev->test_req |=  (settings->actions_flags & AFLAG_DTEST_FT_W) ? TEST_FT : 0;
+	if (!dev->media.creads || dev->media.type.startsWith("DVD+RW") || dev->media.type.startsWith("DVD-RAM")) {
+		dev->test_req |= (settings->actions_flags & AFLAG_DTEST_WT) ? TEST_WT : 0;
+		dev->test_req |= (settings->actions_flags & AFLAG_DTEST_FT_W) ? TEST_FT : 0;
 	}
 	if (!dev->media.creads || dev->media.type.startsWith("DVD+RW")) {
 		dev->WT_simul = (settings->actions_flags & AFLAG_DTEST_WT_SIMUL) ? !!noSimul : 0;
 	}
-	if(dev->media.creads) {
-		dev->test_req |=  (settings->actions_flags & AFLAG_DTEST_RT) ? TEST_RT : 0;
-		dev->test_req |=  (settings->actions_flags & AFLAG_DTEST_ERRC) ? TEST_ERRC : 0;
-		dev->test_req |=  (settings->actions_flags & AFLAG_DTEST_JB) ? TEST_JB : 0;
-		dev->test_req |=  (settings->actions_flags & AFLAG_DTEST_FT_B) ? TEST_FT : 0;
-		dev->test_req |=  (settings->actions_flags & AFLAG_DTEST_TA) ? TEST_TA : 0;
+	if (dev->media.creads) {
+		dev->test_req |= (settings->actions_flags & AFLAG_DTEST_RT) ? TEST_RT : 0;
+		dev->test_req |= (settings->actions_flags & AFLAG_DTEST_ERRC) ? TEST_ERRC : 0;
+		dev->test_req |= (settings->actions_flags & AFLAG_DTEST_JB) ? TEST_JB : 0;
+		dev->test_req |= (settings->actions_flags & AFLAG_DTEST_FT_B) ? TEST_FT : 0;
+		dev->test_req |= (settings->actions_flags & AFLAG_DTEST_TA) ? TEST_TA : 0;
 	}
 	updateData(false);
 }
 
-TestDialog::~TestDialog()
-{
+TestDialog::~TestDialog() {}
 
-}
+device* TestDialog::getDevice() { return dev; }
 
-device* TestDialog::getDevice()
-{
-	return dev;
-}
-
-void TestDialog::winit()
-{
+void TestDialog::winit() {
 	layout = new QGridLayout(this);
 	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(6);
-/*
+	/*
 	layout_dev = new QHBoxLayout();
 	layout_dev->setContentsMargins(3, 3, 3, 3);
 	layout_dev->setSpacing(3);
 	layout->addLayout(layout_dev, 0,0,1,4);
-*/	
-	ldev = new QLabel(tr("Device:"),this);
+*/
+	ldev = new QLabel(tr("Device:"), this);
 	ldev->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-	layout->addWidget(ldev,0,0);
+	layout->addWidget(ldev, 0, 0);
 
 	devid = new QLabel(this);
 	devid->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-	layout->addWidget(devid,0,1);
+	layout->addWidget(devid, 0, 1);
 
-	lmedia = new QLabel(tr("Media:"),this);
+	lmedia = new QLabel(tr("Media:"), this);
 	lmedia->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-	layout->addWidget(lmedia,1,0);
+	layout->addWidget(lmedia, 1, 0);
 
 	media = new QLabel(this);
 	media->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-	layout->addWidget(media,1,1);
+	layout->addWidget(media, 1, 1);
 
-	llabel = new QLabel(tr("Test name:"),this);
+	llabel = new QLabel(tr("Test name:"), this);
 	llabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-	layout->addWidget(llabel,2,0);
+	layout->addWidget(llabel, 2, 0);
 
 	elabel = new QLineEdit(this);
 	elabel->setMaxLength(128);
 	elabel->setText(QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss"));
-	layout->addWidget(elabel,2,1);
+	layout->addWidget(elabel, 2, 1);
 
-// tests selection
+	// tests selection
 
-//	grp_tests = new QGroupBox(tr("Tests"),this);
+	//	grp_tests = new QGroupBox(tr("Tests"),this);
 	grp_tests = new QGroupBox(this);
-	layout->addWidget(grp_tests, 3,0, 1,2);
+	layout->addWidget(grp_tests, 3, 0, 1, 2);
 	layout_tests = new QGridLayout(grp_tests);
 	layout_tests->setContentsMargins(3, 3, 3, 3);
 	layout_tests->setSpacing(3);
-//	grp_tests->setLayout(layout_tests);
+	//	grp_tests->setLayout(layout_tests);
 
-	l_tests  = new QLabel(tr("Tests:"),this);
+	l_tests = new QLabel(tr("Tests:"), this);
 	l_tests_info = new QLabel(this);
 	l_tests_info->setPixmap(style()->standardIcon(QStyle::SP_MessageBoxInformation).pixmap(16, 16));
 	l_tests_info->setToolTip(tr("Selectable options below do NOT imply that your drive is able\n"
-		"to run them, only that the currently selected qScan plugin\n"
-		"supports them. If a selected test immediately fails when run,\n"
-		"it means your drive doesn't support this test type."));
+	                            "to run them, only that the currently selected qScan plugin\n"
+	                            "supports them. If a selected test immediately fails when run,\n"
+	                            "it means your drive doesn't support this test type."));
 	l_tests_info->setCursor(Qt::WhatsThisCursor);
-	QHBoxLayout *layout_tests_label = new QHBoxLayout();
+	QHBoxLayout* layout_tests_label = new QHBoxLayout();
 	layout_tests_label->setContentsMargins(0, 0, 0, 0);
 	layout_tests_label->addWidget(l_tests);
 	layout_tests_label->addWidget(l_tests_info);
 	layout_tests_label->addStretch();
-	layout_tests->addLayout(layout_tests_label, 0,0);
-	l_speeds = new QLabel(tr("Speeds:"),this);
-	layout_tests->addWidget(l_speeds, 0,1);
+	layout_tests->addLayout(layout_tests_label, 0, 0);
+	l_speeds = new QLabel(tr("Speeds:"), this);
+	layout_tests->addWidget(l_speeds, 0, 1);
 
 	ck_RT = new QCheckBox(tr("Read Transfer Rate"), this);
-	layout_tests->addWidget(ck_RT,  1,0);
+	layout_tests->addWidget(ck_RT, 1, 0);
 	spd_RT = new QComboBox(this);
-	layout_tests->addWidget(spd_RT, 1,1);
+	layout_tests->addWidget(spd_RT, 1, 1);
 
 	ck_WT = new QCheckBox(tr("Write Transfer Rate"), this);
-	layout_tests->addWidget(ck_WT,  2,0);
+	layout_tests->addWidget(ck_WT, 2, 0);
 	spd_WT = new QComboBox(this);
-	layout_tests->addWidget(spd_WT, 2,1);
+	layout_tests->addWidget(spd_WT, 2, 1);
 	ck_WT_simul = new QCheckBox(tr("Simulation"), this);
 	ck_WT_simul->setEnabled(false);
-	layout_tests->addWidget(ck_WT_simul,  3,1);
+	layout_tests->addWidget(ck_WT_simul, 3, 1);
 
 	hline0 = new QFrame(this);
 	hline0->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-	layout_tests->addWidget(hline0, 4,0,1,2);
+	layout_tests->addWidget(hline0, 4, 0, 1, 2);
 
-	
+
 	ck_ERRC = new QCheckBox(tr("Error Correction"), this);
-	layout_tests->addWidget(ck_ERRC,  5,0);
+	layout_tests->addWidget(ck_ERRC, 5, 0);
 	spd_ERRC = new QComboBox(this);
-	layout_tests->addWidget(spd_ERRC, 5,1);
+	layout_tests->addWidget(spd_ERRC, 5, 1);
 
-	
+
 	ck_JB = new QCheckBox(tr("Jitter/Asymmetry"), this);
-	layout_tests->addWidget(ck_JB,  6,0);
+	layout_tests->addWidget(ck_JB, 6, 0);
 	spd_JB = new QComboBox(this);
-	layout_tests->addWidget(spd_JB, 6,1);
-	
-	ck_FT = new QCheckBox(tr("Focus/Tracking"), this);
-	layout_tests->addWidget(ck_FT,  7,0);
-	spd_FT = new QComboBox(this);
-	layout_tests->addWidget(spd_FT, 7,1);
+	layout_tests->addWidget(spd_JB, 6, 1);
 
-	
+	ck_FT = new QCheckBox(tr("Focus/Tracking"), this);
+	layout_tests->addWidget(ck_FT, 7, 0);
+	spd_FT = new QComboBox(this);
+	layout_tests->addWidget(spd_FT, 7, 1);
+
+
 	ck_TA = new QCheckBox(tr("Time Analyser"), this);
-	layout_tests->addWidget(ck_TA,  8,0);
-/*
+	layout_tests->addWidget(ck_TA, 8, 0);
+	/*
 	spd_TA = new QComboBox(this);
 	layout_tests->addWidget(spd_TA, 5,1);
 */
 
 	hline1 = new QFrame(this);
 	hline1->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-	layout_tests->addWidget(hline1, 9,0,1,2);
+	layout_tests->addWidget(hline1, 9, 0, 1, 2);
 
 	ck_liteon_force_old = new QCheckBox(tr("LiteOn: force old ERRC commands"), this);
-	layout_tests->addWidget(ck_liteon_force_old, 10,0,1,2);
+	layout_tests->addWidget(ck_liteon_force_old, 10, 0, 1, 2);
 
 	ck_hldtst_test_mode = new QCheckBox(tr("LiteOn: HL-DT-ST test mode"), this);
 	ck_hldtst_test_mode->setToolTip(tr("Attempt to put the drive in test mode before running the scans.\n"
-		"This is known to make some drives (e.g. BU40N) able to run\n"
-		"error correction tests. This is believed to have been removed\n"
-		"from most recent firmwares."));
-	layout_tests->addWidget(ck_hldtst_test_mode, 11,0,1,2);
+	                                   "This is known to make some drives (e.g. BU40N) able to run\n"
+	                                   "error correction tests. This is believed to have been removed\n"
+	                                   "from most recent firmwares."));
+	layout_tests->addWidget(ck_hldtst_test_mode, 11, 0, 1, 2);
 
 	ck_force_probe = new QCheckBox(tr("Force probe (ignore vendor/drive lists)"), this);
 	ck_force_probe->setToolTip(tr("Ignore hardcoded vendor and drive whitelists/blacklists\n"
-		"in plugins. All plugins will attempt to probe the drive\n"
-		"regardless of its vendor string."));
-	layout_tests->addWidget(ck_force_probe, 12,0,1,2);
+	                              "in plugins. All plugins will attempt to probe the drive\n"
+	                              "regardless of its vendor string."));
+	layout_tests->addWidget(ck_force_probe, 12, 0, 1, 2);
 
 	l_plugin = new QLabel(tr("qScan plugin:"), this);
-	layout_tests->addWidget(l_plugin, 13,0);
+	layout_tests->addWidget(l_plugin, 13, 0);
 
 	cb_plugin = new QComboBox(this);
-//	cb_plugin->setEnabled(false);
-	layout_tests->addWidget(cb_plugin, 13,1);
+	//	cb_plugin->setEnabled(false);
+	layout_tests->addWidget(cb_plugin, 13, 1);
 
 	l_plugin_info = new QLabel(this);
-	layout_tests->addWidget(l_plugin_info, 14,0,1,2);
+	layout_tests->addWidget(l_plugin_info, 14, 0, 1, 2);
 
-	layout_tests->setRowStretch(15,10);
+	layout_tests->setRowStretch(15, 10);
 
 /*
 // media summary
@@ -233,7 +224,7 @@ void TestDialog::winit()
 	if (getuid() != 0) {
 		l_root_hint = new QLabel(this);
 		l_root_hint->setText(tr("Tip: Running this program with root privileges (e.g. sudo) may\n"
-			"enable additional test types on some drive models."));
+		                        "enable additional test types on some drive models."));
 		l_root_hint->setWordWrap(true);
 		QFont hintFont = l_root_hint->font();
 		hintFont.setItalic(true);
@@ -248,81 +239,74 @@ void TestDialog::winit()
 	layout->addLayout(layout_butt, 5, 0, 1, 2);
 
 	layout_butt->addStretch(3);
-	butt_run = new QPushButton(tr("Run"),this);
+	butt_run = new QPushButton(tr("Run"), this);
 	butt_run->setIcon(QIcon(":images/scan.png"));
-	layout_butt->addWidget(butt_run,1);
-	butt_cancel = new QPushButton(tr("Cancel"),this);
+	layout_butt->addWidget(butt_run, 1);
+	butt_cancel = new QPushButton(tr("Cancel"), this);
 	butt_cancel->setIcon(QIcon(":images/x.png"));
-	layout_butt->addWidget(butt_cancel,1);
+	layout_butt->addWidget(butt_cancel, 1);
 
-	layout->setRowStretch(0,1);
-	layout->setRowStretch(1,1);
-	layout->setRowStretch(2,1);
-	layout->setRowStretch(3,20);
-	layout->setRowStretch(4,1);
-	layout->setRowStretch(5,1);
+	layout->setRowStretch(0, 1);
+	layout->setRowStretch(1, 1);
+	layout->setRowStretch(2, 1);
+	layout->setRowStretch(3, 20);
+	layout->setRowStretch(4, 1);
+	layout->setRowStretch(5, 1);
 
-	connect( ck_RT,   SIGNAL(clicked(bool)), spd_RT,SLOT(setEnabled(bool)));
-	connect( ck_WT,   SIGNAL(clicked(bool)), spd_WT,SLOT(setEnabled(bool)));
-	connect( ck_WT,   SIGNAL(clicked(bool)), this,SLOT(WTchecked(bool)));
-	connect( ck_ERRC, SIGNAL(clicked(bool)), spd_ERRC,SLOT(setEnabled(bool)));
-	connect( ck_JB,   SIGNAL(clicked(bool)), spd_JB,SLOT(setEnabled(bool)));
-	connect( ck_FT,   SIGNAL(clicked(bool)), spd_FT,SLOT(setEnabled(bool)));
-//	connect( ck_TA,   SIGNAL(clicked(bool)), spd_TA,SLOT(setEnabled(bool)));
-//	connect( ck_plugin, SIGNAL(clicked(bool)), cb_plugin,SLOT(setEnabled(bool)));
-	connect( cb_plugin, SIGNAL(activated(int)), this, SLOT(pluginChanged(int)));
-	connect( ck_hldtst_test_mode, SIGNAL(clicked(bool)), this, SLOT(hldtstTestModeChanged(bool)));
-	connect( ck_force_probe, SIGNAL(clicked(bool)), this, SLOT(forceProbeChanged(bool)));
+	connect(ck_RT, SIGNAL(clicked(bool)), spd_RT, SLOT(setEnabled(bool)));
+	connect(ck_WT, SIGNAL(clicked(bool)), spd_WT, SLOT(setEnabled(bool)));
+	connect(ck_WT, SIGNAL(clicked(bool)), this, SLOT(WTchecked(bool)));
+	connect(ck_ERRC, SIGNAL(clicked(bool)), spd_ERRC, SLOT(setEnabled(bool)));
+	connect(ck_JB, SIGNAL(clicked(bool)), spd_JB, SLOT(setEnabled(bool)));
+	connect(ck_FT, SIGNAL(clicked(bool)), spd_FT, SLOT(setEnabled(bool)));
+	//	connect( ck_TA,   SIGNAL(clicked(bool)), spd_TA,SLOT(setEnabled(bool)));
+	//	connect( ck_plugin, SIGNAL(clicked(bool)), cb_plugin,SLOT(setEnabled(bool)));
+	connect(cb_plugin, SIGNAL(activated(int)), this, SLOT(pluginChanged(int)));
+	connect(ck_hldtst_test_mode, SIGNAL(clicked(bool)), this, SLOT(hldtstTestModeChanged(bool)));
+	connect(ck_force_probe, SIGNAL(clicked(bool)), this, SLOT(forceProbeChanged(bool)));
 
-	connect( butt_run,    SIGNAL(clicked()), this, SLOT(start()) );
-	connect( butt_cancel, SIGNAL(clicked()), this, SLOT(reject()) );
+	connect(butt_run, SIGNAL(clicked()), this, SLOT(start()));
+	connect(butt_cancel, SIGNAL(clicked()), this, SLOT(reject()));
 }
 
-void TestDialog::WTchecked(bool en)
-{
+void TestDialog::WTchecked(bool en) {
 	if (noSimul) return;
 	ck_WT_simul->setEnabled(en);
 }
 
-void TestDialog::checkSimul()
-{
+void TestDialog::checkSimul() {
 	noSimul = 1;
 	if ((dev->media.type.startsWith("CD-") && (dev->cap & CAP_TEST_WRITE_CD)) ||
-		(dev->media.type.startsWith("DVD-") && !dev->media.type.startsWith("DVD-RAM") && (dev->cap & CAP_TEST_WRITE_DVD)) ||
-		(dev->media.type.startsWith("DVD+") && (dev->cap & CAP_TEST_WRITE_DVD_PLUS)) )
-	{
+	    (dev->media.type.startsWith("DVD-") && !dev->media.type.startsWith("DVD-RAM") &&
+	     (dev->cap & CAP_TEST_WRITE_DVD)) ||
+	    (dev->media.type.startsWith("DVD+") && (dev->cap & CAP_TEST_WRITE_DVD_PLUS))) {
 		noSimul = 0;
-		ck_WT_simul->setEnabled( ck_WT->isChecked() );
+		ck_WT_simul->setEnabled(ck_WT->isChecked());
 	} else {
 		ck_WT_simul->setEnabled(false);
 	}
 }
 
-void TestDialog::start()
-{
+void TestDialog::start() {
 	saveData();
-	if (elabel->text().isEmpty()) {
-		elabel->setText(QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss"));
-	}
+	if (elabel->text().isEmpty()) { elabel->setText(QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss")); }
 	if (!dev->test_req) {
 		QMessageBox::information(this, tr("No tests selected!"), tr("You have selected no tests!"));
 		return;
 	}
 #ifndef QT_NO_DEBUG
-	qDebug() << "Selected plugin: "<< dev->plugin;
+	qDebug() << "Selected plugin: " << dev->plugin;
 #endif
 	dev->media.label = elabel->text();
 	accept();
 }
 
-void TestDialog::mediaChanged()
-{
+void TestDialog::mediaChanged() {
 	qDebug() << "TestDialog::mediaChanged()";
 	updateData(true, true);
 }
 
-void TestDialog::updateData(bool save, bool setPlugin)
-{
+void TestDialog::updateData(bool save, bool setPlugin) {
 	if (save) saveData();
 	devid->setText(dev->id);
 	if (dev->media.type == "-") {
@@ -333,16 +317,14 @@ void TestDialog::updateData(bool save, bool setPlugin)
 	}
 	butt_run->setEnabled(true);
 
-	media->setText(dev->media.dstate + " "+ dev->media.type);
+	media->setText(dev->media.dstate + " " + dev->media.type);
 	grp_tests->setEnabled(true);
 
 	ck_RT->setEnabled(dev->media.creads);
 	ck_RT->setChecked(dev->test_req & TEST_RT);
 
-	ck_WT->setEnabled(dev->media.dstate.contains("Blank", Qt::CaseInsensitive) 
-			|| dev->media.type.startsWith("DVD+RW")
-			|| dev->media.type.startsWith("DVD-RAM")
-			);
+	ck_WT->setEnabled(dev->media.dstate.contains("Blank", Qt::CaseInsensitive) ||
+	                  dev->media.type.startsWith("DVD+RW") || dev->media.type.startsWith("DVD-RAM"));
 	ck_WT->setChecked(dev->test_req & TEST_WT);
 	ck_WT_simul->setChecked(dev->WT_simul);
 
@@ -352,7 +334,8 @@ void TestDialog::updateData(bool save, bool setPlugin)
 	ck_JB->setEnabled(dev->test_cap & TEST_JB && dev->media.creads);
 	ck_JB->setChecked(ck_JB->isEnabled() && (dev->test_req & TEST_JB));
 
-	ck_FT->setEnabled(dev->test_cap & TEST_FT && dev->media.type!="-" && !dev->media.type.contains("-ROM", Qt::CaseInsensitive));
+	ck_FT->setEnabled(dev->test_cap & TEST_FT && dev->media.type != "-" &&
+	                  !dev->media.type.contains("-ROM", Qt::CaseInsensitive));
 	ck_FT->setChecked(ck_FT->isEnabled() && (dev->test_req & TEST_FT));
 
 	ck_TA->setEnabled(dev->test_cap & TEST_TA && dev->media.creads);
@@ -362,82 +345,89 @@ void TestDialog::updateData(bool save, bool setPlugin)
 	ck_hldtst_test_mode->setChecked(dev->hldtst_test_mode);
 	ck_force_probe->setChecked(dev->force_probe);
 
-	spd_RT->clear();   spd_RT->setEnabled(ck_RT->isChecked());
-	spd_WT->clear();   spd_WT->setEnabled(ck_WT->isChecked()); ck_WT_simul->setEnabled(ck_WT->isChecked());
-	spd_ERRC->clear(); spd_ERRC->setEnabled(ck_ERRC->isChecked());
-	spd_JB->clear();   spd_JB->setEnabled(ck_JB->isChecked());
-	spd_FT->clear();   spd_FT->setEnabled(ck_FT->isChecked());
-//	spd_TA->clear();   spd_TA->setEnabled(ck_TA->isChecked());
+	spd_RT->clear();
+	spd_RT->setEnabled(ck_RT->isChecked());
+	spd_WT->clear();
+	spd_WT->setEnabled(ck_WT->isChecked());
+	ck_WT_simul->setEnabled(ck_WT->isChecked());
+	spd_ERRC->clear();
+	spd_ERRC->setEnabled(ck_ERRC->isChecked());
+	spd_JB->clear();
+	spd_JB->setEnabled(ck_JB->isChecked());
+	spd_FT->clear();
+	spd_FT->setEnabled(ck_FT->isChecked());
+	//	spd_TA->clear();   spd_TA->setEnabled(ck_TA->isChecked());
 
 	int idx;
 
-	spd_RT->addItems(dev->media.rspeeds);    spd_RT->addItem("Maximum");
-	idx = spd_RT->findText(QString::number(dev->tspeeds.rt)+".",Qt::MatchStartsWith);
+	spd_RT->addItems(dev->media.rspeeds);
+	spd_RT->addItem("Maximum");
+	idx = spd_RT->findText(QString::number(dev->tspeeds.rt) + ".", Qt::MatchStartsWith);
 #ifndef QT_NO_DEBUG
-	qDebug() << "spd_RT: " << dev->tspeeds.rt <<"idx:" << idx;
+	qDebug() << "spd_RT: " << dev->tspeeds.rt << "idx:" << idx;
 #endif
-	if (idx > 0) spd_RT->setCurrentIndex( idx );
+	if (idx > 0) spd_RT->setCurrentIndex(idx);
 
-	spd_WT->addItems(dev->media.wspeedsd);   spd_WT->addItem("Maximum");
-	idx = spd_WT->findText(QString::number(dev->tspeeds.wt)+".",Qt::MatchStartsWith);
+	spd_WT->addItems(dev->media.wspeedsd);
+	spd_WT->addItem("Maximum");
+	idx = spd_WT->findText(QString::number(dev->tspeeds.wt) + ".", Qt::MatchStartsWith);
 #ifndef QT_NO_DEBUG
-	qDebug() << "spd_WT: " << dev->tspeeds.wt <<"idx:" << idx;
+	qDebug() << "spd_WT: " << dev->tspeeds.wt << "idx:" << idx;
 #endif
-	if (idx > 0) spd_WT->setCurrentIndex( idx );
+	if (idx > 0) spd_WT->setCurrentIndex(idx);
 
-	spd_ERRC->addItems(dev->media.tspeeds_errc); spd_ERRC->addItem("Maximum");
-	idx = spd_ERRC->findText(QString::number(dev->tspeeds.errc)+"X",Qt::MatchStartsWith);
+	spd_ERRC->addItems(dev->media.tspeeds_errc);
+	spd_ERRC->addItem("Maximum");
+	idx = spd_ERRC->findText(QString::number(dev->tspeeds.errc) + "X", Qt::MatchStartsWith);
 #ifndef QT_NO_DEBUG
-	qDebug() << "spd_ERRC: " << dev->tspeeds.errc <<"idx:" << idx;
+	qDebug() << "spd_ERRC: " << dev->tspeeds.errc << "idx:" << idx;
 #endif
-	if (idx > 0) spd_ERRC->setCurrentIndex( idx );
+	if (idx > 0) spd_ERRC->setCurrentIndex(idx);
 
-	spd_JB->addItems(dev->media.tspeeds_jb);   spd_JB->addItem("Maximum");
-	idx = spd_JB->findText(QString::number(dev->tspeeds.jb)+"X",Qt::MatchStartsWith);
+	spd_JB->addItems(dev->media.tspeeds_jb);
+	spd_JB->addItem("Maximum");
+	idx = spd_JB->findText(QString::number(dev->tspeeds.jb) + "X", Qt::MatchStartsWith);
 #ifndef QT_NO_DEBUG
-	qDebug() << "spd_JB: " << dev->tspeeds.jb <<"idx:" << idx;
+	qDebug() << "spd_JB: " << dev->tspeeds.jb << "idx:" << idx;
 #endif
-	if (idx > 0) spd_JB->setCurrentIndex( idx );
+	if (idx > 0) spd_JB->setCurrentIndex(idx);
 
-	spd_FT->addItems(dev->media.wspeedsd);   spd_FT->addItem("Maximum");
-	idx = spd_FT->findText(QString::number(dev->tspeeds.ft)+".",Qt::MatchStartsWith);
+	spd_FT->addItems(dev->media.wspeedsd);
+	spd_FT->addItem("Maximum");
+	idx = spd_FT->findText(QString::number(dev->tspeeds.ft) + ".", Qt::MatchStartsWith);
 #ifndef QT_NO_DEBUG
-	qDebug() << "spd_FT: " << dev->tspeeds.ft <<"idx:" << idx;
+	qDebug() << "spd_FT: " << dev->tspeeds.ft << "idx:" << idx;
 #endif
-	if (idx > 0) spd_FT->setCurrentIndex( idx );
+	if (idx > 0) spd_FT->setCurrentIndex(idx);
 
-//	spd_TA->addItems(dev->media.rspeeds);
+	//	spd_TA->addItems(dev->media.rspeeds);
 
 	if (setPlugin) {
-		cb_plugin->addItem(tr("< Autodetect >")); cb_plugin->addItems(dev->plugin_names);
+		cb_plugin->addItem(tr("< Autodetect >"));
+		cb_plugin->addItems(dev->plugin_names);
 		idx = cb_plugin->findText(dev->plugin);
 		if (idx > 0)
-			cb_plugin->setCurrentIndex( idx );
+			cb_plugin->setCurrentIndex(idx);
 		else
 			pluginChanged(0);
 	}
 }
 
-void TestDialog::saveData()
-{
-	dev->test_req =
-		(ck_RT->isChecked() ?   TEST_RT : 0) |
-		(ck_WT->isChecked() ?   TEST_WT : 0) |
-		(ck_ERRC->isChecked() ? TEST_ERRC : 0) |
-		(ck_JB->isChecked() ?   TEST_JB : 0) |
-		(ck_FT->isChecked() ?   TEST_FT : 0) |
-		(ck_TA->isChecked() ?   TEST_TA : 0);
-	dev->WT_simul	  = noSimul ? 0 : ck_WT_simul->isChecked();
+void TestDialog::saveData() {
+	dev->test_req = (ck_RT->isChecked() ? TEST_RT : 0) | (ck_WT->isChecked() ? TEST_WT : 0) |
+	                (ck_ERRC->isChecked() ? TEST_ERRC : 0) | (ck_JB->isChecked() ? TEST_JB : 0) |
+	                (ck_FT->isChecked() ? TEST_FT : 0) | (ck_TA->isChecked() ? TEST_TA : 0);
+	dev->WT_simul = noSimul ? 0 : ck_WT_simul->isChecked();
 	dev->liteon_force_old = ck_liteon_force_old->isChecked();
 	dev->hldtst_test_mode = ck_hldtst_test_mode->isChecked();
 	dev->force_probe = ck_force_probe->isChecked();
 
-	dev->tspeeds.rt   = (int) spd_RT->currentText().remove(QRegularExpression("[Xx]")).toFloat();
-	dev->tspeeds.wt   = (int) spd_WT->currentText().remove(QRegularExpression("[Xx]")).toFloat();
-	dev->tspeeds.errc = (int) spd_ERRC->currentText().remove(QRegularExpression("[Xx]")).toFloat();
-	dev->tspeeds.jb   = (int) spd_JB->currentText().remove(QRegularExpression("[Xx]")).toFloat();
-	dev->tspeeds.ft   = (int) spd_FT->currentText().remove(QRegularExpression("[Xx]")).toFloat();
-	dev->plugin  = (cb_plugin->currentIndex() ? cb_plugin->currentText() : "");
+	dev->tspeeds.rt = (int)spd_RT->currentText().remove(QRegularExpression("[Xx]")).toFloat();
+	dev->tspeeds.wt = (int)spd_WT->currentText().remove(QRegularExpression("[Xx]")).toFloat();
+	dev->tspeeds.errc = (int)spd_ERRC->currentText().remove(QRegularExpression("[Xx]")).toFloat();
+	dev->tspeeds.jb = (int)spd_JB->currentText().remove(QRegularExpression("[Xx]")).toFloat();
+	dev->tspeeds.ft = (int)spd_FT->currentText().remove(QRegularExpression("[Xx]")).toFloat();
+	dev->plugin = (cb_plugin->currentIndex() ? cb_plugin->currentText() : "");
 //	dev->tspeeds.ta   = (int) spd_TA->currentText().remove(QRegularExpression("[Xx]")).toFloat();
 #ifndef QT_NO_DEBUG
 	qDebug() << "spd RT  : " << dev->tspeeds.rt;
@@ -448,18 +438,17 @@ void TestDialog::saveData()
 #endif
 }
 
-void TestDialog::pluginChanged(int idx)
-{
-	ProgressWidget *progress;
-//	bool relock=0;
-//	bool preservePluginsList = dev->preservePluginsList;
+void TestDialog::pluginChanged(int idx) {
+	ProgressWidget* progress;
+	//	bool relock=0;
+	//	bool preservePluginsList = dev->preservePluginsList;
 
 
 #ifndef QT_NO_DEBUG
 	qDebug() << "pluginChanged()";
 #endif
 
-	if (idx > (dev->plugin_infos.size()+2)) {
+	if (idx > (dev->plugin_infos.size() + 2)) {
 		l_plugin_info->setText(tr("plugin info error"));
 		return;
 	}
@@ -468,54 +457,54 @@ void TestDialog::pluginChanged(int idx)
 		if (!dev->detected_plugin.isEmpty()) {
 			if (dev->probed_plugins.size() > 1) {
 				l_plugin_info->setText(tr("Autodetected: %1 (%2 compatible plugins found: %3)")
-					.arg(dev->detected_plugin)
-					.arg(dev->probed_plugins.size())
-					.arg(dev->probed_plugins.join(", ")));
+				                           .arg(dev->detected_plugin)
+				                           .arg(dev->probed_plugins.size())
+				                           .arg(dev->probed_plugins.join(", ")));
 			} else {
 				l_plugin_info->setText(tr("Autodetected: %1").arg(dev->detected_plugin));
 			}
 		} else
 			l_plugin_info->setText(tr("qScan will probe plugin for your drive"));
 	} else {
-		if (!dev->plugin_infos[idx-1].isEmpty()) {
-			l_plugin_info->setText(dev->plugin_infos[idx-1]);
+		if (!dev->plugin_infos[idx - 1].isEmpty()) {
+			l_plugin_info->setText(dev->plugin_infos[idx - 1]);
 		} else {
 			l_plugin_info->setText(tr("no plugin info"));
 		}
 	}
 
 	saveData();
-/*
+	/*
 	if (!dev->mutex->tryLock()) {
 		relock = 1;
 		dev->mutex->unlock();
 	}
 */
 
-	progress = new ProgressWidget(10,3, isVisible() ? this : (QWidget*)parent() );
+	progress = new ProgressWidget(10, 3, isVisible() ? this : (QWidget*)parent());
 	progress->setText(tr("Retrieving test capabilities..."));
 	progress->show();
 
 	dev->update_plugin_info();
-	while(dev->isRunning()) { msleep ( 1 << 5); qApp->processEvents(); }
+	while (dev->isRunning()) {
+		msleep(1 << 5);
+		qApp->processEvents();
+	}
 	delete progress;
 
-//	dev->preservePluginsList = preservePluginsList;
+	//	dev->preservePluginsList = preservePluginsList;
 
-//	if (relock) dev->mutex->lock();
+	//	if (relock) dev->mutex->lock();
 
 	updateData(false, false);
 }
 
-void TestDialog::hldtstTestModeChanged(bool)
-{
+void TestDialog::hldtstTestModeChanged(bool) {
 	saveData();
 	pluginChanged(cb_plugin->currentIndex());
 }
 
-void TestDialog::forceProbeChanged(bool)
-{
+void TestDialog::forceProbeChanged(bool) {
 	saveData();
 	pluginChanged(cb_plugin->currentIndex());
 }
-
