@@ -396,7 +396,7 @@ int qscanner::plugin_attach(char* pname, bool probe_enable, bool no_detach, bool
 //	printf("plugin info\n");
 	if (!silent) printf("Found plugin: %s (%s)\n",plugin->name(),plugin->desc());
 
-	if (plugin->blklist) {
+	if (plugin->blklist && !dev->force_probe) {
 		devlist = plugin->blklist;
 		if (!dev->silent) {
 			printf("Devices in blacklist:\n");
@@ -404,7 +404,7 @@ int qscanner::plugin_attach(char* pname, bool probe_enable, bool no_detach, bool
 				printf("  %s %s*\n",devlist[d].ven,devlist[d].dev);
 			}
 		}
-	
+
 		for(int d=0; !blacklisted && devlist[d].ven_ID>0; d++) {
 			if (!strncmp(dev->ven, devlist[d].ven, strlen(devlist[d].ven)) && !strncmp(dev->dev,devlist[d].dev, strlen(devlist[d].dev)))
 				blacklisted=1;
@@ -417,9 +417,11 @@ int qscanner::plugin_attach(char* pname, bool probe_enable, bool no_detach, bool
 			plugin_detach();
 			return 1;
 		}
+	} else if (dev->force_probe && plugin->blklist && !dev->silent) {
+		printf("Plugin %s: blacklist skipped (force-probe enabled)\n", plugin->name());
 	}
 
-	if (!probe_enable && plugin->devlist) {
+	if (!probe_enable && !dev->force_probe && plugin->devlist) {
 		devlist = plugin->devlist;
 		dev->chk_features = 0;
 

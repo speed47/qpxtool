@@ -75,6 +75,7 @@ drive_info::drive_info(const char* _device){
 	silent=0;
 	liteon_force_old=false;
 	hldtst_test_mode=false;
+	force_probe=false;
 	rpc.phase=0;
 	rpc.region=0;
 

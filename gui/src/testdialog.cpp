@@ -126,7 +126,19 @@ void TestDialog::winit()
 //	grp_tests->setLayout(layout_tests);
 
 	l_tests  = new QLabel(tr("Tests:"),this);
-	layout_tests->addWidget(l_tests, 0,0);
+	l_tests_info = new QLabel(this);
+	l_tests_info->setPixmap(style()->standardIcon(QStyle::SP_MessageBoxInformation).pixmap(16, 16));
+	l_tests_info->setToolTip(tr("Selectable options below do NOT imply that your drive is able\n"
+		"to run them, only that the currently selected qScan plugin\n"
+		"supports them. If a selected test immediately fails when run,\n"
+		"it means your drive doesn't support this test type."));
+	l_tests_info->setCursor(Qt::WhatsThisCursor);
+	QHBoxLayout *layout_tests_label = new QHBoxLayout();
+	layout_tests_label->setContentsMargins(0, 0, 0, 0);
+	layout_tests_label->addWidget(l_tests);
+	layout_tests_label->addWidget(l_tests_info);
+	layout_tests_label->addStretch();
+	layout_tests->addLayout(layout_tests_label, 0,0);
 	l_speeds = new QLabel(tr("Speeds:"),this);
 	layout_tests->addWidget(l_speeds, 0,1);
 
@@ -176,23 +188,33 @@ void TestDialog::winit()
 	hline1->setFrameStyle(QFrame::HLine | QFrame::Sunken);
 	layout_tests->addWidget(hline1, 9,0,1,2);
 
-	ck_liteon_force_old = new QCheckBox(tr("Force old LiteOn CD ERRC commands"), this);
+	ck_liteon_force_old = new QCheckBox(tr("LiteOn: force old ERRC commands"), this);
 	layout_tests->addWidget(ck_liteon_force_old, 10,0,1,2);
 
-	ck_hldtst_test_mode = new QCheckBox(tr("HL-DT-ST test mode (LG drives)"), this);
+	ck_hldtst_test_mode = new QCheckBox(tr("LiteOn: HL-DT-ST test mode"), this);
+	ck_hldtst_test_mode->setToolTip(tr("Attempt to put the drive in test mode before running the scans.\n"
+		"This is known to make some drives (e.g. BU40N) able to run\n"
+		"error correction tests. This is believed to have been removed\n"
+		"from most recent firmwares."));
 	layout_tests->addWidget(ck_hldtst_test_mode, 11,0,1,2);
 
+	ck_force_probe = new QCheckBox(tr("Force probe (ignore vendor/drive lists)"), this);
+	ck_force_probe->setToolTip(tr("Ignore hardcoded vendor and drive whitelists/blacklists\n"
+		"in plugins. All plugins will attempt to probe the drive\n"
+		"regardless of its vendor string."));
+	layout_tests->addWidget(ck_force_probe, 12,0,1,2);
+
 	l_plugin = new QLabel(tr("qScan plugin:"), this);
-	layout_tests->addWidget(l_plugin, 12,0);
+	layout_tests->addWidget(l_plugin, 13,0);
 
 	cb_plugin = new QComboBox(this);
 //	cb_plugin->setEnabled(false);
-	layout_tests->addWidget(cb_plugin, 12,1);
+	layout_tests->addWidget(cb_plugin, 13,1);
 
 	l_plugin_info = new QLabel(this);
-	layout_tests->addWidget(l_plugin_info, 13,0,1,2);
+	layout_tests->addWidget(l_plugin_info, 14,0,1,2);
 
-	layout_tests->setRowStretch(14,10);
+	layout_tests->setRowStretch(15,10);
 
 /*
 // media summary
@@ -236,6 +258,7 @@ void TestDialog::winit()
 //	connect( ck_plugin, SIGNAL(clicked(bool)), cb_plugin,SLOT(setEnabled(bool)));
 	connect( cb_plugin, SIGNAL(activated(int)), this, SLOT(pluginChanged(int)));
 	connect( ck_hldtst_test_mode, SIGNAL(clicked(bool)), this, SLOT(hldtstTestModeChanged(bool)));
+	connect( ck_force_probe, SIGNAL(clicked(bool)), this, SLOT(forceProbeChanged(bool)));
 
 	connect( butt_run,    SIGNAL(clicked()), this, SLOT(start()) );
 	connect( butt_cancel, SIGNAL(clicked()), this, SLOT(reject()) );
@@ -323,6 +346,7 @@ void TestDialog::updateData(bool save, bool setPlugin)
 
 	ck_liteon_force_old->setChecked(dev->liteon_force_old);
 	ck_hldtst_test_mode->setChecked(dev->hldtst_test_mode);
+	ck_force_probe->setChecked(dev->force_probe);
 
 	spd_RT->clear();   spd_RT->setEnabled(ck_RT->isChecked());
 	spd_WT->clear();   spd_WT->setEnabled(ck_WT->isChecked()); ck_WT_simul->setEnabled(ck_WT->isChecked());
@@ -392,6 +416,7 @@ void TestDialog::saveData()
 	dev->WT_simul	  = noSimul ? 0 : ck_WT_simul->isChecked();
 	dev->liteon_force_old = ck_liteon_force_old->isChecked();
 	dev->hldtst_test_mode = ck_hldtst_test_mode->isChecked();
+	dev->force_probe = ck_force_probe->isChecked();
 
 	dev->tspeeds.rt   = (int) spd_RT->currentText().remove(QRegularExpression("[Xx]")).toFloat();
 	dev->tspeeds.wt   = (int) spd_WT->currentText().remove(QRegularExpression("[Xx]")).toFloat();
@@ -469,6 +494,12 @@ void TestDialog::pluginChanged(int idx)
 }
 
 void TestDialog::hldtstTestModeChanged(bool)
+{
+	saveData();
+	pluginChanged(cb_plugin->currentIndex());
+}
+
+void TestDialog::forceProbeChanged(bool)
 {
 	saveData();
 	pluginChanged(cb_plugin->currentIndex());

@@ -134,6 +134,7 @@ void detect_vendor_features(drive_info *dev) {
 enum {
 	OPT_LITEON_FORCE_OLD = 256,
 	OPT_HLDTST_TEST_MODE,
+	OPT_FORCE_PROBE,
 };
 
 static struct option long_options[] = {
@@ -155,6 +156,7 @@ static struct option long_options[] = {
 	{"verbose",   0, NULL, 'v'},
 	{"liteon-force-old",  0, NULL, OPT_LITEON_FORCE_OLD},
 	{"hldtst-test-mode",  0, NULL, OPT_HLDTST_TEST_MODE},
+	{"force-probe",       0, NULL, OPT_FORCE_PROBE},
 	{0,0,0,0}
 };
 
@@ -195,6 +197,7 @@ int main(int argc, char** argv) {
 	bool	simul=1;
 	bool	liteon_force_old=false;
 	bool	hldtst_test_mode=false;
+	bool	force_probe=false;
 	printf( "qScan " VERSION " (C) 2007-2009  Gennady \"ShultZ\" Kozlov\n");
 	while (1) {
 		c = getopt_long(argc, argv, "hvliImMd:pf:t:WSs:r:w:", long_options, NULL);
@@ -225,6 +228,7 @@ int main(int argc, char** argv) {
 				printf("-f --force PLUGIN   force using specified plugin (default: autodetect)\n");
 				printf("   --liteon-force-old  LiteOn: force old CD ERRC commands\n");
 				printf("   --hldtst-test-mode  LiteOn: try to enable test mode on some LG/Hitachi (HL-DT-ST) drives\n");
+				printf("   --force-probe       ignore hardcoded vendor/drive lists, always probe\n");
 				printf("-I --shortinfo      print device info\n");
 				printf("-i --info           print device info (with supported features list)\n");
 				printf("-m --media          print media info\n");
@@ -321,6 +325,9 @@ int main(int argc, char** argv) {
 			case OPT_HLDTST_TEST_MODE:
 				hldtst_test_mode = true;
 				break;
+			case OPT_FORCE_PROBE:
+				force_probe = true;
+				break;
 			default:
 				break;
 		}
@@ -366,6 +373,7 @@ int main(int argc, char** argv) {
 	printf( MSGPREF "using device '%s': '%s' '%s' '%s'\n", device, dev->ven, dev->dev, dev->fw);
 	dev->liteon_force_old = liteon_force_old;
 	dev->hldtst_test_mode = hldtst_test_mode;
+	dev->force_probe = force_probe;
     //dev->silent = 0;
 //	get_features_list(dev);
 	if (!(flags & FL_DEBUG)) dev->silent++;

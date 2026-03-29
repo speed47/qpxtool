@@ -391,6 +391,7 @@ public:
 	char		silent;
 	bool		liteon_force_old;
 	bool		hldtst_test_mode;
+	bool		force_probe;
 private:
 	bool		busy;
 };

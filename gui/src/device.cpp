@@ -188,6 +188,7 @@ device::device(QObject* p)
 	const char *env_liteon = getenv("LITEON_FORCE_OLD");
 	liteon_force_old = (env_liteon && strcmp(env_liteon, "1") == 0);
 	hldtst_test_mode = false;
+	force_probe = false;
 
 	tspeeds.rt = 1;
 	tspeeds.wt = 1;
@@ -407,6 +408,8 @@ bool device::start_update_info()
 						qopts << "--liteon-force-old";
 					if (hldtst_test_mode)
 						qopts << "--hldtst-test-mode";
+					if (force_probe)
+						qopts << "--force-probe";
 					qopts << "-m";
 					proc->start("qscan", qopts);
 				}
@@ -1057,6 +1060,8 @@ bool device::next_test()
 			qopts << "--liteon-force-old";
 		if (hldtst_test_mode)
 			qopts << "--hldtst-test-mode";
+		if (force_probe)
+			qopts << "--force-probe";
 
 #if (!defined(QT_NO_DEBUG) && 0)
 		for (int i=0;i<qopts.size();i++)

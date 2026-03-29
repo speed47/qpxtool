@@ -47,6 +47,7 @@ private slots:
 	void WTchecked(bool);
 	void pluginChanged(int);
 	void hldtstTestModeChanged(bool);
+	void forceProbeChanged(bool);
 	void checkSimul();
 
 private:
@@ -66,6 +67,7 @@ private:
 	QGroupBox		*grp_tests;
 	QGridLayout		*layout_tests;
 	QLabel			*l_tests;
+	QLabel			*l_tests_info;
 	QLabel			*l_speeds;
 
 	QCheckBox		*ck_RT;
@@ -86,6 +88,7 @@ private:
 	QFrame			*hline1;
 	QCheckBox		*ck_liteon_force_old;
 	QCheckBox		*ck_hldtst_test_mode;
+	QCheckBox		*ck_force_probe;
 	QLabel			*l_plugin;
 	QComboBox		*cb_plugin;
 	QLabel			*l_plugin_info;

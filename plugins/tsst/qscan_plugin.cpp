@@ -36,7 +36,7 @@ scan_tsst::~scan_tsst() {
 
 int scan_tsst::probe_drive() {
 	cd_errc tmp_errc;
-	if (strncmp(dev->ven,"TSSTcorp", 8)) return DEV_FAIL;
+	if (!dev->force_probe && strncmp(dev->ven,"TSSTcorp", 8)) return DEV_FAIL;
 	if (dev->media.type & DISC_CD) {
 		if (cmd_cd_errc_init()) return DEV_FAIL;
 		if (cmd_cd_errc_block(&tmp_errc)) return DEV_FAIL;

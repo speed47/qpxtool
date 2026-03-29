@@ -58,7 +58,10 @@ scan_nec::~scan_nec()
 }
 
 int  scan_nec::probe_drive() {
-	if (!strncmp(dev->ven,"TSSTcorp", 8)) return DEV_FAIL;
+	if (!dev->force_probe) {
+		if (!strncmp(dev->ven,"TSSTcorp", 8)) return DEV_FAIL;
+		if (!strncmp(dev->ven,"HL-DT-ST", 8)) return DEV_FAIL;
+	}
 	if (dev->media.type & DISC_CD) {
 		if (cmd_cd_errc_init()) return DEV_FAIL;
 		if (cmd_scan_end()) return DEV_FAIL;
