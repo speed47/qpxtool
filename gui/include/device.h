@@ -483,6 +483,8 @@ devtype		type;
 	QString		detected_plugin;
 	QStringList plugin_names;
 	QStringList plugin_infos;
+	QStringList probed_plugins;
+	QStringList probed_plugin_infos;
 	QString		nprocess;
 	float		pprocess;
 

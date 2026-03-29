@@ -591,6 +591,8 @@ bool device::update_device_info()
 	if (running) return false;
 	plugin_names.clear();
 	plugin_infos.clear();
+	probed_plugins.clear();
+	probed_plugin_infos.clear();
 	threadType = threadDevice;
 	return start();
 }
@@ -602,6 +604,9 @@ bool device::update_media_info()
 #endif
 	if (running) return false;
 	preserveMediaInfo = false;
+	probed_plugins.clear();
+	probed_plugin_infos.clear();
+	detected_plugin.clear();
 	threadType = threadMedia;
 	nprocess = tr("Updating media info...");
 	emit process_started();
@@ -1475,6 +1480,22 @@ void device::qscan_process_line(QString& qout)
 			info = new QTreeWidgetItem(QStringList(qout));
 			info_media.append(info);
 #endif
+		}
+	} else if (qout.startsWith("Probed plugin:")) {
+		int spidx;
+		QString pn,pi;
+		QString tmp = qout.mid(14).simplified();
+		spidx = tmp.indexOf(" ");
+		pn = tmp.mid(0,spidx).simplified();
+		pi = tmp.mid(spidx+1);
+		pi.remove("("); pi.remove(")");
+
+		if (!preserveMediaInfo) {
+#ifndef QT_NO_DEBUG
+			qDebug() << "Probed plugin: " << pn << pi;
+#endif
+			probed_plugins.append(pn);
+			probed_plugin_infos.append(pi);
 		}
 	} else if (qout.contains("using plugin:")) {
 		QString pn = qout.mid(qout.indexOf("using plugin:") + 13).simplified();
