@@ -496,6 +496,7 @@ devtype		type;
 	bool		WT_simul;
 	bool		liteon_force_old;
 	bool		hldtst_test_mode;
+	bool		force_probe;
 	struct timespec		timeSta;
 
 	QMutex	   *mutex;
