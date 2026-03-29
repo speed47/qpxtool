@@ -360,6 +360,10 @@ int main(int argc, char** argv) {
 	//dev->silent = 0;
 	//	get_features_list(dev);
 	if (!(flags & FL_DEBUG)) dev->silent++;
+	// Ensure the drive is ready before querying capabilities and media type.
+	// BD-RE discs in particular may cause the drive to be busy at startup
+	// (e.g., Windows UDF packet-writing or OS auto-mount).
+	wait_unit_ready(dev, 15, false);
 	detect_capabilities(dev);
 	get_buffer_capacity(dev);
 	determine_disc_type(dev);
