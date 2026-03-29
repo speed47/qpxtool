@@ -499,6 +499,22 @@ void QPxToolMW::run_tests()
 //	dev->mutex->unlock();
 	dev->start_tests();
 	mutex_dev.unlock();
+
+	// Switch to the first test tab so the user can see progress
+	static const int test_tab_map[][2] = {
+		{ TEST_RT,   2 },
+		{ TEST_WT,   3 },
+		{ TEST_ERRC, 4 },
+		{ TEST_JB,   5 },
+		{ TEST_FT,   6 },
+		{ TEST_TA,   7 },
+	};
+	for (const auto &entry : test_tab_map) {
+		if (set.tests & entry[0]) {
+			mwidget->selectTab(entry[1]);
+			break;
+		}
+	}
 }
 
 void QPxToolMW::cancel_run_tests()
