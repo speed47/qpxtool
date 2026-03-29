@@ -19,7 +19,7 @@ jobs:
         with:
           msystem: MINGW64
           update: false
-          install: git make pkg-config zip mingw-w64-x86_64-gcc mingw-w64-x86_64-ntldd mingw-w64-x86_64-qt6-base mingw-w64-x86_64-qt6-tools
+          install: git make pkg-config unzip zip mingw-w64-x86_64-gcc mingw-w64-x86_64-ntldd mingw-w64-x86_64-qt6-base mingw-w64-x86_64-qt6-tools
       - name: git config
         run: git config --global core.autocrlf input
         shell: bash
@@ -55,6 +55,10 @@ jobs:
           file gui/debug/qpxtool.exe
           file gui/debug/qpxtool.exe | grep -q 'x86-64'
           file gui/debug/qpxtool.exe | grep -q 'for MS Windows'
+      - name: install UPX
+        run: |
+          wget -q https://github.com/upx/upx/releases/download/v5.1.1/upx-5.1.1-win64.zip
+          unzip upx-5.1.1-win64.zip
       - name: prepare dist
         id: dist
         run: ./.github/workflows/make-dist.sh ${{ steps.conf.outputs.version }}
