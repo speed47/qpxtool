@@ -35,6 +35,7 @@ QPxSettings::QPxSettings() {
 	show_sidebar = 1;
 	show_allctl = 0;
 	actions_flags = 0;
+	console_max_lines = 10000;
 
 	useLocal = 1;
 	useRemote = 0;
@@ -74,6 +75,7 @@ QPxSettings& QPxSettings::operator=(const QPxSettings& o) {
 	report_autosave = o.report_autosave;
 	report_path = o.report_path;
 	actions_flags = o.actions_flags;
+	console_max_lines = o.console_max_lines;
 
 	use_reports_db = o.use_reports_db;
 	report_autosave_db = o.report_autosave_db;
@@ -131,6 +133,7 @@ void QPxSettings::load() {
 	report_autosave = settings->value("report_autosave", 0).toBool();
 	report_path = settings->value("report_path", "").toString();
 	actions_flags = settings->value("actions_flags", "0").toUInt();
+	console_max_lines = settings->value("console_max_lines", 10000).toInt();
 	settings->endGroup();
 	settings->beginGroup("/database");
 	use_reports_db = settings->value("use_reports_db", 0).toBool();
@@ -199,6 +202,7 @@ void QPxSettings::save() {
 	settings->setValue("report_autosave", report_autosave);
 	settings->setValue("report_path", report_path);
 	settings->setValue("actions_flags", actions_flags);
+	settings->setValue("console_max_lines", console_max_lines);
 	settings->endGroup();
 
 	settings->beginGroup("/database");

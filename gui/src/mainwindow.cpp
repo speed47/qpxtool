@@ -672,7 +672,7 @@ void QPxToolMW::scanbus_local() {
 	//					this, SLOT(qscan_process_scanbus()));
 	connect(scanbusio, SIGNAL(readyReadLine()), this, SLOT(qscan_process_scanbus()));
 
-	proc->start("qscan", QStringList("-l"));
+	proc->start("qscan", (set.actions_flags & AFLAG_VERBOSE) ? QStringList() << "-v" << "-l" : QStringList("-l"));
 	if (!proc->waitForStarted(10000)) {
 #ifndef QT_NO_DEBUG
 		qDebug("Can't run qscan!");

@@ -35,6 +35,7 @@ public slots:
 	void appendLine(const QString& line);
 	void appendSeparator(const QString& cmdline);
 	void clear();
+	void saveToFile();
 
 private:
 	devlist* devices;
@@ -42,6 +43,7 @@ private:
 
 	QBoxLayout* layout;
 	QPlainTextEdit* textEdit;
+	QPushButton* saveButton;
 	QPushButton* clearButton;
 
 	device* connectedDev;

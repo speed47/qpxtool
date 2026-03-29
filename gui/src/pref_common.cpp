@@ -20,6 +20,7 @@
 
 #include <QLabel>
 #include <QCheckBox>
+#include <QSpinBox>
 
 prefCommon::prefCommon(QPxSettings* iset, QWidget* p, Qt::WindowFlags fl) : QWidget(p, fl) {
 #ifndef QT_NO_DEBUG
@@ -34,9 +35,23 @@ prefCommon::prefCommon(QPxSettings* iset, QWidget* p, Qt::WindowFlags fl) : QWid
 	// default actions
 	ck_autow = new QCheckBox(tr("Autostart tests on written media inserted"), this);
 	ck_autob = new QCheckBox(tr("Autostart tests on blank media inserted"), this);
+	ck_verbose = new QCheckBox(tr("Use verbose mode for console"), this);
+
+	layout_console_lines = new QHBoxLayout();
+	layout_console_lines->setContentsMargins(0, 0, 0, 0);
+	layout_console_lines->setSpacing(6);
+	pl_console_lines = new QLabel(tr("Console maximum lines:"), this);
+	sb_console_lines = new QSpinBox(this);
+	sb_console_lines->setRange(1000, 999999);
+	sb_console_lines->setSingleStep(1000);
+	layout_console_lines->addWidget(pl_console_lines);
+	layout_console_lines->addWidget(sb_console_lines);
+	layout_console_lines->addStretch();
 
 	layout->addWidget(ck_autow);
 	layout->addWidget(ck_autob);
+	layout->addWidget(ck_verbose);
+	layout->addLayout(layout_console_lines);
 
 	// default tests for written media
 	pl_testsw = new QLabel("<b>" + tr("Default tests for written media") + "</b>", this);
@@ -83,6 +98,8 @@ prefCommon::prefCommon(QPxSettings* iset, QWidget* p, Qt::WindowFlags fl) : QWid
 	// applying settings...
 	ck_autow->setChecked(set->actions_flags & AFLAG_AUTOSTART_W);
 	ck_autob->setChecked(set->actions_flags & AFLAG_AUTOSTART_B);
+	ck_verbose->setChecked(set->actions_flags & AFLAG_VERBOSE);
+	sb_console_lines->setValue(set->console_max_lines);
 
 	ck_rt->setChecked(set->actions_flags & AFLAG_DTEST_RT);
 	ck_wt->setChecked(set->actions_flags & AFLAG_DTEST_WT);
@@ -106,6 +123,11 @@ prefCommon::~prefCommon() {
 		set->actions_flags |= AFLAG_AUTOSTART_B;
 	else
 		set->actions_flags &= ~AFLAG_AUTOSTART_B;
+	if (ck_verbose->isChecked())
+		set->actions_flags |= AFLAG_VERBOSE;
+	else
+		set->actions_flags &= ~AFLAG_VERBOSE;
+	set->console_max_lines = sb_console_lines->value();
 
 	if (ck_rt->isChecked())
 		set->actions_flags |= AFLAG_DTEST_RT;

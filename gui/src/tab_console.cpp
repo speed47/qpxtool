@@ -12,11 +12,15 @@
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QFileDialog>
+#include <QMessageBox>
 #include <QFont>
 
 #include <device.h>
+#include <qpxsettings.h>
 
 #include "tab_console.h"
 
@@ -34,9 +38,12 @@ tabConsole::tabConsole(QPxSettings* iset, devlist* idev, QWidget* p, Qt::WindowF
 	layout->setContentsMargins(0, 0, 0, 0);
 	layout->setSpacing(3);
 
+	QLabel* infoLabel = new QLabel(tr("Console options can be configured in File > Preferences > Common."), this);
+	layout->addWidget(infoLabel);
+
 	textEdit = new QPlainTextEdit(this);
 	textEdit->setReadOnly(true);
-	textEdit->setMaximumBlockCount(10000);
+	textEdit->setMaximumBlockCount(settings->console_max_lines);
 	QFont font("Monospace");
 	font.setStyleHint(QFont::TypeWriter);
 	font.setPointSize(9);
@@ -45,6 +52,9 @@ tabConsole::tabConsole(QPxSettings* iset, devlist* idev, QWidget* p, Qt::WindowF
 
 	QHBoxLayout* buttonLayout = new QHBoxLayout();
 	buttonLayout->addStretch();
+	saveButton = new QPushButton(tr("Save to file"), this);
+	connect(saveButton, SIGNAL(clicked()), this, SLOT(saveToFile()));
+	buttonLayout->addWidget(saveButton);
 	clearButton = new QPushButton(tr("Clear"), this);
 	connect(clearButton, SIGNAL(clicked()), this, SLOT(clear()));
 	buttonLayout->addWidget(clearButton);
@@ -69,7 +79,7 @@ void tabConsole::selectDevice() {
 	connectToDevice(dev);
 }
 
-void tabConsole::reconfig() {}
+void tabConsole::reconfig() { textEdit->setMaximumBlockCount(settings->console_max_lines); }
 
 void tabConsole::appendLine(const QString& line) { textEdit->appendPlainText(line); }
 
@@ -80,6 +90,19 @@ void tabConsole::appendSeparator(const QString& cmdline) {
 }
 
 void tabConsole::clear() { textEdit->clear(); }
+
+void tabConsole::saveToFile() {
+	QString path = QFileDialog::getSaveFileName(this, tr("Save console output"), QString(),
+	                                            tr("Text files (*.txt);;All files (*)"));
+	if (path.isEmpty()) return;
+	QFile file(path);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		QMessageBox::warning(this, tr("Error"), tr("Unable to open file for writing:\n%1").arg(path));
+		return;
+	}
+	file.write(textEdit->toPlainText().toUtf8());
+	file.close();
+}
 
 void tabConsole::connectToDevice(device* dev) {
 	if (!dev || dev->type == device::DevtypeNone || dev->type == device::DevtypeVirtual) return;

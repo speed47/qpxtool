@@ -17,11 +17,13 @@
 #include <qpxsettings.h>
 
 class QVBoxLayout;
+class QHBoxLayout;
 class QGridLayout;
 
 class QGroupBox;
 class QLabel;
 class QCheckBox;
+class QSpinBox;
 
 class prefCommon : public QWidget {
 	Q_OBJECT
@@ -33,7 +35,10 @@ public:
 private:
 	QVBoxLayout* layout;
 
-	QCheckBox *ck_autow, *ck_autob;
+	QCheckBox *ck_autow, *ck_autob, *ck_verbose;
+	QHBoxLayout* layout_console_lines;
+	QLabel* pl_console_lines;
+	QSpinBox* sb_console_lines;
 
 	QLabel *pl_testsw, *pl_testsb;
 	QGridLayout* layout_testsb;
