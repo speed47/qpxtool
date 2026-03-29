@@ -184,6 +184,7 @@ device::device(QObject* p) : QObject(p) {
 	liteon_force_old = (env_liteon && strcmp(env_liteon, "1") == 0);
 	hldtst_test_mode = false;
 	force_probe = false;
+	verbose = false;
 
 	tspeeds.rt = 1;
 	tspeeds.wt = 1;
@@ -379,12 +380,17 @@ bool device::start_update_info() {
 		//				this, SLOT(qscan_process_info()));
 
 		switch (threadType) {
-			case threadDevice:
-				startProcess("qscan", QStringList() << "-d" << path << "-Ip");
-				break;
+			case threadDevice: {
+				QStringList qopts;
+				qopts << "-d" << path;
+				if (verbose) qopts << "-v";
+				qopts << "-Ip";
+				startProcess("qscan", qopts);
+			} break;
 			case threadMedia: {
 				QStringList qopts;
 				qopts << "-d" << path;
+				if (verbose) qopts << "-v";
 				if (!plugin.isEmpty()) qopts << "--force-plugin" << plugin;
 				if (liteon_force_old) qopts << "--liteon-force-old";
 				if (hldtst_test_mode) qopts << "--hldtst-test-mode";
@@ -1000,6 +1006,7 @@ bool device::next_test() {
 		//				this, SLOT(qscan_process_test()));
 
 		qopts << "-d" << path << "-t" << stest << "-s" << QString::number(test_spd);
+		if (verbose) qopts << "-v";
 		if (stest == "wt" && !WT_simul) qopts << "-W";
 		if (stest != "rt" && stest != "wt" && !plugin.isEmpty()) { qopts << "--force-plugin" << plugin; }
 		if (liteon_force_old) qopts << "--liteon-force-old";

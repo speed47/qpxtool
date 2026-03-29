@@ -115,6 +115,7 @@ union ErrcColor {
 #define AFLAG_DTEST_FT_W 0x0200
 #define AFLAG_DTEST_FT_B 0x0400
 #define AFLAG_DTEST_TA 0x0800
+#define AFLAG_VERBOSE 0x1000
 
 class QPxSettings {
 public:
@@ -141,6 +142,7 @@ public:
 	bool report_autosave;
 	QString report_path;
 	uint32_t actions_flags;
+	int console_max_lines;
 
 	bool use_reports_db;
 	bool report_autosave_db;
