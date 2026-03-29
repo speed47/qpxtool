@@ -484,6 +484,7 @@ void QPxToolMW::run_tests()
 
 	connect(dev, SIGNAL(testsDone()), this, SLOT(tests_done()));
 	connect(dev, SIGNAL(testsError()), this, SLOT(tests_error()));
+	connect(dev, SIGNAL(testsStopped()), this, SLOT(tests_stopped()));
 
 	set.tests = dev->test_req;
 	//	dev->mutex->unlock();
@@ -529,6 +530,7 @@ void QPxToolMW::tests_done() {
 	device* dev = (device*)sender();
 	disconnect(dev, SIGNAL(testsDone()), this, SLOT(tests_done()));
 	disconnect(dev, SIGNAL(testsError()), this, SLOT(tests_error()));
+	disconnect(dev, SIGNAL(testsStopped()), this, SLOT(tests_stopped()));
 
 	if (set.report_autosave || set.report_autosave_db) {
 		dev->mutex->lock();
@@ -543,7 +545,10 @@ void QPxToolMW::tests_done() {
 void QPxToolMW::tests_error() {
 	QMessageBox::warning(this, tr("Error"),
 	                     tr("Error performing test!") + "\n" + tr("qScan finished with non-zero exit code"));
+	mwidget->selectTab(8);
 }
+
+void QPxToolMW::tests_stopped() { QMessageBox::information(this, tr("Stopped"), tr("The test has been interrupted")); }
 
 void QPxToolMW::scanbus() {
 	int previdx;

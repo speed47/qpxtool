@@ -116,6 +116,7 @@ private slots:
 
 	void tests_done();
 	void tests_error();
+	void tests_stopped();
 
 protected:
 	virtual void dragEnterEvent(QDragEnterEvent*);
