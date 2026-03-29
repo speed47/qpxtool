@@ -27,9 +27,7 @@
 #include "pref_devices.h"
 #include <QDebug>
 
-prefDevices::prefDevices(QPxSettings *iset, QWidget *p, Qt::WindowFlags f)
-	: QWidget(p,f)
-{
+prefDevices::prefDevices(QPxSettings* iset, QWidget* p, Qt::WindowFlags f) : QWidget(p, f) {
 #ifndef QT_NO_DEBUG
 	qDebug("STA: prefDevices()");
 #endif
@@ -38,19 +36,19 @@ prefDevices::prefDevices(QPxSettings *iset, QWidget *p, Qt::WindowFlags f)
 	layout = new QVBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
 
-	ck_local = new QCheckBox(tr("Use local devices"),this);
+	ck_local = new QCheckBox(tr("Use local devices"), this);
 	ck_local->setChecked(set->useLocal);
 	layout->addWidget(ck_local);
 
-	ck_remote = new QCheckBox(tr("Use network devices"),this);
+	ck_remote = new QCheckBox(tr("Use network devices"), this);
 	ck_remote->setChecked(set->useRemote);
 	layout->addWidget(ck_remote);
 
-//	g_hosts = new QGroupBox(tr("Hosts"), this);
+	//	g_hosts = new QGroupBox(tr("Hosts"), this);
 	//g_hosts->setCheckable(true);
-//	layout->addWidget(g_hosts);
+	//	layout->addWidget(g_hosts);
 
-//	l_hosts = new QVBoxLayout(g_hosts);
+	//	l_hosts = new QVBoxLayout(g_hosts);
 
 	//lst_hosts = new QTreeWidget(g_hosts);
 	lst_hosts = new QTreeWidget(this);
@@ -60,45 +58,44 @@ prefDevices::prefDevices(QPxSettings *iset, QWidget *p, Qt::WindowFlags f)
 	lst_hosts->setHeaderLabels(QStringList() << tr("host") << tr("qscand port"));
 	layout->addWidget(lst_hosts);
 
-	QTreeWidgetItem *hitem;
-	for (int i=0; i<set->hosts.size(); i++) {
+	QTreeWidgetItem* hitem;
+	for (int i = 0; i < set->hosts.size(); i++) {
 		//hitem = new QTreeWidgetItem(lst_hosts, QStringList(set->hosts[i]) );
 		hitem = new QTreeWidgetItem(lst_hosts);
-		hitem->setFlags( hitem->flags() | Qt::ItemIsUserCheckable);
+		hitem->setFlags(hitem->flags() | Qt::ItemIsUserCheckable);
 		hitem->setCheckState(0, (set->hosts[i][0] == '*') ? Qt::Checked : Qt::Unchecked);
 
-		hitem->setText(0, set->hosts[i].remove(0,1) );
-		if (i<set->ports.size())
-			hitem->setText(1, set->ports[i] );
+		hitem->setText(0, set->hosts[i].remove(0, 1));
+		if (i < set->ports.size())
+			hitem->setText(1, set->ports[i]);
 		else
-			hitem->setText(1, "46660" );
+			hitem->setText(1, "46660");
 		lst_hosts->addTopLevelItem(hitem);
 	}
-//	lst_hosts->sortItems(0,Qt::AscendingOrder);
+	//	lst_hosts->sortItems(0,Qt::AscendingOrder);
 	lst_hosts->installEventFilter(this);
 #ifndef QT_NO_DEBUG
 	qDebug("END: prefDevices()");
 #endif
 }
 
-prefDevices::~prefDevices()
-{
+prefDevices::~prefDevices() {
 #ifndef QT_NO_DEBUG
 	qDebug("STA: ~prefDevices()");
 #endif
 	int hcnt = lst_hosts->topLevelItemCount();
-	QTreeWidgetItem *hitem;
+	QTreeWidgetItem* hitem;
 
-	set->useLocal  = ck_local->isChecked();
+	set->useLocal = ck_local->isChecked();
 	set->useRemote = ck_remote->isChecked();
 	set->hosts.clear();
 	set->ports.clear();
 
-	for (int i=0; i<hcnt; i++) {
+	for (int i = 0; i < hcnt; i++) {
 		hitem = lst_hosts->topLevelItem(i);
 
-		set->hosts.append( ((hitem->checkState(0) == Qt::Checked) ? "*" : "-") + hitem->text(0) );
-		set->ports.append( hitem->text(1) );
+		set->hosts.append(((hitem->checkState(0) == Qt::Checked) ? "*" : "-") + hitem->text(0));
+		set->ports.append(hitem->text(1));
 	}
 
 #ifndef QT_NO_DEBUG
@@ -106,21 +103,20 @@ prefDevices::~prefDevices()
 #endif
 }
 
-bool prefDevices::eventFilter(QObject* obj, QEvent* e)
-{
+bool prefDevices::eventFilter(QObject* obj, QEvent* e) {
 	if (obj == lst_hosts) {
 #ifndef QT_NO_DEBUG
 //		qDebug(QString("lst_hosts::event: %1").arg(e->type()));
 #endif
 		if (e->type() == QEvent::ContextMenu) {
-			hostsContextMenu( (QContextMenuEvent*)e );
+			hostsContextMenu((QContextMenuEvent*)e);
 			return true;
-//		} else if (e->type() == QEvent::MouseButtonDblClick) {
-//			hostEdit();
-//			return true;
+			//		} else if (e->type() == QEvent::MouseButtonDblClick) {
+			//			hostEdit();
+			//			return true;
 		} else if (e->type() == QEvent::KeyPress) {
-			switch ( ((QKeyEvent*)e)->key()) {
-			//	case Qt::Key_Enter:
+			switch (((QKeyEvent*)e)->key()) {
+					//	case Qt::Key_Enter:
 				case Qt::Key_Return:
 					hostEdit();
 					return true;
@@ -137,75 +133,70 @@ bool prefDevices::eventFilter(QObject* obj, QEvent* e)
 			return false;
 		}
 	} else {
-		QWidget::eventFilter(obj,e);
+		QWidget::eventFilter(obj, e);
 	}
 	return false;
 }
 
-void prefDevices::hostsContextMenu(QContextMenuEvent* e)
-{
-	QMenu *cmenu;
-	QAction *act;
+void prefDevices::hostsContextMenu(QContextMenuEvent* e) {
+	QMenu* cmenu;
+	QAction* act;
 #ifndef QT_NO_DEBUG
 	qDebug("hostsContextMenu()");
 #endif
 	cmenu = new QMenu(this);
-	act = cmenu->addAction(QIcon(":images/edit.png"),tr("Edit host"),   this, SLOT(hostEdit()));
+	act = cmenu->addAction(QIcon(":images/edit.png"), tr("Edit host"), this, SLOT(hostEdit()));
 	if (!lst_hosts->currentItem()) act->setEnabled(false);
-	act = cmenu->addAction(QIcon(":images/add.png"), tr("Add host"),    this, SLOT(hostAdd()));
-	act = cmenu->addAction(QIcon(":images/x.png"),   tr("Remove host"), this, SLOT(hostRemove()));
+	act = cmenu->addAction(QIcon(":images/add.png"), tr("Add host"), this, SLOT(hostAdd()));
+	act = cmenu->addAction(QIcon(":images/x.png"), tr("Remove host"), this, SLOT(hostRemove()));
 	if (!lst_hosts->currentItem()) act->setEnabled(false);
 	cmenu->exec(e->globalPos());
 	delete cmenu;
 }
 
-void prefDevices::hostAdd()
-{
-	QTreeWidgetItem *hitem;
+void prefDevices::hostAdd() {
+	QTreeWidgetItem* hitem;
 #ifndef QT_NO_DEBUG
 	qDebug("hostAdd()");
 #endif
-	hostEditDialog	*hadd = new hostEditDialog("", 46660, this);
+	hostEditDialog* hadd = new hostEditDialog("", 46660, this);
 	if (hadd->exec() && !hadd->hostname().isEmpty()) {
 		hitem = new QTreeWidgetItem(lst_hosts);
 		hitem->setFlags(hitem->flags() | Qt::ItemIsUserCheckable);
 		hitem->setCheckState(0, Qt::Checked);
 
-		hitem->setText(0, hadd->hostname() );
-		hitem->setText(1, QString::number(hadd->port()) );
+		hitem->setText(0, hadd->hostname());
+		hitem->setText(1, QString::number(hadd->port()));
 		lst_hosts->addTopLevelItem(hitem);
 	}
 	delete hadd;
 }
 
-void prefDevices::hostEdit()
-{
-	QTreeWidgetItem *hitem = lst_hosts->currentItem();
+void prefDevices::hostEdit() {
+	QTreeWidgetItem* hitem = lst_hosts->currentItem();
 #ifndef QT_NO_DEBUG
 	qDebug("hostEdit()");
 #endif
 	if (!hitem) return;
-	hostEditDialog	*hedit = new hostEditDialog(hitem->text(0), hitem->text(1).toInt(), this);
+	hostEditDialog* hedit = new hostEditDialog(hitem->text(0), hitem->text(1).toInt(), this);
 	hedit->setWindowTitle(tr("Edit host"));
 
 	if (hedit->exec() && !hedit->hostname().isEmpty()) {
-		hitem->setText(0, hedit->hostname() );
-		hitem->setText(1, QString::number(hedit->port()) );
-	}	
+		hitem->setText(0, hedit->hostname());
+		hitem->setText(1, QString::number(hedit->port()));
+	}
 	delete hedit;
 }
 
-void prefDevices::hostRemove()
-{
-	QTreeWidgetItem *hitem = lst_hosts->currentItem();
+void prefDevices::hostRemove() {
+	QTreeWidgetItem* hitem = lst_hosts->currentItem();
 #ifndef QT_NO_DEBUG
 	qDebug("hostRemove()");
 #endif
 	if (!hitem) return;
-	if (QMessageBox::warning(this,
-				tr("Remove host?"),
-				tr("You are about to remove host from list:\n%1:%2\nAre you sure?").arg(hitem->text(0)).arg(hitem->text(1)),
-				QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok) == QMessageBox::Ok)
-	delete lst_hosts->takeTopLevelItem( lst_hosts->indexOfTopLevelItem(hitem));
+	if (QMessageBox::warning(
+	        this, tr("Remove host?"),
+	        tr("You are about to remove host from list:\n%1:%2\nAre you sure?").arg(hitem->text(0)).arg(hitem->text(1)),
+	        QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok) == QMessageBox::Ok)
+		delete lst_hosts->takeTopLevelItem(lst_hosts->indexOfTopLevelItem(hitem));
 }
-

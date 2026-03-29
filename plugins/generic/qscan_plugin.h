@@ -16,38 +16,36 @@
 #include "qpx_scan_plugin_api.h"
 
 static const drivedesclist drivelist =
-//static drivedesclist drivelist =
-{
-	{ "", 0, "", 0}
-};
+    //static drivedesclist drivelist =
+    {{"", 0, "", 0}};
 
-static const char plugin_name[]="C2P";
-static const char plugin_desc[]="Generic scan plugin for devices supported C2 pointers";
+static const char plugin_name[] = "C2P";
+static const char plugin_desc[] = "Generic scan plugin for devices supported C2 pointers";
 
 class drive_info;
 
 class scan_generic : public scan_plugin {
 public:
-//    scan_generic(drive_info* idev=NULL);
-    scan_generic(drive_info* idev);
-    virtual ~scan_generic();
-//    virtual int  check_drive();
-    virtual int  probe_drive();
-    virtual int  errc_data();
-    virtual int  check_test(unsigned int test);
-    virtual int  start_test(unsigned int test, long slba, int &speed);
-    virtual int  scan_block(void* data,uint32_t* ilba);
-    virtual int  end_test();
+	//    scan_generic(drive_info* idev=NULL);
+	scan_generic(drive_info* idev);
+	virtual ~scan_generic();
+	//    virtual int  check_drive();
+	virtual int probe_drive();
+	virtual int errc_data();
+	virtual int check_test(unsigned int test);
+	virtual int start_test(unsigned int test, long slba, int& speed);
+	virtual int scan_block(void* data, uint32_t* ilba);
+	virtual int end_test();
 
-    virtual const char* name() { return plugin_name; };
-    virtual const char* desc() { return plugin_desc; };
+	virtual const char* name() { return plugin_name; };
+	virtual const char* desc() { return plugin_desc; };
+
 private:
 	uint32_t lba;
 
-	int cmd_cd_errc_block(cd_errc *data);
-//	int c2calc(cd_errc *data);
+	int cmd_cd_errc_block(cd_errc* data);
+	//	int c2calc(cd_errc *data);
 	int c2calc(unsigned char* buf, uint32_t lba, unsigned char sects);
 };
 
 #endif
-

@@ -20,21 +20,21 @@
 //#define bstyle "QPushButton::flat { border: none; }"
 #define bstyle "QPushButton::flat { text-align: left; }"
 
-#define addTabButton(pb,icon,name,tabidx,layout) \
-{ \
-	pb = new QPushButton(QIcon(icon),name,bframe); \
-	pb->setStyleSheet(bstyle); \
-	pb->setFlat(true); \
-	pb->setCheckable(true); \
-	pb->setIconSize(QSize(24,24)); \
-	pb->setMinimumHeight(26); \
-	pb->setFocusPolicy(Qt::NoFocus); \
-	QFont f = pb->font(); \
-	f.setPointSize(f.pointSize()+1); \
-	pb->setFont(f); \
-	grp->addButton(pb,tabidx++); \
-	layout->addWidget(pb); \
-}
+#define addTabButton(pb, icon, name, tabidx, layout)     \
+	{                                                    \
+		pb = new QPushButton(QIcon(icon), name, bframe); \
+		pb->setStyleSheet(bstyle);                       \
+		pb->setFlat(true);                               \
+		pb->setCheckable(true);                          \
+		pb->setIconSize(QSize(24, 24));                  \
+		pb->setMinimumHeight(26);                        \
+		pb->setFocusPolicy(Qt::NoFocus);                 \
+		QFont f = pb->font();                            \
+		f.setPointSize(f.pointSize() + 1);               \
+		pb->setFont(f);                                  \
+		grp->addButton(pb, tabidx++);                    \
+		layout->addWidget(pb);                           \
+	}
 
 #include <QIcon>
 
@@ -53,10 +53,8 @@
 
 #include <QDebug>
 
-QPxMainWidget::QPxMainWidget(QPxSettings *iset, devlist *idev, QWidget *p)
-	: QWidget(p)
-{
-	int tabidx=0;
+QPxMainWidget::QPxMainWidget(QPxSettings* iset, devlist* idev, QWidget* p) : QWidget(p) {
+	int tabidx = 0;
 #ifndef QT_NO_DEBUG
 	qDebug("STA: QPxMainWidget()");
 #endif
@@ -64,7 +62,7 @@ QPxMainWidget::QPxMainWidget(QPxSettings *iset, devlist *idev, QWidget *p)
 	settings = iset;
 	devices = idev;
 
-	QPushButton *pb;
+	QPushButton* pb;
 	layout = new QHBoxLayout(this);
 	layout->setContentsMargins(3, 3, 3, 3);
 	layout->setSpacing(3);
@@ -76,7 +74,7 @@ QPxMainWidget::QPxMainWidget(QPxSettings *iset, devlist *idev, QWidget *p)
 	layout_buttons = new QVBoxLayout(bframe);
 	layout_buttons->setContentsMargins(3, 3, 3, 3);
 	layout_buttons->setSpacing(0);
-//	layout->addLayout(layout_buttons);
+	//	layout->addLayout(layout_buttons);
 
 	grp = new QButtonGroup(bframe);
 
@@ -85,54 +83,54 @@ QPxMainWidget::QPxMainWidget(QPxSettings *iset, devlist *idev, QWidget *p)
 
 	tab_DevInfo = new tabDevInfo(iset, idev, this);
 	stack->addWidget(tab_DevInfo);
-	addTabButton(pb,":images/device.png", "Device", tabidx,layout_buttons);
+	addTabButton(pb, ":images/device.png", "Device", tabidx, layout_buttons);
 	pb->setChecked(true);
 	connect(this, SIGNAL(deviceSelected()), tab_DevInfo, SLOT(selectDevice()));
 
 	tab_MediaInfo = new tabMediaInfo(iset, idev, this);
 	stack->addWidget(tab_MediaInfo);
-	addTabButton(pb,":images/disc.png", "Media", tabidx,layout_buttons);
+	addTabButton(pb, ":images/disc.png", "Media", tabidx, layout_buttons);
 	connect(this, SIGNAL(deviceSelected()), tab_MediaInfo, SLOT(selectDevice()));
 
 	tab_RT = new tabTransfer(iset, idev, "RT", 0, this);
 	stack->addWidget(tab_RT);
-	addTabButton(pb,":images/test_rt.png", "Read Transfer", tabidx,layout_buttons);
+	addTabButton(pb, ":images/test_rt.png", "Read Transfer", tabidx, layout_buttons);
 	connect(this, SIGNAL(configured()), tab_RT, SLOT(reconfig()));
 	connect(this, SIGNAL(deviceSelected()), tab_RT, SLOT(selectDevice()));
 
 	tab_WT = new tabTransfer(iset, idev, "WT", 1, this);
 	stack->addWidget(tab_WT);
-	addTabButton(pb,":images/test_wt.png", "Write Transfer", tabidx,layout_buttons);
+	addTabButton(pb, ":images/test_wt.png", "Write Transfer", tabidx, layout_buttons);
 	connect(this, SIGNAL(configured()), tab_WT, SLOT(reconfig()));
 	connect(this, SIGNAL(deviceSelected()), tab_WT, SLOT(selectDevice()));
 
 	tab_ERRC = new tabERRC(iset, idev, "ERRC", this);
 	stack->addWidget(tab_ERRC);
-	addTabButton(pb,":images/test_errc.png", "Error Correction", tabidx,layout_buttons);
+	addTabButton(pb, ":images/test_errc.png", "Error Correction", tabidx, layout_buttons);
 	connect(this, SIGNAL(configured()), tab_ERRC, SLOT(reconfig()));
 	connect(this, SIGNAL(deviceSelected()), tab_ERRC, SLOT(selectDevice()));
 
 	tab_JB = new tabJB(iset, idev, "JB", this);
 	stack->addWidget(tab_JB);
-	addTabButton(pb,":images/test_jb.png", "Jitter/Asymmetry", tabidx,layout_buttons);
+	addTabButton(pb, ":images/test_jb.png", "Jitter/Asymmetry", tabidx, layout_buttons);
 	connect(this, SIGNAL(configured()), tab_JB, SLOT(reconfig()));
 	connect(this, SIGNAL(deviceSelected()), tab_JB, SLOT(selectDevice()));
 
 	tab_FETE = new tabFETE(iset, idev, "FETE", this);
 	stack->addWidget(tab_FETE);
-	addTabButton(pb,":images/test_ft.png", "FE/TE", tabidx,layout_buttons);
+	addTabButton(pb, ":images/test_ft.png", "FE/TE", tabidx, layout_buttons);
 	connect(this, SIGNAL(configured()), tab_FETE, SLOT(reconfig()));
 	connect(this, SIGNAL(deviceSelected()), tab_FETE, SLOT(selectDevice()));
 
 	tab_TA = new tabTA(iset, idev, "TA", this);
 	stack->addWidget(tab_TA);
-	addTabButton(pb,":images/test_ta.png", "Time Analyser", tabidx,layout_buttons);
+	addTabButton(pb, ":images/test_ta.png", "Time Analyser", tabidx, layout_buttons);
 	connect(this, SIGNAL(configured()), tab_TA, SLOT(reconfig()));
 	connect(this, SIGNAL(deviceSelected()), tab_TA, SLOT(selectDevice()));
 
 	tab_Console = new tabConsole(iset, idev, this);
 	stack->addWidget(tab_Console);
-	addTabButton(pb,":images/document.png", "Console", tabidx,layout_buttons);
+	addTabButton(pb, ":images/document.png", "Console", tabidx, layout_buttons);
 	connect(this, SIGNAL(configured()), tab_Console, SLOT(reconfig()));
 	connect(this, SIGNAL(deviceSelected()), tab_Console, SLOT(selectDevice()));
 
@@ -146,24 +144,31 @@ QPxMainWidget::QPxMainWidget(QPxSettings *iset, devlist *idev, QWidget *p)
 #endif
 }
 
-QPxMainWidget::~QPxMainWidget()
-{
+QPxMainWidget::~QPxMainWidget() {
 #ifndef QT_NO_DEBUG
 	qDebug("STA: ~QPxMainWidget()");
 	qDebug("END: ~QPxMainWidget()");
 #endif
 }
 
-void QPxMainWidget::setSidebarVisible(bool en) { settings->show_sidebar = en; bframe->setVisible(en); }
-void QPxMainWidget::selectTab(int idx) { grp->button(idx)->setChecked(true); stack->setCurrentIndex(idx); }
+void QPxMainWidget::setSidebarVisible(bool en) {
+	settings->show_sidebar = en;
+	bframe->setVisible(en);
+}
+void QPxMainWidget::selectTab(int idx) {
+	grp->button(idx)->setChecked(true);
+	stack->setCurrentIndex(idx);
+}
 void QPxMainWidget::reconfig() { emit configured(); }
-void QPxMainWidget::clearDev() { tab_MediaInfo->clear(); tab_DevInfo->clear(); }
+void QPxMainWidget::clearDev() {
+	tab_MediaInfo->clear();
+	tab_DevInfo->clear();
+}
 void QPxMainWidget::clearMedia() { tab_MediaInfo->clear(); }
 void QPxMainWidget::selectDevice() { emit deviceSelected(); }
 
-void QPxMainWidget::drawGraph(QImage& img, device *dev, int ttype, int eflags)
-{
-	switch(ttype) {
+void QPxMainWidget::drawGraph(QImage& img, device* dev, int ttype, int eflags) {
+	switch (ttype) {
 		case TEST_RT:
 			tab_RT->drawGraph(img, dev, TEST_RT);
 			break;
@@ -184,4 +189,3 @@ void QPxMainWidget::drawGraph(QImage& img, device *dev, int ttype, int eflags)
 			break;
 	}
 }
-

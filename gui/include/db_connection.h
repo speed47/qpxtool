@@ -19,30 +19,23 @@ class QString;
 class DBParams {
 public:
 	DBParams();
-	DBParams(QString driver, 
-			QString host, 
-			QString name, 
-			QString user, 
-			QString pass,
-			int port = 5432
-	);
-//	DBParams(const DBParams& p);
+	DBParams(QString driver, QString host, QString name, QString user, QString pass, int port = 5432);
+	//	DBParams(const DBParams& p);
 	~DBParams() {};
 
-    bool	params_set;
-	QString	driver;
-    QString	host;
-    int		port;
-    QString	name;
-    QString	user;
-    QString	pass;
+	bool params_set;
+	QString driver;
+	QString host;
+	int port;
+	QString name;
+	QString user;
+	QString pass;
 
 	QString conn_name;
 };
 
-bool SqlProbeConnection(const DBParams& par, const QString& CONNECTION="test connection");
-bool SqlOpenConnection (const DBParams& par, const QString& CONNECTION="test connection");
-void SqlCloseConnection(const QString& CONNECTION="test connection");
+bool SqlProbeConnection(const DBParams& par, const QString& CONNECTION = "test connection");
+bool SqlOpenConnection(const DBParams& par, const QString& CONNECTION = "test connection");
+void SqlCloseConnection(const QString& CONNECTION = "test connection");
 
 #endif // _DB_CONNECTION_H
-

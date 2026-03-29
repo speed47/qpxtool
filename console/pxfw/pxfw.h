@@ -36,19 +36,19 @@ const uint32_t PX_760	= 0x0200;
 const uint32_t PX_PREMIUM2	= 0x0400;
 */
 
-const uint32_t FL_HELP		= 0x00000001;
-const uint32_t FL_DEV		= 0x00000002;
-const uint32_t FL_FWIF		= 0x00000004;
-const uint32_t FL_FWOF		= 0x00000008;
-const uint32_t FL_UPDATE	= 0x00000010;
-const uint32_t FL_BACKUP	= 0x00000020;
-const uint32_t FL_DEBUG		= 0x00000040;
-const uint32_t FL_TEST		= 0x00000080;
-const uint32_t FL_RESET		= 0x00000100;
-const uint32_t FL_FORCE		= 0x00000200;
-const uint32_t FL_SCAN		= 0x00000400;
-const uint32_t FL_EEPROM	= 0x00000800;
-const uint32_t FL_EEIF		= 0x00001000;
-const uint32_t FL_EEOF		= 0x00002000;
+const uint32_t FL_HELP = 0x00000001;
+const uint32_t FL_DEV = 0x00000002;
+const uint32_t FL_FWIF = 0x00000004;
+const uint32_t FL_FWOF = 0x00000008;
+const uint32_t FL_UPDATE = 0x00000010;
+const uint32_t FL_BACKUP = 0x00000020;
+const uint32_t FL_DEBUG = 0x00000040;
+const uint32_t FL_TEST = 0x00000080;
+const uint32_t FL_RESET = 0x00000100;
+const uint32_t FL_FORCE = 0x00000200;
+const uint32_t FL_SCAN = 0x00000400;
+const uint32_t FL_EEPROM = 0x00000800;
+const uint32_t FL_EEIF = 0x00001000;
+const uint32_t FL_EEOF = 0x00002000;
 
 #endif // __PXFW_H

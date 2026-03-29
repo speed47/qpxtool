@@ -19,19 +19,18 @@ class imgwriter {
 public:
 	imgwriter(char* fn, smap* map);
 	~imgwriter();
-	int	write(uint32_t lba, int scnt, int ssz, void* buff);
-//	void	set_file(char* fn);
-//	int	open();
-//	int	close();
-	imgwriter(const imgwriter &in) = delete;
-	imgwriter(imgwriter &in) = delete;
-	imgwriter& operator=(const imgwriter &in) = delete;
+	int write(uint32_t lba, int scnt, int ssz, void* buff);
+	//	void	set_file(char* fn);
+	//	int	open();
+	//	int	close();
+	imgwriter(const imgwriter& in) = delete;
+	imgwriter(imgwriter& in) = delete;
+	imgwriter& operator=(const imgwriter& in) = delete;
 
 private:
-	char*		fname;
-	FILE*		iso;
-	Mutex*		mutex;
+	char* fname;
+	FILE* iso;
+	Mutex* mutex;
 };
 
 #endif
-

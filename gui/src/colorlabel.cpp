@@ -16,50 +16,43 @@
 #include "colorlabel.h"
 #include <QDebug>
 
-ColorLabel::ColorLabel(QColor icol, QString itext, bool ieditable, QWidget *p, Qt::WindowFlags f)
-	: QWidget(p,f)
-{
+ColorLabel::ColorLabel(QColor icol, QString itext, bool ieditable, QWidget* p, Qt::WindowFlags f) : QWidget(p, f) {
 	col = icol;
 	text = itext;
 	editable = ieditable;
-	setMinimumSize(40,20);
+	setMinimumSize(40, 20);
 }
 
-ColorLabel::~ColorLabel()
-{
-}
+ColorLabel::~ColorLabel() {}
 
-void ColorLabel::mousePressEvent(QMouseEvent* e)
-{
+void ColorLabel::mousePressEvent(QMouseEvent* e) {
 	if (!editable) return;
 #ifndef QT_NO_DEBUG
 	qDebug() << "x: " << e->position().x() << " y: " << e->position().y();
 #endif
-//	if (e->position().x() < height() && e->position().x() > 1 && e->position().y() > 1 && e->position().y() < height()) {
-	if (e->button() == Qt::LeftButton && e->position().x() < (height()+2)) {
+	//	if (e->position().x() < height() && e->position().x() > 1 && e->position().y() > 1 && e->position().y() < height()) {
+	if (e->button() == Qt::LeftButton && e->position().x() < (height() + 2)) {
 		col = QColorDialog::getColor(col, this);
 		update();
 	}
 }
 
-void ColorLabel::paintEvent(QPaintEvent*)
-{
-//#ifndef QT_NO_DEBUG
-//	wDebug("ColorLabel::paintEvent()");
-//#endif
-	QRect	rect(1, 1, height()-2, height()-2);
-	QRect	trect(height()+4, 1, width()-height()-6, height()-2);
+void ColorLabel::paintEvent(QPaintEvent*) {
+	//#ifndef QT_NO_DEBUG
+	//	wDebug("ColorLabel::paintEvent()");
+	//#endif
+	QRect rect(1, 1, height() - 2, height() - 2);
+	QRect trect(height() + 4, 1, width() - height() - 6, height() - 2);
 	QPainter p(this);
 	p.setRenderHint(QPainter::Antialiasing, true);
 	p.setRenderHint(QPainter::TextAntialiasing, true);
 
-	p.setPen( QPen(col, 2));
-	p.fillRect(rect.adjusted(1,1,-1,-1), QBrush(col) );
+	p.setPen(QPen(col, 2));
+	p.fillRect(rect.adjusted(1, 1, -1, -1), QBrush(col));
 
-	p.setPen( QPen(QColor(Qt::black), 2));
+	p.setPen(QPen(QColor(Qt::black), 2));
 	p.drawRoundedRect(rect, 20, 20);
 
 	p.drawText(trect, Qt::AlignLeft | Qt::AlignVCenter, text);
 	//p.drawRect(rect);
 }
-

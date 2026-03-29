@@ -16,22 +16,18 @@
 #include <colors.h>
 #include <qscan_plugin.h>
 
-scan_plugin*	plugin_create(drive_info* idev){
-	return new scan_liteon(idev);
-}
+scan_plugin* plugin_create(drive_info* idev) { return new scan_liteon(idev); }
 
-void plugin_destroy(scan_plugin* iplugin){
+void plugin_destroy(scan_plugin* iplugin) {
 	if (iplugin != NULL) delete iplugin;
 }
 
-scan_liteon::scan_liteon(drive_info* idev)
-	: scan_plugin(), lba(0), cd_errc_new(false), hldtst_test_mode(false)
-{
+scan_liteon::scan_liteon(drive_info* idev) : scan_plugin(), lba(0), cd_errc_new(false), hldtst_test_mode(false) {
 	dev = idev;
 	if (!dev->silent) printf("scan_liteon()\n");
-	devlist = (drivedesc*) &drivelist; 
-	blklist = (drivedesc*) &blacklist; 
-	test=0;
+	devlist = (drivedesc*)&drivelist;
+	blklist = (drivedesc*)&blacklist;
+	test = 0;
 }
 
 scan_liteon::~scan_liteon() {
@@ -43,10 +39,9 @@ scan_liteon::~scan_liteon() {
 	if (!dev->silent) printf("~scan_liteon()\n");
 }
 
-int  scan_liteon::probe_drive() {
+int scan_liteon::probe_drive() {
 #ifndef PLUGINS_LITEON_NOPROBE
-	if (dev->hldtst_test_mode
-	    && !strncmp(dev->ven, "HL-DT-ST", 8)) {
+	if (dev->hldtst_test_mode && !strncmp(dev->ven, "HL-DT-ST", 8)) {
 		printf(COL_YEL "LiteOn: Entering HL-DT-ST test mode..." COL_NORM "\n");
 		if (!cmd_hldtst_test_mode_toggle()) {
 			hldtst_test_mode = true;
@@ -73,28 +68,24 @@ int  scan_liteon::probe_drive() {
 #endif
 }
 
-int  scan_liteon::errc_data()
-{
+int scan_liteon::errc_data() {
 	if (dev->media.type & DISC_CD) {
-		return (ERRC_DATA_BLER|ERRC_DATA_E22|ERRC_DATA_E32|ERRC_DATA_UNCR);
+		return (ERRC_DATA_BLER | ERRC_DATA_E22 | ERRC_DATA_E32 | ERRC_DATA_UNCR);
 	} else if (dev->media.type & DISC_DVD) {
-		return (ERRC_DATA_PIE|ERRC_DATA_PIF|ERRC_DATA_UNCR);
+		return (ERRC_DATA_PIE | ERRC_DATA_PIF | ERRC_DATA_UNCR);
 	} else if (dev->media.type & DISC_BD) {
-		return (ERRC_DATA_LDC|ERRC_DATA_BIS|ERRC_DATA_UNCR);
+		return (ERRC_DATA_LDC | ERRC_DATA_BIS | ERRC_DATA_UNCR);
 	}
 	return 0;
 }
 
-int  scan_liteon::check_test(unsigned int itest)
-{
+int scan_liteon::check_test(unsigned int itest) {
 	switch (itest) {
 		case CHK_ERRC:
-			if (dev->media.type & ~DISC_DVDRAM)
-				return 0;
+			if (dev->media.type & ~DISC_DVDRAM) return 0;
 			break;
 		case CHK_FETE:
-			if (dev->media.type & ~DISC_DVDROM)
-				return 0;
+			if (dev->media.type & ~DISC_DVDROM) return 0;
 			break;
 		default:
 			return -1;
@@ -104,12 +95,10 @@ int  scan_liteon::check_test(unsigned int itest)
 
 int* scan_liteon::get_test_speeds(unsigned int itest) { return NULL; }
 
-int  scan_liteon::start_test(unsigned int itest, long ilba, int &speed)
-{
+int scan_liteon::start_test(unsigned int itest, long ilba, int& speed) {
 	// Activate HL-DT-ST test mode if requested and not already active.
 	// This is needed for listed devices that skip probe_drive().
-	if (!hldtst_test_mode && dev->hldtst_test_mode
-	    && !strncmp(dev->ven, "HL-DT-ST", 8)) {
+	if (!hldtst_test_mode && dev->hldtst_test_mode && !strncmp(dev->ven, "HL-DT-ST", 8)) {
 		printf(COL_YEL "LiteOn: Entering HL-DT-ST test mode..." COL_NORM "\n");
 		if (!cmd_hldtst_test_mode_toggle()) {
 			hldtst_test_mode = true;
@@ -118,29 +107,28 @@ int  scan_liteon::start_test(unsigned int itest, long ilba, int &speed)
 		}
 	}
 
-	int r=-1;
+	int r = -1;
 	switch (itest) {
 		case CHK_ERRC_CD:
-			lba=ilba;
+			lba = ilba;
 			set_read_speed(speed);
 			r = cmd_cd_errc_init();
 			break;
 		case CHK_ERRC_DVD:
-			lba=ilba;
+			lba = ilba;
 			set_read_speed(speed);
 			r = cmd_dvd_errc_init();
 			break;
 		case CHK_ERRC_BD:
-			lba=ilba;
+			lba = ilba;
 			set_read_speed(speed);
 			r = cmd_bd_errc_init();
 			break;
 		case CHK_FETE:
-			start_stop(dev,1);
-			seek(dev,0);
+			start_stop(dev, 1);
+			seek(dev, 0);
 			r = cmd_fete_init(speed);
-			if (r)
-				return -1;
+			if (r) return -1;
 			break;
 		default:
 			return -1;
@@ -154,21 +142,20 @@ int  scan_liteon::start_test(unsigned int itest, long ilba, int &speed)
 	}
 }
 
-int  scan_liteon::scan_block(void *data, uint32_t *ilba)
-{
-	int r=-1;
+int scan_liteon::scan_block(void* data, uint32_t* ilba) {
+	int r = -1;
 	switch (test) {
 		case CHK_ERRC_CD:
 			r = cmd_cd_errc_block((cd_errc*)data);
-			if(ilba) *ilba = lba;
+			if (ilba) *ilba = lba;
 			return r;
 		case CHK_ERRC_DVD:
 			r = cmd_dvd_errc_block((dvd_errc*)data);
-			if(ilba) *ilba = lba;
+			if (ilba) *ilba = lba;
 			return r;
 		case CHK_ERRC_BD:
 			r = cmd_bd_errc_block((bd_errc*)data);
-			if(ilba) *ilba = lba;
+			if (ilba) *ilba = lba;
 			return r;
 		case CHK_FETE:
 			if (dev->media.type & DISC_CD) {
@@ -178,15 +165,14 @@ int  scan_liteon::scan_block(void *data, uint32_t *ilba)
 			} else if (dev->media.type & DISC_BD) {
 				r = cmd_bd_fete_block((cdvd_ft*)data);
 			}
-			if(ilba) *ilba = lba;
-			return r;	
+			if (ilba) *ilba = lba;
+			return r;
 		default:
 			return -1;
 	}
 }
 
-int  scan_liteon::end_test()
-{
+int scan_liteon::end_test() {
 	switch (test) {
 		case CHK_ERRC_CD:
 			cmd_cd_errc_end();
@@ -203,6 +189,6 @@ int  scan_liteon::end_test()
 		default:
 			break;
 	}
-	test=0;
+	test = 0;
 	return 0;
 }

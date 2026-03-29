@@ -17,8 +17,7 @@
 #include <QString>
 #include <QStringList>
 
-class QPxIODevice : public QObject
-{
+class QPxIODevice : public QObject {
 	Q_OBJECT
 public:
 	QPxIODevice(QObject*);
@@ -35,10 +34,9 @@ protected slots:
 	void splitInput();
 
 private:
-	QIODevice   *io;
-	QString     buf;
-	QStringList lines; 
+	QIODevice* io;
+	QString buf;
+	QStringList lines;
 };
 
 #endif
-

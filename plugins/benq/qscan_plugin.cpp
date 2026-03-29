@@ -13,59 +13,42 @@
 #include <stdio.h>
 #include <qscan_plugin.h>
 
-static const int SPEEDS_ERRC_CD[] = {
-	 8*CD_SPEED_MULT,
-	12*CD_SPEED_MULT,
-	24*CD_SPEED_MULT,
-	32*CD_SPEED_MULT,
-	40*CD_SPEED_MULT,
-	48*CD_SPEED_MULT,
-	0
-};
+static const int SPEEDS_ERRC_CD[] = {8 * CD_SPEED_MULT,
+                                     12 * CD_SPEED_MULT,
+                                     24 * CD_SPEED_MULT,
+                                     32 * CD_SPEED_MULT,
+                                     40 * CD_SPEED_MULT,
+                                     48 * CD_SPEED_MULT,
+                                     0};
 
-static const int SPEEDS_ERRC_DVD[] = {
-	 1*DVD_SPEED_MULT,
-	 2*DVD_SPEED_MULT,
-	 4*DVD_SPEED_MULT,
-	 6*DVD_SPEED_MULT,
-	 8*DVD_SPEED_MULT,
-	12*DVD_SPEED_MULT,
-	16*DVD_SPEED_MULT,
-	0
-};
+static const int SPEEDS_ERRC_DVD[] = {1 * DVD_SPEED_MULT, 2 * DVD_SPEED_MULT,  4 * DVD_SPEED_MULT,  6 * DVD_SPEED_MULT,
+                                      8 * DVD_SPEED_MULT, 12 * DVD_SPEED_MULT, 16 * DVD_SPEED_MULT, 0};
 
-scan_plugin*	plugin_create(drive_info* idev)
-{
-	return new scan_benq(idev);
-}
+scan_plugin* plugin_create(drive_info* idev) { return new scan_benq(idev); }
 
-void plugin_destroy(scan_plugin* iplugin)
-{
+void plugin_destroy(scan_plugin* iplugin) {
 	if (iplugin != NULL) delete iplugin;
 }
 
-scan_benq::scan_benq(drive_info* idev)
-    : scan_plugin(), lba(0), sidx(0)
-{
+scan_benq::scan_benq(drive_info* idev) : scan_plugin(), lba(0), sidx(0) {
 	dev = idev;
 	if (!dev->silent) printf("scan_benq()\n");
-	devlist = (drivedesc*) &drivelist; 
-	test=0;
+	devlist = (drivedesc*)&drivelist;
+	test = 0;
 }
 
-scan_benq::~scan_benq()
-{
+scan_benq::~scan_benq() {
 	if (!dev->silent) printf("~scan_benq()\n");
 }
 
 
-int  scan_benq::probe_drive() {
+int scan_benq::probe_drive() {
 	if (dev->media.type & DISC_CD) {
-		int spd=8;
+		int spd = 8;
 		if (cmd_cd_errc_init(spd)) return DEV_FAIL;
 		if (cmd_cd_end()) return DEV_FAIL;
 	} else if (dev->media.type & DISC_DVD) {
-		int spd=4;
+		int spd = 4;
 		if (cmd_dvd_errc_init(spd)) return DEV_FAIL;
 		if (cmd_dvd_end()) return DEV_FAIL;
 	} else {
@@ -75,25 +58,23 @@ int  scan_benq::probe_drive() {
 }
 
 
-int  scan_benq::errc_data()
-{
+int scan_benq::errc_data() {
 	if (dev->media.type & DISC_CD) {
-		return (ERRC_DATA_BLER|ERRC_DATA_E11|ERRC_DATA_E21|ERRC_DATA_E31|ERRC_DATA_E12|ERRC_DATA_E22|ERRC_DATA_E32|ERRC_DATA_UNCR);
+		return (ERRC_DATA_BLER | ERRC_DATA_E11 | ERRC_DATA_E21 | ERRC_DATA_E31 | ERRC_DATA_E12 | ERRC_DATA_E22 |
+		        ERRC_DATA_E32 | ERRC_DATA_UNCR);
 	} else if (dev->media.type & DISC_DVD) {
-		return (ERRC_DATA_PIE|ERRC_DATA_PIF|ERRC_DATA_POE|ERRC_DATA_POF|ERRC_DATA_UNCR);
+		return (ERRC_DATA_PIE | ERRC_DATA_PIF | ERRC_DATA_POE | ERRC_DATA_POF | ERRC_DATA_UNCR);
 	}
 	return 0;
 }
 
-int  scan_benq::check_test(unsigned int itest)
-{
+int scan_benq::check_test(unsigned int itest) {
 	switch (itest) {
 		case CHK_ERRC:
 			return 0;
 		case CHK_FETE:
-//			if (dev->media.dstatus) return -1;
-			if (dev->media.type & DISC_DVD & ~DISC_DVDROM)
-				return 0;
+			//			if (dev->media.dstatus) return -1;
+			if (dev->media.type & DISC_DVD & ~DISC_DVDROM) return 0;
 			break;
 		default:
 			break;
@@ -101,15 +82,12 @@ int  scan_benq::check_test(unsigned int itest)
 	return -1;
 }
 
-int* scan_benq::get_test_speeds(unsigned int itest)
-{
+int* scan_benq::get_test_speeds(unsigned int itest) {
 	switch (itest) {
 		case CHK_ERRC:
 		case CHK_JB:
-			if (dev->media.type & DISC_CD)
-				return (int*)SPEEDS_ERRC_CD;
-			if (dev->media.type & DISC_DVD)
-				return (int*)SPEEDS_ERRC_DVD;
+			if (dev->media.type & DISC_CD) return (int*)SPEEDS_ERRC_CD;
+			if (dev->media.type & DISC_DVD) return (int*)SPEEDS_ERRC_DVD;
 			break;
 		case CHK_FETE:
 			if (dev->media.type & DISC_DVD)
@@ -122,23 +100,22 @@ int* scan_benq::get_test_speeds(unsigned int itest)
 	return NULL;
 }
 
-int  scan_benq::start_test(unsigned int itest, long ilba, int &speed)
-{
-	int r=-1;
-	sidx=0;
+int scan_benq::start_test(unsigned int itest, long ilba, int& speed) {
+	int r = -1;
+	sidx = 0;
 	switch (itest) {
 		case CHK_ERRC_CD:
-			lba=ilba;
+			lba = ilba;
 			r = cmd_cd_errc_init(speed);
 			break;
 		case CHK_ERRC_DVD:
-			lba=ilba;
+			lba = ilba;
 			r = cmd_dvd_errc_init(speed);
 			break;
 		case CHK_FETE:
-//			if (dev->media.dstatus) return -1;
+			//			if (dev->media.dstatus) return -1;
 			if (dev->media.type & DISC_DVD & ~DISC_DVDROM) {
-				lba=ilba;
+				lba = ilba;
 				r = cmd_dvd_fete_init(speed);
 				break;
 			} else {
@@ -156,17 +133,16 @@ int  scan_benq::start_test(unsigned int itest, long ilba, int &speed)
 	}
 }
 
-int  scan_benq::scan_block(void *data, uint32_t *ilba)
-{
-	int r=-1;
+int scan_benq::scan_block(void* data, uint32_t* ilba) {
+	int r = -1;
 	switch (test) {
 		case CHK_ERRC_CD:
 			r = cmd_cd_errc_block((cd_errc*)data);
-			if(ilba) *ilba = lba;
+			if (ilba) *ilba = lba;
 			return r;
 		case CHK_ERRC_DVD:
 			r = cmd_dvd_errc_block((dvd_errc*)data);
-			if(ilba) *ilba = lba;
+			if (ilba) *ilba = lba;
 			return r;
 		case CHK_FETE:
 			if (dev->media.type & DISC_DVD & ~DISC_DVDROM) {
@@ -179,9 +155,8 @@ int  scan_benq::scan_block(void *data, uint32_t *ilba)
 	}
 }
 
-int  scan_benq::end_test()
-{
-	int r=0;
+int scan_benq::end_test() {
+	int r = 0;
 	switch (test) {
 		case CHK_ERRC_CD:
 			r = cmd_cd_end();
@@ -195,7 +170,6 @@ int  scan_benq::end_test()
 		default:
 			break;
 	}
-	test=0;
+	test = 0;
 	return r;
 }
-

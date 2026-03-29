@@ -1,4 +1,4 @@
-	/*
+/*
 	 * This file is part of the QPxTool project.
 	 * Copyright (C) 2009 Gennady "ShultZ" Kozlov <qpxtool@mail.ru>
 	 *
@@ -29,21 +29,19 @@
 
 #include <QDebug>
 
-#define TAB_COMMON		0
-#define TAB_VARIREC		1
-#define TAB_GIGAREC		2
-#define TAB_SECUREC		3
-#define TAB_SILENT_PLEX	4
-#define TAB_SILENT_PIO	5
-#define TAB_DESTRUCT	6
-#define TAB_TATTOO		7
+#define TAB_COMMON 0
+#define TAB_VARIREC 1
+#define TAB_GIGAREC 2
+#define TAB_SECUREC 3
+#define TAB_SILENT_PLEX 4
+#define TAB_SILENT_PIO 5
+#define TAB_DESTRUCT 6
+#define TAB_TATTOO 7
 
-devSettings::devSettings(QPxSettings *iset, device *idev, QWidget *p, Qt::WindowFlags fl)
-	: QDialog(p,fl)
-{
+devSettings::devSettings(QPxSettings* iset, device* idev, QWidget* p, Qt::WindowFlags fl) : QDialog(p, fl) {
 	dev = idev;
 	set = iset;
-	setWindowTitle("QPxTool - "+tr("Device Controls"));
+	setWindowTitle("QPxTool - " + tr("Device Controls"));
 	cpage = NULL;
 
 	layout = new QHBoxLayout(this);
@@ -51,43 +49,42 @@ devSettings::devSettings(QPxSettings *iset, device *idev, QWidget *p, Qt::Window
 	layout->setSpacing(3);
 	setLayout(layout);
 
-	ilist  = new ImagesList(80,32,32,this);
-//	ilist->hideText();
-	layout->addWidget(ilist,1);
+	ilist = new ImagesList(80, 32, 32, this);
+	//	ilist->hideText();
+	layout->addWidget(ilist, 1);
 
-	ilist->addLabel(tr("Common"),  QImage(":images/settings2.png"), TAB_COMMON);
+	ilist->addLabel(tr("Common"), QImage(":images/settings2.png"), TAB_COMMON);
 	if (set->show_allctl || dev->features.supported & FEATURE_VARIREC)
-		ilist->addLabel(tr("VariRec"), QImage(":images/varirec.png"),	TAB_VARIREC);
+		ilist->addLabel(tr("VariRec"), QImage(":images/varirec.png"), TAB_VARIREC);
 	if (set->show_allctl || dev->features.supported & FEATURE_GIGAREC)
-		ilist->addLabel(tr("GigaRec"), QImage(":images/gigarec.png"),	TAB_GIGAREC);
+		ilist->addLabel(tr("GigaRec"), QImage(":images/gigarec.png"), TAB_GIGAREC);
 	if (set->show_allctl || dev->features.supported & FEATURE_SECUREC)
-		ilist->addLabel(tr("SecuRec"), QImage(":images/password.png"),	TAB_SECUREC);
+		ilist->addLabel(tr("SecuRec"), QImage(":images/password.png"), TAB_SECUREC);
 	if (set->show_allctl || dev->features.supported & FEATURE_SILENT)
-		ilist->addLabel(tr("Silent mode"), QImage(":images/sound.png"),	TAB_SILENT_PLEX);
+		ilist->addLabel(tr("Silent mode"), QImage(":images/sound.png"), TAB_SILENT_PLEX);
 	if (set->show_allctl || dev->features.supported & FEATURE_PIOQUIET)
-		ilist->addLabel(tr("PioQuiet"), QImage(":images/sound.png"),	TAB_SILENT_PIO);
+		ilist->addLabel(tr("PioQuiet"), QImage(":images/sound.png"), TAB_SILENT_PIO);
 	if (set->show_allctl || dev->features.supported & FEATURE_DESTRUCT)
 		ilist->addLabel(tr("Destruction"), QImage(":images/disc-eraser.png"), TAB_DESTRUCT);
 	if (set->show_allctl || dev->features.supported & FEATURE_F1TATTOO)
-		ilist->addLabel(tr("Disc T@2"), QImage(":images/tattoo.png"),	TAB_TATTOO);
+		ilist->addLabel(tr("Disc T@2"), QImage(":images/tattoo.png"), TAB_TATTOO);
 
 	layoutc = new QVBoxLayout();
 	layoutc->setContentsMargins(0, 0, 0, 0);
 	layoutc->setSpacing(3);
-	layout->addLayout(layoutc,4);
+	layout->addLayout(layoutc, 4);
 
 	setPage(0);
 
 	connect(ilist, SIGNAL(selected(int)), this, SLOT(setPage(int)));
 
-	setMinimumSize(450,380);
-	setMaximumSize(450,580);
+	setMinimumSize(450, 380);
+	setMaximumSize(450, 580);
 }
 
 devSettings::~devSettings() {}
 
-void devSettings::setPage(int page)
-{
+void devSettings::setPage(int page) {
 #ifndef QT_NO_DEBUG
 	qDebug() << "setPage: " << page;
 #endif
@@ -132,4 +129,3 @@ void devSettings::setPage(int page)
 			qDebug() << "Invalid page num: " << page;
 	}
 }
-

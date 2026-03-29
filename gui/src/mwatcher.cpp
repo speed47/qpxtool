@@ -17,14 +17,13 @@
 #include <device.h>
 
 
-MediaWatcher::MediaWatcher(device *qdev)
-{
+MediaWatcher::MediaWatcher(device* qdev) {
 #ifndef QT_NO_DEBUG
 	qDebug("MediaWatcher()");
 #endif
 	if (qdev->type == device::DevtypeLocal) {
 		QByteArray ba;
-		ba+=qdev->path.toUtf8();
+		ba += qdev->path.toUtf8();
 		dev = new drive_info(ba.data());
 		if (inquiry(dev)) {
 			delete dev;
@@ -35,37 +34,36 @@ MediaWatcher::MediaWatcher(device *qdev)
 	}
 }
 
-MediaWatcher::~MediaWatcher()
-{
+MediaWatcher::~MediaWatcher() {
 #ifndef QT_NO_DEBUG
 	qDebug("~MediaWatcher()");
 #endif
 	if (dev) delete dev;
 }
 
-void MediaWatcher::stop()  { sreq=1; }
-void MediaWatcher::pause() { preq=1; }
-void MediaWatcher::unPause() { preq=0; }
+void MediaWatcher::stop() { sreq = 1; }
+void MediaWatcher::pause() { preq = 1; }
+void MediaWatcher::unPause() { preq = 0; }
 
-void MediaWatcher::run()
-{
+void MediaWatcher::run() {
 	if (!dev) {
 		qDebug("Can't start watcher: NULL device!");
 		return;
 	}
 
-	int op,cp;
+	int op, cp;
 #ifndef QT_NO_DEBUG
 	qDebug() << dev->device << ": watcher started";
 #endif
-	sreq = 0; preq = 0;
-// initialising surrent status
+	sreq = 0;
+	preq = 0;
+	// initialising surrent status
 	op = cp = test_unit_ready(dev);
 	while (!sreq) {
 		if (!preq) {
 			cp = test_unit_ready(dev);
 
-			if (cp!=op) {
+			if (cp != op) {
 				switch (cp) {
 					case -1:
 						cp = op;
@@ -87,7 +85,8 @@ void MediaWatcher::run()
 						qDebug() << dev->device << ": loading media";
 						break;
 					default:
-						print_sense(cp); printf("\n");
+						print_sense(cp);
+						printf("\n");
 						break;
 				}
 				op = cp;
@@ -99,4 +98,3 @@ void MediaWatcher::run()
 	qDebug() << dev->device << ": watcher stoped";
 #endif
 }
-

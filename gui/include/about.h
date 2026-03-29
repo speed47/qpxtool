@@ -21,20 +21,18 @@ class QTabWidget;
 class QTextEdit;
 class QLabel;
 
-class AboutDialog : public QDialog
-{
+class AboutDialog : public QDialog {
 	Q_OBJECT
 public:
-	AboutDialog(QWidget *p=NULL, Qt::WindowFlags fl=Qt::WindowFlags());
+	AboutDialog(QWidget* p = NULL, Qt::WindowFlags fl = Qt::WindowFlags());
 	~AboutDialog();
 
 private:
-	QBoxLayout	*layout;
-	QLabel		*lversion;
-	QTabWidget	*tw;
-	QTextEdit	*te_licence;
-	QTextEdit	*te_about;
+	QBoxLayout* layout;
+	QLabel* lversion;
+	QTabWidget* tw;
+	QTextEdit* te_licence;
+	QTextEdit* te_about;
 };
 
 #endif // _ABOUT_H
-

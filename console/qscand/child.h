@@ -18,23 +18,22 @@
 #include <sys/time.h>
 
 typedef struct {
-	bool	used;
+	bool used;
 	struct sockaddr_in cliaddr;
-	int    connfd;
+	int connfd;
 } child_arg_t;
 
 typedef struct {
-	thread_t	tid;
-	child_arg_t	arg;
+	thread_t tid;
+	child_arg_t arg;
 } child_t;
 
-extern child_t children[CLIENTS_MAX+1];
-extern void *child_thread(void *argp);
-extern int  child_find_unused();
+extern child_t children[CLIENTS_MAX + 1];
+extern void* child_thread(void* argp);
+extern int child_find_unused();
 extern void child_list_clear();
 
 extern int clients;
-extern Mutex *cmutex;
+extern Mutex* cmutex;
 
 #endif // CHILDPROC_H
-

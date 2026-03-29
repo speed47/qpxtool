@@ -18,29 +18,27 @@
 
 #include <QWidget>
 
-class TattooWidget : public QWidget
-{
+class TattooWidget : public QWidget {
 	Q_OBJECT
 public:
-	TattooWidget(QWidget *p);
+	TattooWidget(QWidget* p);
 	~TattooWidget();
-	void setRadius(int,int);
+	void setRadius(int, int);
 	void setImage(QImage&);
 
 private:
 	void convertImage();
-	int		r0mm,r1mm;
-	int		r0p, r1p;
-	QImage	timg, dimg;
+	int r0mm, r1mm;
+	int r0p, r1p;
+	QImage timg, dimg;
 
-	int x0,y0;
+	int x0, y0;
 
 protected:
 	void paintEvent(QPaintEvent*);
 	void resizeEvent(QResizeEvent*);
-	float SRC_x2ang(int, int w=F1TATTOOW);
+	float SRC_x2ang(int, int w = F1TATTOOW);
 	float SRC_y2rad(int, int);
 };
 
 #endif // TATTOOWIDGET_H
-

@@ -22,16 +22,15 @@ class ColorLabel;
 
 //#define __LEGEND_SHOW_SPEED
 
-class tabTransfer : public GraphTab
-{
+class tabTransfer : public GraphTab {
 	Q_OBJECT
 public:
-	tabTransfer(QPxSettings *iset, devlist *idev, QString iname, bool irw,
-			QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags());
+	tabTransfer(QPxSettings* iset, devlist* idev, QString iname, bool irw, QWidget* p = 0,
+	            Qt::WindowFlags fl = Qt::WindowFlags());
 	~tabTransfer();
 
 public slots:
-//	void clear();
+	//	void clear();
 	void selectDevice();
 	void updateLast();
 	void updateSummary(device*, float);
@@ -41,22 +40,21 @@ protected:
 	virtual void updateGraph();
 
 private:
-	bool		rw;
-	QBoxLayout	*layout_info;
+	bool rw;
+	QBoxLayout* layout_info;
 
 #ifdef __LEGEND_SHOW_SPEED
-	ColorLabel	*pl_spd;
+	ColorLabel* pl_spd;
 #endif
-	QLabel		*pl_sta;
-	QLabel		*l_sta_x;
-	QLabel		*l_sta_kb;
-	QLabel		*pl_end;
-	QLabel		*l_end_x;
-	QLabel		*l_end_kb;
-	QLabel		*pl_avg;
-	QLabel		*l_avg_x;
-	QLabel		*l_avg_kb;
+	QLabel* pl_sta;
+	QLabel* l_sta_x;
+	QLabel* l_sta_kb;
+	QLabel* pl_end;
+	QLabel* l_end_x;
+	QLabel* l_end_kb;
+	QLabel* pl_avg;
+	QLabel* l_avg_x;
+	QLabel* l_avg_kb;
 };
 
 #endif
-

@@ -12,9 +12,9 @@
 #ifndef __sense_h
 #define __sense_h
 
-#define	SK(errcode)	(((errcode)>>16)&0xF)
-#define	ASC(errcode)	(((errcode)>>8)&0xFF)
-#define ASCQ(errcode)	((errcode)&0xFF)
+#define SK(errcode) (((errcode) >> 16) & 0xF)
+#define ASC(errcode) (((errcode) >> 8) & 0xFF)
+#define ASCQ(errcode) ((errcode) & 0xFF)
 
 extern int sense2str(int err, char* str);
 

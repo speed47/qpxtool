@@ -18,22 +18,24 @@
 
 class SliderItem {
 public:
-	SliderItem(QString s, bool en = true) { text=s; enabled=en; }
+	SliderItem(QString s, bool en = true) {
+		text = s;
+		enabled = en;
+	}
 
-	inline bool operator==(const SliderItem& o) const { return text==o.text; };
-	inline bool operator==(const QString& o) const { return text==o; };
+	inline bool operator==(const SliderItem& o) const { return text == o.text; };
+	inline bool operator==(const QString& o) const { return text == o; };
 
 	QString text;
-	bool	enabled;
+	bool enabled;
 };
 
 
-class TextSlider : public QAbstractSlider
-{
+class TextSlider : public QAbstractSlider {
 	Q_OBJECT
 public:
-	TextSlider(QWidget *p = NULL);
-	TextSlider(Qt::Orientation, QWidget *p = NULL);
+	TextSlider(QWidget* p = NULL);
+	TextSlider(Qt::Orientation, QWidget* p = NULL);
 	void addItem(QString, bool en = true);
 	void setItemEnabled(int, bool);
 	void setItemEnabled(QString, bool);
@@ -46,7 +48,7 @@ public:
 	void last();
 	bool prev();
 	bool next();
-	int  value();
+	int value();
 	QString text();
 
 public slots:
@@ -68,7 +70,7 @@ protected:
 private:
 	void initDefaults();
 	void moveToEnabled();
-	int  oldpos;
+	int oldpos;
 	bool en;
 
 	QStyleOptionSlider op;
@@ -76,4 +78,3 @@ private:
 };
 
 #endif
-

@@ -23,30 +23,30 @@
 //#define ENABLE_UNCR
 
 #define NOFORCE_REPAINT 0
-#define FORCE_REPAINT   1
+#define FORCE_REPAINT 1
 
-class QPxGraph : public QWidget
-{
+class QPxGraph : public QWidget {
 	Q_OBJECT
 public:
-	QPxGraph(QPxSettings *iset, devlist *idev, QString iname, int ttype, QWidget *p=0, Qt::WindowFlags fl = Qt::WindowFlags());
+	QPxGraph(QPxSettings* iset, devlist* idev, QString iname, int ttype, QWidget* p = 0,
+	         Qt::WindowFlags fl = Qt::WindowFlags());
 	~QPxGraph();
-//	void	setDataNames(QStringList dn);
-//	void	setZeroPos(float);
-//	float	zeroPos();
-	void drawGraph(QPainter*, QSize, device*, int ttype, const QRect& rect, int eflags=0, bool forceRepaint=0);
+	//	void	setDataNames(QStringList dn);
+	//	void	setZeroPos(float);
+	//	float	zeroPos();
+	void drawGraph(QPainter*, QSize, device*, int ttype, const QRect& rect, int eflags = 0, bool forceRepaint = 0);
 	void setErrcList(int, QString glabel);
 	void setErrcShow(int, bool);
 	void setShowSpeed(bool);
 	void setRightMarginHidden(bool);
-	int  getLastX();
+	int getLastX();
 
 public slots:
 	void setZoneTA(int zone);
 	void setLayerTA(int layer);
 	void setModeTA(bool mode) { taMode = mode; };
 
-	void changeScale(int idx=0);
+	void changeScale(int idx = 0);
 
 protected:
 	void contextMenuEvent(QContextMenuEvent*);
@@ -67,44 +67,41 @@ private slots:
 	void setScalePolicyFixed();
 	void setScaleTypeLog();
 	void setScaleTypeLin();
-	void setScaleValue( int val, int idx=-1);
-	void scaleIn(int idx=0);
-	void scaleOut(int idx=0);
+	void setScaleValue(int val, int idx = -1);
+	void scaleIn(int idx = 0);
+	void scaleOut(int idx = 0);
 
 signals:
 	void scaleChanged();
 
 private:
-	bool		taMode; // 0 - Pit, 1 - Land
-	int			taZone;
-	int			taLayer;
-	int			errc2h(int h, int val);
-	int			jitter2h(int h, float val);
-	int			asymm2h(int h, float val);
-	int			ta2h(int h, int val);
-	double		Hscale;
-	double		HscaleLBA;
-	float		Vscale;
-	float		Vscale1X;
-	int			test;
-	bool		showspeed;
-	devlist		*devices;
-	QPxSettings	*settings;
-	QString		label;
-	QString		name[2];
+	bool taMode; // 0 - Pit, 1 - Land
+	int taZone;
+	int taLayer;
+	int errc2h(int h, int val);
+	int jitter2h(int h, float val);
+	int asymm2h(int h, float val);
+	int ta2h(int h, int val);
+	double Hscale;
+	double HscaleLBA;
+	float Vscale;
+	float Vscale1X;
+	int test;
+	bool showspeed;
+	devlist* devices;
+	QPxSettings* settings;
+	QString label;
+	QString name[2];
 	QStringList dataNames;
-	Scale		*scale[2];
-//	float		zeropos;
-	uint8_t		errcList;
-	bool		forceAll;
-	uint64_t	lastX;
+	Scale* scale[2];
+	//	float		zeropos;
+	uint8_t errcList;
+	bool forceAll;
+	uint64_t lastX;
 #ifdef CACHE_GRAPH
-	QImage		*img;
+	QImage* img;
 #endif
-	int			margin_left,
-				margin_right,
-				margin_bottom;
+	int margin_left, margin_right, margin_bottom;
 };
 
 #endif
-

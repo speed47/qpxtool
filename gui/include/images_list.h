@@ -25,22 +25,18 @@ class ImageLabel;
 class ImageDialog;
 
 
-class ImagesList : public QScrollArea
-{
+class ImagesList : public QScrollArea {
 	Q_OBJECT
 
 public:
-	enum ListDir {
-	    Vertical   = 1,
-	    Horizontal = 2
-	};
+	enum ListDir { Vertical = 1, Horizontal = 2 };
 
-	ImagesList(int minW, QWidget *parent, ListDir	orient = Vertical);
-	ImagesList(int minW, QSize isize, QWidget *parent, ListDir orient = Vertical);
-	ImagesList(int minW, int iw, int ih, QWidget *parent, ListDir orient = Vertical);
+	ImagesList(int minW, QWidget* parent, ListDir orient = Vertical);
+	ImagesList(int minW, QSize isize, QWidget* parent, ListDir orient = Vertical);
+	ImagesList(int minW, int iw, int ih, QWidget* parent, ListDir orient = Vertical);
 	~ImagesList();
 
-	int addLabel(QString label, QImage image, int imgid=-1);
+	int addLabel(QString label, QImage image, int imgid = -1);
 
 public slots:
 	void clear();
@@ -57,16 +53,15 @@ protected:
 private:
 	void winit(ListDir orient);
 
-	int	current;
-//	QScrollArea *w;
+	int current;
+	//	QScrollArea *w;
 	void clear_img();
-	QWidget		*cwidget;
-	QBoxLayout	*clayout;
+	QWidget* cwidget;
+	QBoxLayout* clayout;
 
-	QList<ImageLabel*>	images_l;
+	QList<ImageLabel*> images_l;
 	int iconw, iconh;
 	int minW;
 };
 
 #endif
-

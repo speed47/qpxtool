@@ -29,53 +29,48 @@
 #include "preferences.h"
 #include <QDebug>
 
-QPxPreferences::QPxPreferences(QPxSettings *iset, QWidget *p, Qt::WindowFlags f)
-	: QDialog (p,f)
-{
+QPxPreferences::QPxPreferences(QPxSettings* iset, QWidget* p, Qt::WindowFlags f) : QDialog(p, f) {
 #ifndef QT_NO_DEBUG
 	qDebug("QPxPreferences()");
 #endif
 	setWindowTitle("QPxTool - " + tr("Preferences"));
 	set_old = iset;
 	set = *iset;
-	if (set_old->geometry_pref.width() > 0 && set_old->geometry_pref.height() > 0)
-		setGeometry(set_old->geometry_pref);
+	if (set_old->geometry_pref.width() > 0 && set_old->geometry_pref.height() > 0) setGeometry(set_old->geometry_pref);
 
-	for (int i=0; i<PREF_PAGES; i++) pages[i] = NULL;
-	curPage=-1;
+	for (int i = 0; i < PREF_PAGES; i++) pages[i] = NULL;
+	curPage = -1;
 	winit();
 	setPage(0);
 }
 
-QPxPreferences::~QPxPreferences()
-{
+QPxPreferences::~QPxPreferences() {
 #ifndef QT_NO_DEBUG
 	qDebug("~QPxPreferences()");
 #endif
 	set_old->geometry_pref = geometry();
 }
 
-void QPxPreferences::winit()
-{
+void QPxPreferences::winit() {
 	layout = new QHBoxLayout();
 	//layout = new QHBoxLayout();
 	setLayout(layout);
 	layout->setContentsMargins(3, 3, 3, 3);
 
-	ilist  = new ImagesList(80,this);
+	ilist = new ImagesList(80, this);
 	layout->addWidget(ilist);
 
-	ilist->addLabel(tr("Common"),  QImage(":images/settings.png"));
+	ilist->addLabel(tr("Common"), QImage(":images/settings.png"));
 	ilist->addLabel(tr("Devices"), QImage(":images/disc.png"));
-	ilist->addLabel(tr("Colors"),  QImage(":images/colors.png"));
+	ilist->addLabel(tr("Colors"), QImage(":images/colors.png"));
 	ilist->addLabel(tr("Reports"), QImage(":images/document.png"));
 
 	QObject::connect(ilist, SIGNAL(selected(int)), this, SLOT(setPage(int)));
 
 	parea = new QVBoxLayout();
 	layout->addLayout(parea);
-//	parea->insertStretch(0,10);
-//	parea->insertStretch(1,10);
+	//	parea->insertStretch(0,10);
+	//	parea->insertStretch(1,10);
 
 	hline0 = new QFrame(this);
 	hline0->setFrameStyle(QFrame::HLine | QFrame::Sunken);
@@ -88,40 +83,38 @@ void QPxPreferences::winit()
 
 	layout_butt->addStretch(10);
 
-	pb_save   = new QPushButton( QIcon(":images/ok.png"), tr("Save"), this);
-	pb_cancel = new QPushButton( QIcon(":images/x.png"), tr("Cancel"), this);
+	pb_save = new QPushButton(QIcon(":images/ok.png"), tr("Save"), this);
+	pb_cancel = new QPushButton(QIcon(":images/x.png"), tr("Cancel"), this);
 	pb_save->setMinimumWidth(100);
 	pb_cancel->setMinimumWidth(100);
 
-	layout_butt->addWidget(pb_save,1);
-	layout_butt->addWidget(pb_cancel,1);
+	layout_butt->addWidget(pb_save, 1);
+	layout_butt->addWidget(pb_cancel, 1);
 
-	connect( pb_save,   SIGNAL(clicked()), this, SLOT(save()) );
-	connect( pb_cancel, SIGNAL(clicked()), this, SLOT(cancel()) );
-//	playout = new QVBoxLayout;
-//	playout->setContentsMargins(0, 0, 0, 0);
-//	layout->addLayout(playout);
+	connect(pb_save, SIGNAL(clicked()), this, SLOT(save()));
+	connect(pb_cancel, SIGNAL(clicked()), this, SLOT(cancel()));
+	//	playout = new QVBoxLayout;
+	//	playout->setContentsMargins(0, 0, 0, 0);
+	//	layout->addLayout(playout);
 }
 
-void QPxPreferences::setPage(int page)
-{
+void QPxPreferences::setPage(int page) {
 #ifndef QT_NO_DEBUG
 //	qDebug(QString("pageSelected: %1").arg(page));
 #endif
 	if (curPage == page) return;
-	if (curPage >=0 && pages[curPage]) {
-
+	if (curPage >= 0 && pages[curPage]) {
 		pages[curPage]->hide();
-	//	delete pages[curPage];
-	//	pages[curPage] = NULL;
+		//	delete pages[curPage];
+		//	pages[curPage] = NULL;
 	}
-/*
+	/*
 	if (pages[curPage]) {
 		pages[curPage]->show();
 		return;
 	}
 */
-	switch(page) {
+	switch (page) {
 		case 0:
 			setWindowTitle("QPxTool - " + tr("Preferences") + ": " + tr("Common"));
 			if (!pages[page]) pages[page] = new prefCommon(&set, this);
@@ -141,13 +134,12 @@ void QPxPreferences::setPage(int page)
 		default:
 			break;
 	}
-	parea->insertWidget(0,pages[page]);
+	parea->insertWidget(0, pages[page]);
 	pages[page]->show();
 	curPage = page;
 }
 
-void QPxPreferences::save()
-{
+void QPxPreferences::save() {
 #ifndef QT_NO_DEBUG
 	qDebug("QPxPreferences::save()");
 #endif
@@ -155,29 +147,25 @@ void QPxPreferences::save()
 	*set_old = set;
 }
 
-void QPxPreferences::cancel()
-{
+void QPxPreferences::cancel() {
 #ifndef QT_NO_DEBUG
 	qDebug("QPxPreferences::cancel()");
 #endif
 	close();
 }
 
-void QPxPreferences::closeEvent(QCloseEvent* e)
-{
+void QPxPreferences::closeEvent(QCloseEvent* e) {
 #ifndef QT_NO_DEBUG
 	qDebug("QPxPreferences::closeEvent()");
 #endif
-	for (int i=0; i<PREF_PAGES; i++)
+	for (int i = 0; i < PREF_PAGES; i++)
 		if (pages[i]) delete pages[i];
 	QDialog::closeEvent(e);
 }
 
-void QPxPreferences::keyPressEvent(QKeyEvent* e)
-{
+void QPxPreferences::keyPressEvent(QKeyEvent* e) {
 	if (e->key() == Qt::Key_Escape) {
 		close();
 		e->accept();
 	}
 }
-
