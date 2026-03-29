@@ -390,13 +390,15 @@ bool device::start_update_info()
 #endif
 		io->setIODevice(proc);
 		proc->setReadChannel(QProcess::StandardOutput);
+		QObject::connect(proc, SIGNAL(readyReadStandardError()),
+				this, SLOT(readStderr()));
 
 //		QObject::connect(proc, SIGNAL(readyReadStandardOutput()),
 //				this, SLOT(qscan_process_info()));
 
 		switch (threadType) {
 			case threadDevice:
-				proc->start("qscan", QStringList() << "-d" << path << "-Ip");
+				startProcess("qscan", QStringList() << "-d" << path << "-Ip");
 				break;
 			case threadMedia:
 				{
@@ -411,14 +413,14 @@ bool device::start_update_info()
 					if (force_probe)
 						qopts << "--force-probe";
 					qopts << "-m";
-					proc->start("qscan", qopts);
+					startProcess("qscan", qopts);
 				}
 				break;
 			case threadGetFeatures:
-				proc->start("cdvdcontrol", QStringList() << "-d" << path << "-c");
+				startProcess("cdvdcontrol", QStringList() << "-d" << path << "-c");
 				break;
 			case threadGetASDB:
-				proc->start("cdvdcontrol", QStringList() << "-d" << path << "--as-list");
+				startProcess("cdvdcontrol", QStringList() << "-d" << path << "--as-list");
 				break;
 			case threadMQCK:
 				{
@@ -430,7 +432,7 @@ bool device::start_update_info()
 #ifndef QT_NO_DEBUG
 					qDebug() << cdvdopts;
 #endif
-					proc->start("cdvdcontrol", cdvdopts );
+					startProcess("cdvdcontrol", cdvdopts );
 				}
 				break;
 			case threadAScre:
@@ -443,14 +445,14 @@ bool device::start_update_info()
 #ifndef QT_NO_DEBUG
 					qDebug() << cdvdopts;
 #endif
-					proc->start("cdvdcontrol", cdvdopts );
+					startProcess("cdvdcontrol", cdvdopts );
 				}
 				break;
 			case threadDestruct:
-				proc->start("cdvdcontrol", QStringList() << "-d" << path << "--destruct" << (features.as_act_mode ? "full" : "quick"));
+				startProcess("cdvdcontrol", QStringList() << "-d" << path << "--destruct" << (features.as_act_mode ? "full" : "quick"));
 				break;
 			case threadTattoo:
-				proc->start("f1tattoo", QStringList() << "-d" << path << "--tattoo-raw" << features.tattoo_file);
+				startProcess("f1tattoo", QStringList() << "-d" << path << "--tattoo-raw" << features.tattoo_file);
 				break;
 			default:
 				goto update_info_err;
@@ -1046,6 +1048,8 @@ bool device::next_test()
 #endif
 		io->setIODevice(proc);
 		proc->setReadChannel(QProcess::StandardOutput);
+		QObject::connect(proc, SIGNAL(readyReadStandardError()),
+				this, SLOT(readStderr()));
 
 //		QObject::connect(proc, SIGNAL(readyReadStandardOutput()),
 //				this, SLOT(qscan_process_test()));
@@ -1067,7 +1071,7 @@ bool device::next_test()
 		for (int i=0;i<qopts.size();i++)
 			qDebug("[" + QString::number(i) + "] "+ qopts[i]);
 #endif
-		proc->start("qscan", qopts);
+		startProcess("qscan", qopts);
 
 		if (!proc->waitForStarted(10000)) {
 #ifndef QT_NO_DEBUG
@@ -1154,6 +1158,7 @@ void device::qscan_process_info()
 	while (io->linesAvailable() ) {
 		qout = io->readLine();
 //		qout.remove("\n");
+		emit outputLine(qout);
 		switch (threadType) {
 			case threadDevice:
 			case threadMedia:
@@ -1745,6 +1750,29 @@ void device::cdvdcontrol_process_asdb(QString& qout)
 	asdb.append(it);
 }
 
+void device::startProcess(const QString &program, const QStringList &args)
+{
+	QStringList quoted;
+	for (const QString &a : args) {
+		if (a.contains(' '))
+			quoted << ("'" + a + "'");
+		else
+			quoted << a;
+	}
+	emit processCommand(program + " " + quoted.join(" "));
+	proc->start(program, args);
+}
+
+void device::readStderr()
+{
+	if (!proc) return;
+	QByteArray data = proc->readAllStandardError();
+	QString text = QString::fromLocal8Bit(data);
+	const QStringList lines = text.split(QRegularExpression("[\r\n]"), Qt::SkipEmptyParts);
+	for (const QString &line : lines)
+		emit outputLine(line);
+}
+
 void device::qscan_callback_test()
 {
 	int xcode = 0;
@@ -1851,6 +1879,7 @@ void device::qscan_process_test()
 		qout = io->readLine();
 		qout.remove("\n");
 		qout.remove("\r");
+		emit outputLine(qout);
 #ifndef QT_NO_DEBUG
 		qDebug() << qout;
 #endif

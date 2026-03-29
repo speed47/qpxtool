@@ -182,9 +182,8 @@ tabMediaInfo::tabMediaInfo(QPxSettings *iset, devlist *idev, QWidget *p, Qt::Win
 	minfo->setRootIsDecorated(false);
 	minfo->setColumnCount(1);
 	mifont = minfo->font();
+	mifont.setStyleHint(QFont::Monospace);
 	mifont.setFamily("Monospace");
-//	mifont.setBold(false);
-//	mifont.setItalic(false);
 	minfo->setFont(mifont);
 	layout->addWidget(minfo);
 

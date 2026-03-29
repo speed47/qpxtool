@@ -299,6 +299,10 @@ void QPxToolMW::create_actions()
 	act_sblist << act; act->setCheckable(true);
 	act->setShortcut( QKeySequence("Alt+8") );
 	connect(act, SIGNAL(triggered()), this, SLOT(selectTab()));
+	act = act_sbgrp->addAction(QIcon(":images/document.png"), "Console");
+	act_sblist << act; act->setCheckable(true);
+	act->setShortcut( QKeySequence("Alt+9") );
+	connect(act, SIGNAL(triggered()), this, SLOT(selectTab()));
 
 	connect(act_exit, SIGNAL(triggered()), this, SLOT(exit()));
 	connect(act_scanbus, SIGNAL(triggered()), this, SLOT(scanbus()));
