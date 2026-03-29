@@ -1808,7 +1808,7 @@ read_total_dvdmr:
 		}
 	} else if (drive->media.type & (DISC_DVDplus | DISC_BD)) {
 		if (drive->media.type & (DISC_DVDpRW | DISC_DVDpRWDL)) {
-#warning DVD+RW total sectors reading
+// TODO: DVD+RW total sectors reading
 		} else {
 			len= 44;
 			drive->cmd[0] = MMC_READ_DVD_STRUCTURE;

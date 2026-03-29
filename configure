@@ -400,9 +400,9 @@ LPNG_INC  = $lpng_iopts
 LPNG_LIB  = $lpng_ldflags
 " >> Makefile
 	echo "WFLAGS    = -Wall" >> Makefile
-	echo "WFLAGS   += -Wno-unused-but-set-variable -Wno-format-truncation -Wno-error=cpp" >> Makefile
-	echo "WFLAGS   += -Wno-misleading-indentation -Wno-unused-result -Wno-unused-parameter" >> Makefile
-	echo "WFLAGS   += -Wno-deprecated-copy -Wno-literal-suffix -Wno-deprecated-declarations" >> Makefile
+	echo "WFLAGS   += -Wno-unused-but-set-variable" >> Makefile
+	echo "WFLAGS   += -Wno-unused-result" >> Makefile
+	echo "WFLAGS   += -Wno-unused-parameter" >> Makefile
 	echo "CXXFLAGS += \$(WFLAGS) -O2 $CXXFLAGS $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
 	echo "CFLAGS   += \$(WFLAGS) -O2 $CFLAGS   $OSDEFS $LPNG_DEFS $PLUGIN_DEFS $DEFS" >> Makefile
 

@@ -1066,7 +1066,6 @@ void QPxGraph::drawGridTA(QPainter* p, const QSize& s, device *dev, int ttype)
 //	int idxn, idxd;
 //	int scaleType;
 	float Hscale;
-	int   TAgrids;
 //	TestData* data;
 
 #ifndef QT_NO_DEBUG
@@ -1086,16 +1085,6 @@ void QPxGraph::drawGridTA(QPainter* p, const QSize& s, device *dev, int ttype)
 //	p->drawLine(0,s.height()-margin_bottom,s.width(),s.height()-margin_bottom);
 
 
-	TAgrids=14;
-/*
-	if (dev->media.type.startsWith("CD")) {
-		TAgrids=11;
-	} else {
-		TAgrids=14;
-	}
-*/
-
-//	Hscale = width() / ((float)TAgrids-1);
 	Hscale = s.width() / 13.0;
 
 	p->setPen(QPen(palette().color(QPalette::Dark), 1, GRID_STYLE));

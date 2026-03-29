@@ -122,7 +122,7 @@ int get_device_info(drive_info* dev)
 			if (!plextor_get_autostrategy(dev)) dev->ven_features|=PX_ASTRATEGY;
 			if (!plextor_get_testwrite_dvdplus(dev)) dev->ven_features|=PX_SIMUL_PLUS;
 		}
-#warning "PlexEraser DETECTION. Just assume PX755/760 and Premium-II"
+// TODO: PlexEraser DETECTION. Just assume PX755/760 and Premium-II
 		// if ((dev->dev_ID == PLEXTOR_755) || (dev->dev_ID == PLEXTOR_760) || (dev->dev_ID == PLEXTOR_PREMIUM2))
 		if ( isPlextorLockPresent(dev) )
 			dev->ven_features|=PX_ERASER;

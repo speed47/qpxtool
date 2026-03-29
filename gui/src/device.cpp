@@ -357,7 +357,7 @@ bool device::start_update_info()
 	if (threadType==threadMedia && !preserveMediaInfo) {
 		clearMinfo();
 //		mwidget->update();
-#warning !!! mwidget->clearMedia() call
+// TODO: mwidget->clearMedia() call
 		//mwidget->clearMedia();
 	}
 

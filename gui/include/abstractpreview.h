@@ -38,6 +38,7 @@ public:
         fpage = page;
         frect = r;
     }
+    QPageInfo(const QPageInfo &other) : fpage(other.fpage), frect(other.frect) {}
     ~QPageInfo() {}
 
     QPageInfo &operator=(const QPageInfo &data) {

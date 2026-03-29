@@ -843,7 +843,6 @@ void AbstractPreview::paintEvent(QPaintEvent *)
 	QPainter *p = new QPainter(viewport());
 //    QPixmap *pix = NULL;
 	int page = d->beginPageNumber;
-	const QColor bkg = viewport()->backgroundRole();
 	int xx = d->xx, yy = -d->yy;
 	int xx2,yy2;
 	int ty_sta,ty_end,tx_sta,tx_end;
@@ -1105,7 +1104,7 @@ void AbstractPreview::mousePressEvent(QMouseEvent *e)
     }
 
     if(sel >= 0) {
-#warning disabled due to enable multiple selection of same page (i.e. to return to viewed page)
+// TODO: disabled due to enable multiple selection of same page (i.e. to return to viewed page)
 //      if(d->selectPageIndex == sel) return;
         d->selectPageIndex = sel;
         //Вызываем событие клика мышкой на странице
