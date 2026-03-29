@@ -46,6 +46,7 @@ private slots:
 	void updateData(bool save=1, bool setPlugin=1);
 	void WTchecked(bool);
 	void pluginChanged(int);
+	void hldtstTestModeChanged(bool);
 	void checkSimul();
 
 private:
