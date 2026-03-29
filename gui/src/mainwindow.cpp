@@ -1097,7 +1097,7 @@ void QPxToolMW::autosave_report(device *dev)
 #endif
 		return;
 	}
-#warning !!! hardcoded report name structure
+// TODO: hardcoded report name structure
 	fpath = set.report_path + "/" + dt.toString("yyyy-MM-dd");
 	fname = dt.toString("/hh-mm-ss_") + dev->media.type + ".pdf";
 
@@ -1684,7 +1684,7 @@ QString QPxToolMW::generate_html(device *dev, QString idir)
 			.arg( ((int)dev->testData.ta_time) % 60, 2, 10, QChar('0'));
 		r+= "</p>\n";
 		r+= "\t<table align=center border=0 cellspacing=0 width=80\%>\n";
-#warning TA analysis data
+// TODO: TA analysis data
 		r+= "\t</table>\n";
 
 		for (int l=0; l<dev->media.ilayers; l++) 
@@ -1785,7 +1785,7 @@ void QPxToolMW::save_results_db(device *idev)
 	if (!devices.size()) return;
 	if (!dev) dev = devices.current();
 
-#warning !!! set media label before saving to database
+// TODO: set media label before saving to database
 	if (dev->media.label.isEmpty()) {
 		//
 	}
@@ -1891,7 +1891,7 @@ void QPxToolMW::save_results_db(device *idev)
 			:md5, :data_xml \
 		) RETURNING id");
 
-#warning empty fields in report saving query!!!
+// TODO: empty fields in report saving query
 	q->bindValue(":dev_id", id_model);
 	q->bindValue(":dev_fw", dev->fw);
 	q->bindValue(":id_media_type", id_media);

@@ -334,7 +334,7 @@ int qscanner::run_wr_transfer()
 }
 
 #else // #ifdef DISABLE_INTERNAL_WT
-#warning Using internal WT implementation!
+// TODO: Using internal WT implementation!
 
 int qscanner::run_wr_transfer()
 {

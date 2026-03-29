@@ -55,7 +55,7 @@
 #endif
 
 #ifndef HAVE_UINTPTR_T
-#warning "Assuming that (unsigned long) can hold (void *)"
+// TODO: Assuming that (unsigned long) can hold (void *)
 //typedef unsigned long uintptr_t;
 #endif
 
@@ -1122,13 +1122,10 @@ static int UDFGetDescriptor( udf_t *udf, int id,
   uint32_t lbnum, MVDS_location, MVDS_length;
   struct avdp_t avdp;
   uint16_t TagID;
-  uint32_t lastsector;
-  int i, terminate;
+  int i;
   int desc_found = 0;
   /* Find Anchor */
-  lastsector = 0;
   lbnum = 256;   /* Try #1, prime anchor */
-  terminate = 0;
   if(bufsize < DVD_VIDEO_LB_LEN) {
     return 0;
   }

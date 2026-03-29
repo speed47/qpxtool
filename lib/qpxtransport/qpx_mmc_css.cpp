@@ -335,7 +335,7 @@ int get_rpc_state(drive_info* drive){
 //	int len=8;
 	int i;
 	unsigned char regmask;
-	unsigned char t;//,vl,ul;
+	unsigned char t;
 	unsigned char sh;
 
 	if (!(drive->rd_capabilities & DEVICE_DVD) || !(drive->capabilities & CAP_DVD_CSS))
@@ -595,7 +595,7 @@ int css_disckey( drive_info* drive )
     unsigned char p_disc_key[DVD_KEY_SIZE];
     int i;
 
-#warning clean title keys
+// TODO: clean title keys
 
     if( css_get_bus_key( drive ) )
     {
@@ -1608,7 +1608,7 @@ static int css_CrackTitleKey( drive_info* drive, int i_pos, int i_len,
                                      "secret arcanes to recover\n", i_pos );
 
                 /* Reset the drive before trying to continue */
-#warning "Reset the drive before trying to continue"
+// TODO: Reset the drive before trying to continue
 //                _dvdcss_close( dvdcss );
 //                _dvdcss_open( dvdcss );
 
