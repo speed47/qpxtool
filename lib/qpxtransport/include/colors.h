@@ -12,17 +12,20 @@
 #ifndef _COLORS_H_INCLUDED
 #define _COLORS_H_INCLUDED
 
-#define COL_GR0 "\E[30;60m"
-#define COL_RED "\E[31;60m"
-#define COL_GRN "\E[32;60m"
-#define COL_YEL "\E[33;60m"
-#define COL_BLU "\E[34;60m"
-#define COL_VIOL "\E[35;60m"
-#define COL_CYAN "\E[36;60m"
-#define COL_GR1 "\E[37;60m"
-#define COL_NO__ "\E[38;60m"
-#define COL_WHITE "\E[39;60m"
+extern const char* COL_GR0;
+extern const char* COL_RED;
+extern const char* COL_GRN;
+extern const char* COL_YEL;
+extern const char* COL_BLU;
+extern const char* COL_VIOL;
+extern const char* COL_CYAN;
+extern const char* COL_GR1;
+extern const char* COL_NO__;
+extern const char* COL_WHITE;
+extern const char* COL_NORM;
 
-#define COL_NORM "\E[0m"
+// Call once at startup; disables color output if NO_COLOR is set.
+// See https://no-color.org/
+void colors_init();
 
 #endif

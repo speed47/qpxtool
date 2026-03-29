@@ -83,7 +83,7 @@ int scan_liteon::cmd_cd_errc_init_old() {
 		sperror("LiteOn_init_E_cx_scan", dev->err);
 		return 1;
 	}
-	printf(COL_YEL "LiteOn: using OLD CD ERRC commands" COL_NORM "\n");
+	printf("%sLiteOn: using OLD CD ERRC commands%s\n", COL_YEL, COL_NORM);
 	return 0;
 }
 
@@ -104,13 +104,13 @@ int scan_liteon::cmd_cd_errc_init_new() {
 
 int scan_liteon::cmd_cd_errc_init() {
 	if (dev->liteon_force_old) {
-		printf(COL_GRN "LiteOn: forced old CD ERRC commands" COL_NORM "\n");
+		printf("%sLiteOn: forced old CD ERRC commands%s\n", COL_GRN, COL_NORM);
 		cd_errc_new = false;
 		return cmd_cd_errc_init_old();
 	}
 	cd_errc_new = true;
 	if (cmd_cd_errc_init_new()) return cmd_cd_errc_init_old();
-	printf(COL_GRN "LiteOn: using new CD ERRC commands" COL_NORM "\n");
+	printf("%sLiteOn: using new CD ERRC commands%s\n", COL_GRN, COL_NORM);
 	return 0;
 }
 
@@ -344,7 +344,7 @@ int scan_liteon::cmd_dvd_errc_block(dvd_errc* data) {
 #endif
 
 	// Data Received:
-	// 00000000  00 00 00 8E 00 00 00 00                           ...Ž....
+	// 00000000  00 00 00 8E 00 00 00 00                           ...ï¿½....
 
 	//	lba = ((dev->rd_buf[1] << 16 )& 0xFF0000) + ((dev->rd_buf[2] << 8)&0xFF00 ) + (dev->rd_buf[3] & 0xFF);
 	lba = ntoh32(dev->rd_buf);

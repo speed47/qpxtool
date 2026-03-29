@@ -100,9 +100,9 @@ inline void perror(const char* str) {
 	              0, // Default language
 	              (LPTSTR)&lpMsgBuf, 0, NULL);
 	if (str)
-		fprintf(stderr, COL_RED "%s: %s" COL_NORM, str, (char*)lpMsgBuf);
+		fprintf(stderr, "%s%s: %s%s", COL_RED, str, (char*)lpMsgBuf, COL_NORM);
 	else
-		fprintf(stderr, COL_RED "%s" COL_NORM, (char*)lpMsgBuf);
+		fprintf(stderr, "%s%s%s", COL_RED, (char*)lpMsgBuf, COL_NORM);
 
 	LocalFree(lpMsgBuf);
 }
@@ -118,11 +118,11 @@ void sperror(const char* cmd, int err) //,  Scsi_Command *scsi)
 	sense2str(err, sense_str);
 
 	if (err == -1) {
-		fprintf(stderr, COL_RED "\n:-( unable to %s : [%d] " COL_NORM, cmd, saved_errno);
+		fprintf(stderr, "%s\n:-( unable to %s : [%d] %s", COL_RED, cmd, saved_errno, COL_NORM);
 		errno = saved_errno, perror(NULL);
 	} else
-		fprintf(stderr, COL_RED "\n:-[ %s failed with SK=%Xh/ASC=%02Xh/ACQ=%02Xh]: %s\n" COL_NORM, cmd, SK(err),
-		        ASC(err), ASCQ(err), sense_str);
+		fprintf(stderr, "%s\n:-[ %s failed with SK=%Xh/ASC=%02Xh/ACQ=%02Xh]: %s\n%s", COL_RED, cmd, SK(err), ASC(err),
+		        ASCQ(err), sense_str, COL_NORM);
 }
 
 autofree::autofree() { ptr = NULL; }
