@@ -480,6 +480,7 @@ devtype		type;
 	int		tests, ctest;
 	int		test_spd;
 	QString		plugin;
+	QString		detected_plugin;
 	QStringList plugin_names;
 	QStringList plugin_infos;
 	QString		nprocess;

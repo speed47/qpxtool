@@ -1476,6 +1476,12 @@ void device::qscan_process_line(QString& qout)
 			info_media.append(info);
 #endif
 		}
+	} else if (qout.contains("using plugin:")) {
+		QString pn = qout.mid(qout.indexOf("using plugin:") + 13).simplified();
+		if (pn != "no plugin")
+			detected_plugin = pn;
+		else
+			detected_plugin.clear();
 	} else if (qout.startsWith("Found plugin:")) {
 		int spidx;
 		QString pn,pi;

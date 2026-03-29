@@ -235,6 +235,7 @@ void TestDialog::winit()
 //	connect( ck_TA,   SIGNAL(clicked(bool)), spd_TA,SLOT(setEnabled(bool)));
 //	connect( ck_plugin, SIGNAL(clicked(bool)), cb_plugin,SLOT(setEnabled(bool)));
 	connect( cb_plugin, SIGNAL(activated(int)), this, SLOT(pluginChanged(int)));
+	connect( ck_hldtst_test_mode, SIGNAL(clicked(bool)), this, SLOT(hldtstTestModeChanged(bool)));
 
 	connect( butt_run,    SIGNAL(clicked()), this, SLOT(start()) );
 	connect( butt_cancel, SIGNAL(clicked()), this, SLOT(reject()) );
@@ -425,7 +426,10 @@ void TestDialog::pluginChanged(int idx)
 	}
 
 	if (!idx) {
-		l_plugin_info->setText(tr("qScan will probe plugin for your drive"));
+		if (!dev->detected_plugin.isEmpty())
+			l_plugin_info->setText(tr("Autodetected: %1").arg(dev->detected_plugin));
+		else
+			l_plugin_info->setText(tr("qScan will probe plugin for your drive"));
 	} else {
 		if (!dev->plugin_infos[idx-1].isEmpty()) {
 			l_plugin_info->setText(dev->plugin_infos[idx-1]);
@@ -455,5 +459,11 @@ void TestDialog::pluginChanged(int idx)
 //	if (relock) dev->mutex->lock();
 
 	updateData(false, false);
+}
+
+void TestDialog::hldtstTestModeChanged(bool)
+{
+	saveData();
+	pluginChanged(cb_plugin->currentIndex());
 }
 
