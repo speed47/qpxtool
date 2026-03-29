@@ -2657,6 +2657,13 @@ int read_mediaid_bd(drive_info* drive) {
 		drive->media.type = DISC_BD_R_SEQ;
 	}
 
+	// BD-RE discs may be misdetected as BD-ROM or other types (e.g. CD-ROM via stale data);
+	// if the DI data says "BDW", this is a BD-RE disc
+	if (!(drive->media.type & DISC_BD_RE) && strncmp((const char*)&drive->media.MID_raw[4 + 8], "BDW", 3) == 0) {
+		if (!drive->silent) printf("BD DI info indicates type BD-RE\n");
+		drive->media.type = DISC_BD_RE;
+	}
+
 	if (drive->media.type & DISC_BD_ROM) {
 		if (!drive->silent) printf(COL_YEL "BD-ROM does not contain media ID" COL_NORM "\n");
 		return 0;
@@ -2869,93 +2876,111 @@ int determine_disc_type(drive_info* drive) {
 	drive->media.MID_size = 0;
 	// 	drive->media.type = Media_NoMedia;
 	if (drive->mmc > 1) {
-		get_configuration(drive, FEATURE_PROFILE_LIST, NULL, 0);
-		switch (drive->rd_buf[7]) {
-			case 0:
-				drive->media.type = DISC_NODISC;
-				break;
-			case PROFILE_CD_ROM:
-				drive->media.type = DISC_CDROM;
-				break;
-			case PROFILE_CD_R:
-				drive->media.type = DISC_CDR;
-				break;
-			case PROFILE_CD_RW:
-				drive->media.type = DISC_CDRW;
-				break;
-			case PROFILE_DVD_ROM:
-				drive->media.type = DISC_DVDROM;
-				break;
-			case PROFILE_DVD_R_SEQ:
-				drive->media.type = DISC_DVDmR;
-				break;
-			case PROFILE_DVD_RAM:
-				drive->media.type = DISC_DVDRAM;
-				break;
-			case PROFILE_DVD_RW_RESTOV:
-				drive->media.type = DISC_DVDmRWR;
-				break;
-			case PROFILE_DVD_RW_SEQ:
-				drive->media.type = DISC_DVDmRWS;
-				break;
-			case PROFILE_DVD_RW_DL:
-				drive->media.type = DISC_DVDmRWDL;
-				break;
-			case PROFILE_DVD_R_DL_SEQ:
-				drive->media.type = DISC_DVDmRDL;
-				break;
-			case PROFILE_DVD_R_DL_JUMP:
-				drive->media.type = DISC_DVDmRDLJ;
-				break;
-			case PROFILE_DVD_PLUS_RW:
-				drive->media.type = DISC_DVDpRW;
-				break;
-			case PROFILE_DVD_PLUS_R:
-				drive->media.type = DISC_DVDpR;
-				break;
-			case PROFILE_DVD_PLUS_R_DL:
-				drive->media.type = DISC_DVDpRDL;
-				break;
-			case PROFILE_DVD_PLUS_RW_DL:
-				drive->media.type = DISC_DVDpRWDL;
-				break;
-
-			case PROFILE_BD_ROM:
-				drive->media.type = DISC_BD_ROM;
-				break;
-			case PROFILE_BD_R_SEQ:
-				drive->media.type = DISC_BD_R_SEQ;
-				break;
-			case PROFILE_BD_R_RND:
-				drive->media.type = DISC_BD_R_RND;
-				break;
-			case PROFILE_BD_RE:
-				drive->media.type = DISC_BD_RE;
-				break;
-
-			case PROFILE_HDDVD_ROM:
-				drive->media.type = DISC_HDDVD_ROM;
-				break;
-			case PROFILE_HDDVD_R:
-				drive->media.type = DISC_HDDVD_R;
-				break;
-			case PROFILE_HDDVD_RAM:
-				drive->media.type = DISC_HDDVD_RAM;
-				break;
-			case PROFILE_HDDVD_RW:
-				drive->media.type = DISC_HDDVD_RW;
-				break;
-			case PROFILE_HDDVD_R_DL:
-				drive->media.type = DISC_HDDVD_RDL;
-				break;
-			case PROFILE_HDDVD_RW_DL:
-				drive->media.type = DISC_HDDVD_RWDL;
-				break;
-
-			default:
-				drive->media.type = DISC_UN;
-				break;
+		int gc_err = get_configuration(drive, FEATURE_PROFILE_LIST, NULL, 0);
+		if (gc_err) {
+			if (!drive->silent)
+				printf("GET_CONFIGURATION failed (0x%05X), retrying after TEST_UNIT_READY...\n", gc_err);
+			wait_unit_ready(drive, 10);
+			gc_err = get_configuration(drive, FEATURE_PROFILE_LIST, NULL, 0);
+			if (gc_err && !drive->silent) printf("GET_CONFIGURATION retry also failed (0x%05X)\n", gc_err);
 		}
+		if (gc_err) {
+			// GET_CONFIGURATION failed even after retry; rd_buf contains stale data.
+			// Try to detect media presence via READ_CAPACITY and use fallback detection.
+			read_capacity(drive);
+			if (drive->media.capacity) {
+				drive->media.type = DISC_UN;
+				if (!drive->silent)
+					printf("Disc present (%d sectors) but profile unknown, attempting fallback detection\n",
+					       drive->media.capacity);
+			}
+		} else
+			switch (drive->rd_buf[7]) {
+				case 0:
+					drive->media.type = DISC_NODISC;
+					break;
+				case PROFILE_CD_ROM:
+					drive->media.type = DISC_CDROM;
+					break;
+				case PROFILE_CD_R:
+					drive->media.type = DISC_CDR;
+					break;
+				case PROFILE_CD_RW:
+					drive->media.type = DISC_CDRW;
+					break;
+				case PROFILE_DVD_ROM:
+					drive->media.type = DISC_DVDROM;
+					break;
+				case PROFILE_DVD_R_SEQ:
+					drive->media.type = DISC_DVDmR;
+					break;
+				case PROFILE_DVD_RAM:
+					drive->media.type = DISC_DVDRAM;
+					break;
+				case PROFILE_DVD_RW_RESTOV:
+					drive->media.type = DISC_DVDmRWR;
+					break;
+				case PROFILE_DVD_RW_SEQ:
+					drive->media.type = DISC_DVDmRWS;
+					break;
+				case PROFILE_DVD_RW_DL:
+					drive->media.type = DISC_DVDmRWDL;
+					break;
+				case PROFILE_DVD_R_DL_SEQ:
+					drive->media.type = DISC_DVDmRDL;
+					break;
+				case PROFILE_DVD_R_DL_JUMP:
+					drive->media.type = DISC_DVDmRDLJ;
+					break;
+				case PROFILE_DVD_PLUS_RW:
+					drive->media.type = DISC_DVDpRW;
+					break;
+				case PROFILE_DVD_PLUS_R:
+					drive->media.type = DISC_DVDpR;
+					break;
+				case PROFILE_DVD_PLUS_R_DL:
+					drive->media.type = DISC_DVDpRDL;
+					break;
+				case PROFILE_DVD_PLUS_RW_DL:
+					drive->media.type = DISC_DVDpRWDL;
+					break;
+
+				case PROFILE_BD_ROM:
+					drive->media.type = DISC_BD_ROM;
+					break;
+				case PROFILE_BD_R_SEQ:
+					drive->media.type = DISC_BD_R_SEQ;
+					break;
+				case PROFILE_BD_R_RND:
+					drive->media.type = DISC_BD_R_RND;
+					break;
+				case PROFILE_BD_RE:
+					drive->media.type = DISC_BD_RE;
+					break;
+
+				case PROFILE_HDDVD_ROM:
+					drive->media.type = DISC_HDDVD_ROM;
+					break;
+				case PROFILE_HDDVD_R:
+					drive->media.type = DISC_HDDVD_R;
+					break;
+				case PROFILE_HDDVD_RAM:
+					drive->media.type = DISC_HDDVD_RAM;
+					break;
+				case PROFILE_HDDVD_RW:
+					drive->media.type = DISC_HDDVD_RW;
+					break;
+				case PROFILE_HDDVD_R_DL:
+					drive->media.type = DISC_HDDVD_RDL;
+					break;
+				case PROFILE_HDDVD_RW_DL:
+					drive->media.type = DISC_HDDVD_RWDL;
+					break;
+
+				default:
+					drive->media.type = DISC_UN;
+					break;
+			}
 		if (!drive->media.type) return 0;
 		read_disc_information(drive);
 		if (drive->media.type & DISC_CD) {
@@ -3087,6 +3112,98 @@ int determine_disc_type(drive_info* drive) {
 
 			read_mediaid_bd(drive);
 			if (!drive->silent) printf("** MID: '%s'\n", drive->media.MID);
+		} else if (drive->media.type & DISC_UN) {
+			// Profile detection failed but a disc is present.
+			// Try to identify via BD disc structure (READ DISC STRUCTURE with media type=BD).
+			if (!drive->silent) printf("Attempting fallback media type detection...\n");
+			drive->cmd[0] = MMC_READ_DVD_STRUCTURE;
+			drive->cmd[1] = 1; // media type = BD
+			drive->cmd[7] = 0x00;
+			drive->cmd[8] = 0;
+			drive->cmd[9] = 4;
+			drive->cmd[11] = 0;
+			if (!drive->cmd.transport(READ, drive->rd_buf, 4)) {
+				unsigned int di_len = (drive->rd_buf[0] << 8 | drive->rd_buf[1]) + 2;
+				if (di_len > 128) di_len = 128;
+				drive->cmd[0] = MMC_READ_DVD_STRUCTURE;
+				drive->cmd[1] = 1; // media type = BD
+				drive->cmd[7] = 0x00;
+				drive->cmd[8] = di_len >> 8;
+				drive->cmd[9] = di_len & 0xFF;
+				drive->cmd[11] = 0;
+				if (!drive->cmd.transport(READ, drive->rd_buf, di_len) && di_len > 16 && drive->rd_buf[4] == 'D' &&
+				    drive->rd_buf[5] == 'I') {
+					// Got valid BD Disc Information
+					const char* di_type = (const char*)&drive->rd_buf[4 + 8];
+					if (!strncmp(di_type, "BDW", 3)) {
+						if (!drive->silent) printf("Fallback: detected BD-RE from DI\n");
+						drive->media.type = DISC_BD_RE;
+					} else if (!strncmp(di_type, "BDR", 3)) {
+						if (!drive->silent) printf("Fallback: detected BD-R from DI\n");
+						drive->media.type = DISC_BD_R_SEQ;
+					} else if (!strncmp(di_type, "BDO", 3)) {
+						if (!drive->silent) printf("Fallback: detected BD-ROM from DI\n");
+						drive->media.type = DISC_BD_ROM;
+					} else {
+						if (!drive->silent) printf("Fallback: unknown BD DI type '%.3s'\n", di_type);
+						drive->media.type = DISC_BD_ROM;
+					}
+					// Now do the normal BD handling
+					drive->cmd[0] = MMC_READ_DVD_STRUCTURE;
+					drive->cmd[1] = 1; // media type = BD
+					drive->cmd[9] = 36;
+					drive->cmd[11] = 0;
+					if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 36)))
+						if (!drive->silent) sperror("READ_DVD_STRUCTURE", drive->err);
+					drive->media.book_type = 0;
+					drive->media.layers = (drive->rd_buf[16] & 0xF0) >> 4;
+					switch (drive->rd_buf[17] & 0x0F) {
+						case 0:
+						case 1:
+							drive->media.gbpl = 25;
+							break;
+						case 2:
+							drive->media.gbpl = 27;
+							break;
+						case 4:
+							drive->media.gbpl = 32;
+							break;
+						case 5:
+							drive->media.gbpl = 33;
+							break;
+						default:
+							printf("WARNING: Unknown layer size (%d), defaulting to 25GB\n", drive->rd_buf[17] & 0x0F);
+							drive->media.gbpl = 25;
+					}
+					read_mediaid_bd(drive);
+					if (!drive->silent) printf("** MID: '%s'\n", drive->media.MID);
+				}
+			}
+			if (drive->media.type & DISC_UN) {
+				// BD structure didn't work, try DVD structure
+				drive->cmd[0] = MMC_READ_DVD_STRUCTURE;
+				drive->cmd[7] = 0;
+				drive->cmd[9] = 36;
+				drive->cmd[11] = 0;
+				if (!drive->cmd.transport(READ, drive->rd_buf, 36)) {
+					// Got DVD structure data - at least it's a DVD
+					if (!drive->silent) printf("Fallback: disc responds to DVD structure query, assuming DVD-ROM\n");
+					drive->media.type = DISC_DVDROM;
+					drive->media.book_type = (drive->rd_buf[4] & 0xFF);
+					drive->media.max_rate = (drive->rd_buf[5] & 0x0F);
+					drive->media.disc_size = ((drive->rd_buf[5] & 0xF0) >> 4);
+					drive->media.layers = 1 + ((drive->rd_buf[6] & 0x60) >> 5);
+					read_mediaid_dvd(drive);
+				}
+			}
+			if (drive->media.type & DISC_UN) {
+				// Neither BD nor DVD structure worked - assume CD
+				if (!drive->silent) printf("Fallback: defaulting to CD-ROM\n");
+				drive->media.type = DISC_CDROM;
+				read_disc_information(drive);
+				drive->media.type = determine_cd_type(drive);
+				read_mediaid_cd(drive);
+			}
 		}
 	} else {
 		read_capacity(drive);
