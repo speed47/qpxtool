@@ -98,6 +98,7 @@ private:
 	QTextBrowser	*media;
 */
 
+	QLabel			*l_root_hint = nullptr;
 	QBoxLayout		*layout_butt;
 	QPushButton		*butt_run;
 	QPushButton		*butt_cancel;
