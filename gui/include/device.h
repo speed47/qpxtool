@@ -524,6 +524,7 @@ private slots:
 	void qscan_process_test();
 	void qscan_callback_info();
 	void qscan_callback_test();
+	void readStderr();
 
 	void watcherStarted();
 	void watcherStoped();
@@ -556,11 +557,15 @@ signals:
 	void block_FT();
 	void block_TA();
 
+	void outputLine(const QString &line);
+	void processCommand(const QString &cmdline);
+
 private:
 	void qscan_process_line(QString&);
 	void cdvdcontrol_process_line(QString&);
 	void cdvdcontrol_process_asdb(QString&);
 
+	void startProcess(const QString &program, const QStringList &args);
 	bool start();
 	bool start_update_info();
 	bool next_test();

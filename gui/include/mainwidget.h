@@ -34,6 +34,7 @@ class tabERRC;
 class tabJB;
 class tabFETE;
 class tabTA;
+class tabConsole;
 class QPxGraph;
 
 class QPxMainWidget : public QWidget
@@ -77,6 +78,7 @@ private:
 	tabJB			*tab_JB;
 	tabFETE			*tab_FETE;
 	tabTA			*tab_TA;
+	tabConsole		*tab_Console;
 };
 
 #endif

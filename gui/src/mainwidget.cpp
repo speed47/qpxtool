@@ -47,6 +47,7 @@
 #include <tab_jb.h>
 #include <tab_fete.h>
 #include <tab_ta.h>
+#include <tab_console.h>
 
 #include "mainwidget.h"
 
@@ -128,6 +129,12 @@ QPxMainWidget::QPxMainWidget(QPxSettings *iset, devlist *idev, QWidget *p)
 	addTabButton(pb,":images/test_ta.png", "Time Analyser", tabidx,layout_buttons);
 	connect(this, SIGNAL(configured()), tab_TA, SLOT(reconfig()));
 	connect(this, SIGNAL(deviceSelected()), tab_TA, SLOT(selectDevice()));
+
+	tab_Console = new tabConsole(iset, idev, this);
+	stack->addWidget(tab_Console);
+	addTabButton(pb,":images/document.png", "Console", tabidx,layout_buttons);
+	connect(this, SIGNAL(configured()), tab_Console, SLOT(reconfig()));
+	connect(this, SIGNAL(deviceSelected()), tab_Console, SLOT(selectDevice()));
 
 	connect(grp, SIGNAL(idClicked(int)), stack, SLOT(setCurrentIndex(int)));
 	layout_buttons->addStretch(10);

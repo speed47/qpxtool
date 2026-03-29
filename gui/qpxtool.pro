@@ -54,6 +54,7 @@ HEADERS += include/about.h \
            include/tab_jb.h \
            include/tab_mediainfo.h \
            include/tab_ta.h \
+           include/tab_console.h \
            include/tab_transfer.h \
            include/tattoowidget.h \
            include/testdialog.h \
@@ -95,6 +96,7 @@ SOURCES += src/about.cpp \
            src/tab_jb.cpp \
            src/tab_mediainfo.cpp \
            src/tab_ta.cpp \
+           src/tab_console.cpp \
            src/tab_transfer.cpp \
            src/tattoowidget.cpp \
            src/testdialog.cpp \
