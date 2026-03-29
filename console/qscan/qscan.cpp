@@ -561,12 +561,24 @@ int main(int argc, char** argv) {
 	//	scanner = new qscanner(dev);
 		if (scanner->plugins_probe(!test && (flags & FL_LPLUGIN), false) && !(flags & FL_LPLUGIN) ) {
 			printf( MSGPREF "Device not found in any plugin support list, trying to probe...\n");
-			if (scanner->plugins_probe(!test && (flags & FL_LPLUGIN), !(flags & FL_LPLUGIN))) {
+
+			probe_result probed[MAX_PROBE_RESULTS];
+			int nprobed = scanner->plugins_probe_all(probed, MAX_PROBE_RESULTS);
+
+			if (nprobed > 0) {
+				for (int p = 0; p < nprobed; p++) {
+					printf("Probed plugin: %s (%s)\n", probed[p].name, probed[p].desc);
+				}
+				if (nprobed > 1) {
+					printf( MSGPREF "%d compatible plugins found by probing\n", nprobed);
+				}
+				scanner->plugin_attach(probed[0].name);
+			}
+
+			if (!scanner->is_plugin_attached()) {
 				printf( MSGPREF "Probe failed! Trying fallback plugin...\n");
-				if (!(flags & FL_LPLUGIN)) {
-					if (scanner->plugin_attach_fallback()) {
-						printf( MSGPREF "Error loading fallback plugin!\n");
-					}
+				if (scanner->plugin_attach_fallback()) {
+					printf( MSGPREF "Error loading fallback plugin!\n");
 				}
 			}
 		}

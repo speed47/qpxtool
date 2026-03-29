@@ -234,7 +234,55 @@ int qscanner::plugins_probe(bool test, bool probe_enable) {
 	return r;
 }
 
-int qscanner::plugin_attach_fallback() { return plugin_attach(FALLBACK_PLUGIN_NAME); } 
+int qscanner::plugins_probe_all(probe_result* results, int max_results) {
+	char *pname;
+	char *ppath;
+	DIR  *dir;
+	struct dirent *dentry;
+	int i;
+	int count = 0;
+	bool was_silent = dev->silent;
+
+	for (i=0; strlen(ppaths[i]) && count < max_results; i++) {
+		ppath = (char*) ppaths[i];
+		if (!dev->silent)
+			printf("Looking for plugins in %s...\n", ppath);
+		dir = opendir(ppath);
+		if (dir) {
+			dentry = readdir(dir);
+			while(dentry && count < max_results) {
+				if (!strncmp(dentry->d_name,"libqscan_",9)) {
+					pname = (char*) malloc (strlen(dentry->d_name) + strlen(ppath) +2 );
+#if defined (_WIN32) || defined (_WIN64)
+					sprintf(pname, "%s\\%s", ppath, dentry->d_name);
+#else
+					sprintf(pname, "%s/%s", ppath, dentry->d_name);
+#endif
+					dev->silent = 1;
+					plugin_attach(pname, true, 0, 1);
+					dev->silent = was_silent;
+					if (attached) {
+						if (strcmp(plugin->name(), FALLBACK_PLUGIN_NAME)) {
+							strncpy(results[count].name, plugin->name(), sizeof(results[count].name) - 1);
+							results[count].name[sizeof(results[count].name) - 1] = '\0';
+							strncpy(results[count].desc, plugin->desc(), sizeof(results[count].desc) - 1);
+							results[count].desc[sizeof(results[count].desc) - 1] = '\0';
+							results[count].chk_features = dev->chk_features;
+							count++;
+						}
+						plugin_detach();
+					}
+					free(pname);
+				}
+				dentry = readdir(dir);
+			}
+			closedir(dir);
+		}
+	}
+	return count;
+}
+
+int qscanner::plugin_attach_fallback() { return plugin_attach(FALLBACK_PLUGIN_NAME); }
 
 int qscanner::plugin_attach(const char* name) { // modernization
 	char *pname;

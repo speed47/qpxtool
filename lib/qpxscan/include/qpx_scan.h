@@ -39,6 +39,14 @@ class qpxwriter;
 
 //static const int ppaths_cnt = sizeof(ppaths) / sizeof(path);
 
+#define MAX_PROBE_RESULTS 16
+
+struct probe_result {
+	char name[64];
+	char desc[256];
+	int  chk_features;
+};
+
 class qscanner {
 public:
 	qscanner(drive_info* idev);
@@ -52,6 +60,7 @@ public:
 	int* get_test_speeds(unsigned int);
 //	int  plugins_probe();
 	int  plugins_probe(bool test, bool probe_enable);
+	int  plugins_probe_all(probe_result* results, int max_results);
 	int  plugin_attach_fallback();
 	int  plugin_attach(const char* name);
 	int  plugin_attach(char* pname, bool probe_enable, bool no_detach, bool silent=1);

@@ -426,9 +426,16 @@ void TestDialog::pluginChanged(int idx)
 	}
 
 	if (!idx) {
-		if (!dev->detected_plugin.isEmpty())
-			l_plugin_info->setText(tr("Autodetected: %1").arg(dev->detected_plugin));
-		else
+		if (!dev->detected_plugin.isEmpty()) {
+			if (dev->probed_plugins.size() > 1) {
+				l_plugin_info->setText(tr("Autodetected: %1 (%2 compatible plugins found: %3)")
+					.arg(dev->detected_plugin)
+					.arg(dev->probed_plugins.size())
+					.arg(dev->probed_plugins.join(", ")));
+			} else {
+				l_plugin_info->setText(tr("Autodetected: %1").arg(dev->detected_plugin));
+			}
+		} else
 			l_plugin_info->setText(tr("qScan will probe plugin for your drive"));
 	} else {
 		if (!dev->plugin_infos[idx-1].isEmpty()) {
