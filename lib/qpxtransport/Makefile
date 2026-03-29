@@ -1,4 +1,5 @@
-SRC  = common_functions \
+SRC  = colors \
+	common_functions \
 	qpx_transport \
 	qpx_mmc \
 	qpx_mmc_css \

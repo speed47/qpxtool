@@ -1713,6 +1713,9 @@ void device::startProcess(const QString& program, const QStringList& args) {
 			quoted << a;
 	}
 	emit processCommand(program + " " + quoted.join(" "));
+	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+	env.insert("NO_COLOR", "1");
+	proc->setProcessEnvironment(env);
 	proc->start(program, args);
 }
 

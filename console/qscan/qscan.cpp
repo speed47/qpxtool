@@ -20,6 +20,7 @@
 #include <signal.h>
 
 // #include <qpx_mmc.h> // <-- already included via <qpx_scan.h>
+#include <colors.h>
 #include <qpx_scan.h>
 #include <plextor_features.h>
 // <wincon.h> already included via <qpx_scan.h> --> <qpx_mmc.h> -->
@@ -175,6 +176,7 @@ void show_available_errc_data(qscanner* scanner) {
 }
 
 int main(int argc, char** argv) {
+	colors_init();
 	int result = 0;
 
 	drive_info* dev = NULL;

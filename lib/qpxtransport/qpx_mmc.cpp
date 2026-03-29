@@ -2665,7 +2665,7 @@ int read_mediaid_bd(drive_info* drive) {
 	}
 
 	if (drive->media.type & DISC_BD_ROM) {
-		if (!drive->silent) printf(COL_YEL "BD-ROM does not contain media ID" COL_NORM "\n");
+		if (!drive->silent) printf("%sBD-ROM does not contain media ID%s\n", COL_YEL, COL_NORM);
 		return 0;
 	}
 	memcpy(drive->media.MID, drive->media.MID_raw + 4 + 100, 6);
