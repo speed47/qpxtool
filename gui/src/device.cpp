@@ -897,8 +897,8 @@ bool device::stop_tests() {
 			qWarning() << "stop_tests(): proc is null, aborting";
 			return false;
 		}
-		qWarning() << "stop_tests(): killing proc, pid=" << proc->processId() << "state=" << proc->state();
-		proc->kill();
+		qWarning() << "stop_tests(): terminating proc, pid=" << proc->processId() << "state=" << proc->state();
+		proc->terminate();
 	} else if (type == device::DevtypeTCP) {
 		if (!sock) return false;
 #ifndef QT_NO_DEBUG
@@ -1795,12 +1795,10 @@ void device::qscan_callback_test() {
 			break;
 	}
 
-	if (xcode) {
-		if (stopped) {
-			emit testsStopped();
-		} else {
-			emit testsError();
-		}
+	if (stopped) {
+		emit testsStopped();
+	} else if (xcode) {
+		emit testsError();
 	}
 
 	next_test();

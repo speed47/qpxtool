@@ -33,7 +33,10 @@ scan_liteon::scan_liteon(drive_info* idev) : scan_plugin(), lba(0), cd_errc_new(
 scan_liteon::~scan_liteon() {
 	if (hldtst_test_mode) {
 		printf("LiteOn: Exiting HL-DT-ST test mode\n");
-		cmd_hldtst_test_mode_toggle();
+		if (cmd_hldtst_test_mode_toggle())
+			printf("LiteOn: HL-DT-ST test mode exit failed\n");
+		else
+			printf("LiteOn: HL-DT-ST test mode exited successfully\n");
 		hldtst_test_mode = false;
 	}
 	if (!dev->silent) printf("~scan_liteon()\n");
