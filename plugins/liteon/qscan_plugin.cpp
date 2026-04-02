@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <colors.h>
 #include <qscan_plugin.h>
 
@@ -48,6 +49,8 @@ int scan_liteon::probe_drive() {
 		printf("%sLiteOn: Entering HL-DT-ST test mode...%s\n", COL_YEL, COL_NORM);
 		if (!cmd_hldtst_test_mode_toggle()) {
 			hldtst_test_mode = true;
+			printf("LiteOn: Waiting 7 seconds for drive to settle in test mode...\n");
+			sleep(7);
 		} else {
 			printf("%sLiteOn: HL-DT-ST test mode entry failed%s\n", COL_RED, COL_NORM);
 		}
@@ -105,6 +108,8 @@ int scan_liteon::start_test(unsigned int itest, long ilba, int& speed) {
 		printf("%sLiteOn: Entering HL-DT-ST test mode...%s\n", COL_YEL, COL_NORM);
 		if (!cmd_hldtst_test_mode_toggle()) {
 			hldtst_test_mode = true;
+			printf("LiteOn: Waiting 7 seconds for drive to settle in test mode...\n");
+			sleep(7);
 		} else {
 			printf("%sLiteOn: HL-DT-ST test mode entry failed%s\n", COL_RED, COL_NORM);
 		}
