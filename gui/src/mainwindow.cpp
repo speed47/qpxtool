@@ -814,6 +814,7 @@ void QPxToolMW::qscan_process_scanbus() {
 				              .arg(dev->host)
 				              .arg(dev->port);
 			}
+			dev->verbose = !!(set.actions_flags & AFLAG_VERBOSE);
 			devices.append(dev);
 			c_dev->addItem(dev->id);
 			dev->startWatcher();
@@ -1037,6 +1038,9 @@ void QPxToolMW::preferences() {
 	bool dbOpen = QSqlDatabase::database("reports").isOpen();
 	act_save_db->setEnabled(dbOpen);
 	act_load_db->setEnabled(dbOpen);
+
+	bool verbose = !!(set.actions_flags & AFLAG_VERBOSE);
+	for (int i = 0; i < devices.size(); i++) devices[i]->verbose = verbose;
 
 	mwidget->reconfig();
 }
