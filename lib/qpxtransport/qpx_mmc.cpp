@@ -2894,7 +2894,9 @@ int determine_disc_type(drive_info* drive) {
 					printf("Disc present (%d sectors) but profile unknown, attempting fallback detection\n",
 					       drive->media.capacity);
 			}
-		} else
+		} else {
+			if (!drive->silent)
+				printf("GET_CONFIGURATION ok, profile=0x%02X%02X\n", drive->rd_buf[6], drive->rd_buf[7]);
 			switch (drive->rd_buf[7]) {
 				case 0:
 					drive->media.type = DISC_NODISC;
@@ -2978,9 +2980,13 @@ int determine_disc_type(drive_info* drive) {
 					break;
 
 				default:
+					if (!drive->silent)
+						printf("GET_CONFIGURATION: unrecognized profile 0x%02X%02X, treating as unknown\n",
+						       drive->rd_buf[6], drive->rd_buf[7]);
 					drive->media.type = DISC_UN;
 					break;
 			}
+		}
 		if (!drive->media.type) return 0;
 		read_disc_information(drive);
 		if (drive->media.type & DISC_CD) {
@@ -3133,6 +3139,8 @@ int determine_disc_type(drive_info* drive) {
 				drive->cmd[11] = 0;
 				if (!drive->cmd.transport(READ, drive->rd_buf, di_len) && di_len > 16 && drive->rd_buf[4] == 'D' &&
 				    drive->rd_buf[5] == 'I') {
+					if (!drive->silent) printf("Fallback: BD DI header valid, di_len=%u\n", di_len);
+
 					// Got valid BD Disc Information
 					const char* di_type = (const char*)&drive->rd_buf[4 + 8];
 					if (!strncmp(di_type, "BDW", 3)) {
@@ -3177,7 +3185,13 @@ int determine_disc_type(drive_info* drive) {
 					}
 					read_mediaid_bd(drive);
 					if (!drive->silent) printf("** MID: '%s'\n", drive->media.MID);
+				} else {
+					if (!drive->silent)
+						printf("Fallback: BD DI read failed or invalid header (bytes 4-5: 0x%02X 0x%02X)\n",
+						       drive->rd_buf[4], drive->rd_buf[5]);
 				}
+			} else {
+				if (!drive->silent) printf("Fallback: BD DI initial probe failed\n");
 			}
 			if (drive->media.type & DISC_UN) {
 				// BD structure didn't work, try DVD structure
@@ -3194,6 +3208,8 @@ int determine_disc_type(drive_info* drive) {
 					drive->media.disc_size = ((drive->rd_buf[5] & 0xF0) >> 4);
 					drive->media.layers = 1 + ((drive->rd_buf[6] & 0x60) >> 5);
 					read_mediaid_dvd(drive);
+				} else {
+					if (!drive->silent) printf("Fallback: DVD structure query also failed\n");
 				}
 			}
 			if (drive->media.type & DISC_UN) {
