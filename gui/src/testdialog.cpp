@@ -49,7 +49,6 @@ TestDialog::TestDialog(QPxSettings* iset, device* idev, QWidget* p, Qt::WindowFl
 	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
 	// setting default selection for tests autostart
-	dev->verbose = !!(settings->actions_flags & AFLAG_VERBOSE);
 	dev->test_req = 0;
 	if (!dev->media.creads || dev->media.type.startsWith("DVD+RW") || dev->media.type.startsWith("DVD-RAM")) {
 		dev->test_req |= (settings->actions_flags & AFLAG_DTEST_WT) ? TEST_WT : 0;
