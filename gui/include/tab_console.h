@@ -21,6 +21,7 @@ class device;
 class devlist;
 class QPxSettings;
 
+#include <QPointer>
 #include <QWidget>
 
 class tabConsole : public QWidget {
@@ -46,7 +47,7 @@ private:
 	QPushButton* saveButton;
 	QPushButton* clearButton;
 
-	device* connectedDev;
+	QPointer<device> connectedDev;
 	void connectToDevice(device* dev);
 	void disconnectFromDevice();
 };
