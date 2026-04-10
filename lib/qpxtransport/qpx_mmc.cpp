@@ -2864,6 +2864,108 @@ int read_mediaid_cd(drive_info* drive) {
 	return 0;
 }
 
+// Read BD disc structure and populate layers/gbpl/MID fields.
+// Assumes drive->media.type is already set to a BD type.
+static void read_bd_structure_info(drive_info* drive) {
+	drive->cmd[0] = MMC_READ_DVD_STRUCTURE;
+	drive->cmd[1] = 1; // media type = BD
+	drive->cmd[9] = 36;
+	drive->cmd[11] = 0;
+	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 36)))
+		if (!drive->silent) sperror("READ_DVD_STRUCTURE", drive->err);
+	drive->media.book_type = 0;
+	drive->media.layers = (drive->rd_buf[16] & 0xF0) >> 4;
+	switch (drive->rd_buf[17] & 0x0F) {
+		case 0: case 1: drive->media.gbpl = 25; break;
+		case 2: drive->media.gbpl = 27; break;
+		case 4: drive->media.gbpl = 32; break;
+		case 5: drive->media.gbpl = 33; break;
+		default:
+			printf("WARNING: Unknown layer size (%d), defaulting to 25GB\n",
+			       drive->rd_buf[17] & 0x0F);
+			drive->media.gbpl = 25;
+	}
+	read_mediaid_bd(drive);
+	if (!drive->silent) printf("** MID: '%s'\n", drive->media.MID);
+}
+
+// Attempt to identify disc type via structure probes when profile-based
+// detection is unavailable. Tries BD, then DVD, then falls back to CD.
+// On entry, drive->media.type should be DISC_UN.
+static void fallback_detect_disc_type(drive_info* drive) {
+	// Try BD disc structure (READ DISC STRUCTURE with media type=BD)
+	drive->cmd[0] = MMC_READ_DVD_STRUCTURE;
+	drive->cmd[1] = 1; // media type = BD
+	drive->cmd[7] = 0x00;
+	drive->cmd[8] = 0;
+	drive->cmd[9] = 4;
+	drive->cmd[11] = 0;
+	if (!drive->cmd.transport(READ, drive->rd_buf, 4)) {
+		unsigned int di_len = (drive->rd_buf[0] << 8 | drive->rd_buf[1]) + 2;
+		if (di_len > 128) di_len = 128;
+		drive->cmd[0] = MMC_READ_DVD_STRUCTURE;
+		drive->cmd[1] = 1; // media type = BD
+		drive->cmd[7] = 0x00;
+		drive->cmd[8] = di_len >> 8;
+		drive->cmd[9] = di_len & 0xFF;
+		drive->cmd[11] = 0;
+		if (!drive->cmd.transport(READ, drive->rd_buf, di_len) && di_len > 16 &&
+		    drive->rd_buf[4] == 'D' && drive->rd_buf[5] == 'I') {
+			if (!drive->silent) printf("Fallback: BD DI header valid, di_len=%u\n", di_len);
+			const char* di_type = (const char*)&drive->rd_buf[4 + 8];
+			if (!strncmp(di_type, "BDW", 3)) {
+				if (!drive->silent) printf("Fallback: detected BD-RE from DI\n");
+				drive->media.type = DISC_BD_RE;
+			} else if (!strncmp(di_type, "BDR", 3)) {
+				if (!drive->silent) printf("Fallback: detected BD-R from DI\n");
+				drive->media.type = DISC_BD_R_SEQ;
+			} else if (!strncmp(di_type, "BDO", 3)) {
+				if (!drive->silent) printf("Fallback: detected BD-ROM from DI\n");
+				drive->media.type = DISC_BD_ROM;
+			} else {
+				if (!drive->silent) printf("Fallback: unknown BD DI type '%.3s'\n", di_type);
+				drive->media.type = DISC_BD_ROM;
+			}
+			read_bd_structure_info(drive);
+			// BD requires MMC-5 at minimum
+			if (drive->mmc < 5) drive->mmc = 5;
+		} else {
+			if (!drive->silent)
+				printf("Fallback: BD DI read failed or invalid header (bytes 4-5: 0x%02X 0x%02X)\n",
+				       drive->rd_buf[4], drive->rd_buf[5]);
+		}
+	} else {
+		if (!drive->silent) printf("Fallback: BD DI initial probe failed\n");
+	}
+	if (drive->media.type & DISC_UN) {
+		// BD structure didn't work, try DVD structure
+		drive->cmd[0] = MMC_READ_DVD_STRUCTURE;
+		drive->cmd[7] = 0;
+		drive->cmd[9] = 36;
+		drive->cmd[11] = 0;
+		if (!drive->cmd.transport(READ, drive->rd_buf, 36)) {
+			if (!drive->silent) printf("Fallback: disc responds to DVD structure query, assuming DVD-ROM\n");
+			drive->media.type = DISC_DVDROM;
+			drive->media.book_type = (drive->rd_buf[4] & 0xFF);
+			drive->media.max_rate = (drive->rd_buf[5] & 0x0F);
+			drive->media.disc_size = ((drive->rd_buf[5] & 0xF0) >> 4);
+			drive->media.layers = 1 + ((drive->rd_buf[6] & 0x60) >> 5);
+			read_mediaid_dvd(drive);
+			// DVD requires MMC-2 at minimum
+			if (drive->mmc < 2) drive->mmc = 2;
+		} else {
+			if (!drive->silent) printf("Fallback: DVD structure query also failed\n");
+		}
+	}
+	if (drive->media.type & DISC_UN) {
+		if (!drive->silent) printf("Fallback: defaulting to CD-ROM\n");
+		drive->media.type = DISC_CDROM;
+		read_disc_information(drive);
+		drive->media.type = determine_cd_type(drive);
+		read_mediaid_cd(drive);
+	}
+}
+
 int determine_disc_type(drive_info* drive) {
 	//	int current = 0;
 	//	int i=0;
@@ -3083,149 +3185,19 @@ int determine_disc_type(drive_info* drive) {
 */
 			return 0;
 		} else if (drive->media.type & DISC_BD) {
-			drive->rd_buf[4] = 0;
-			drive->cmd[0] = MMC_READ_DVD_STRUCTURE;
-			drive->cmd[1] = 1; // media type = BD
-			drive->cmd[9] = 36;
-			drive->cmd[11] = 0;
-			if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 36)))
-				if (!drive->silent) sperror("READ_DVD_STRUCTURE", drive->err);
-			drive->media.book_type = 0;
-
-			drive->media.layers = (drive->rd_buf[16] & 0xF0) >> 4;
-
-			switch (drive->rd_buf[17] & 0x0F) {
-				case 0:
-				case 1:
-					drive->media.gbpl = 25;
-					break;
-				case 2:
-					drive->media.gbpl = 27;
-					break;
-					//				case 3: /* unknown */
-				case 4:
-					drive->media.gbpl = 32;
-					break; /* seen on a BDXL QL */
-				case 5:
-					drive->media.gbpl = 33;
-					break;
-				default:
-					/* unknown, default to 25 */
-					printf("WARNING: Unknown layer size (%d), defaulting to 25GB, which is probably wrong!\n",
-					       drive->rd_buf[17] & 0x0F);
-					drive->media.gbpl = 25;
-			}
-
-			read_mediaid_bd(drive);
-			if (!drive->silent) printf("** MID: '%s'\n", drive->media.MID);
+			read_bd_structure_info(drive);
 		} else if (drive->media.type & DISC_UN) {
-			// Profile detection failed but a disc is present.
-			// Try to identify via BD disc structure (READ DISC STRUCTURE with media type=BD).
 			if (!drive->silent) printf("Attempting fallback media type detection...\n");
-			drive->cmd[0] = MMC_READ_DVD_STRUCTURE;
-			drive->cmd[1] = 1; // media type = BD
-			drive->cmd[7] = 0x00;
-			drive->cmd[8] = 0;
-			drive->cmd[9] = 4;
-			drive->cmd[11] = 0;
-			if (!drive->cmd.transport(READ, drive->rd_buf, 4)) {
-				unsigned int di_len = (drive->rd_buf[0] << 8 | drive->rd_buf[1]) + 2;
-				if (di_len > 128) di_len = 128;
-				drive->cmd[0] = MMC_READ_DVD_STRUCTURE;
-				drive->cmd[1] = 1; // media type = BD
-				drive->cmd[7] = 0x00;
-				drive->cmd[8] = di_len >> 8;
-				drive->cmd[9] = di_len & 0xFF;
-				drive->cmd[11] = 0;
-				if (!drive->cmd.transport(READ, drive->rd_buf, di_len) && di_len > 16 && drive->rd_buf[4] == 'D' &&
-				    drive->rd_buf[5] == 'I') {
-					if (!drive->silent) printf("Fallback: BD DI header valid, di_len=%u\n", di_len);
-
-					// Got valid BD Disc Information
-					const char* di_type = (const char*)&drive->rd_buf[4 + 8];
-					if (!strncmp(di_type, "BDW", 3)) {
-						if (!drive->silent) printf("Fallback: detected BD-RE from DI\n");
-						drive->media.type = DISC_BD_RE;
-					} else if (!strncmp(di_type, "BDR", 3)) {
-						if (!drive->silent) printf("Fallback: detected BD-R from DI\n");
-						drive->media.type = DISC_BD_R_SEQ;
-					} else if (!strncmp(di_type, "BDO", 3)) {
-						if (!drive->silent) printf("Fallback: detected BD-ROM from DI\n");
-						drive->media.type = DISC_BD_ROM;
-					} else {
-						if (!drive->silent) printf("Fallback: unknown BD DI type '%.3s'\n", di_type);
-						drive->media.type = DISC_BD_ROM;
-					}
-					// Now do the normal BD handling
-					drive->cmd[0] = MMC_READ_DVD_STRUCTURE;
-					drive->cmd[1] = 1; // media type = BD
-					drive->cmd[9] = 36;
-					drive->cmd[11] = 0;
-					if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 36)))
-						if (!drive->silent) sperror("READ_DVD_STRUCTURE", drive->err);
-					drive->media.book_type = 0;
-					drive->media.layers = (drive->rd_buf[16] & 0xF0) >> 4;
-					switch (drive->rd_buf[17] & 0x0F) {
-						case 0:
-						case 1:
-							drive->media.gbpl = 25;
-							break;
-						case 2:
-							drive->media.gbpl = 27;
-							break;
-						case 4:
-							drive->media.gbpl = 32;
-							break;
-						case 5:
-							drive->media.gbpl = 33;
-							break;
-						default:
-							printf("WARNING: Unknown layer size (%d), defaulting to 25GB\n", drive->rd_buf[17] & 0x0F);
-							drive->media.gbpl = 25;
-					}
-					read_mediaid_bd(drive);
-					if (!drive->silent) printf("** MID: '%s'\n", drive->media.MID);
-				} else {
-					if (!drive->silent)
-						printf("Fallback: BD DI read failed or invalid header (bytes 4-5: 0x%02X 0x%02X)\n",
-						       drive->rd_buf[4], drive->rd_buf[5]);
-				}
-			} else {
-				if (!drive->silent) printf("Fallback: BD DI initial probe failed\n");
-			}
-			if (drive->media.type & DISC_UN) {
-				// BD structure didn't work, try DVD structure
-				drive->cmd[0] = MMC_READ_DVD_STRUCTURE;
-				drive->cmd[7] = 0;
-				drive->cmd[9] = 36;
-				drive->cmd[11] = 0;
-				if (!drive->cmd.transport(READ, drive->rd_buf, 36)) {
-					// Got DVD structure data - at least it's a DVD
-					if (!drive->silent) printf("Fallback: disc responds to DVD structure query, assuming DVD-ROM\n");
-					drive->media.type = DISC_DVDROM;
-					drive->media.book_type = (drive->rd_buf[4] & 0xFF);
-					drive->media.max_rate = (drive->rd_buf[5] & 0x0F);
-					drive->media.disc_size = ((drive->rd_buf[5] & 0xF0) >> 4);
-					drive->media.layers = 1 + ((drive->rd_buf[6] & 0x60) >> 5);
-					read_mediaid_dvd(drive);
-				} else {
-					if (!drive->silent) printf("Fallback: DVD structure query also failed\n");
-				}
-			}
-			if (drive->media.type & DISC_UN) {
-				// Neither BD nor DVD structure worked - assume CD
-				if (!drive->silent) printf("Fallback: defaulting to CD-ROM\n");
-				drive->media.type = DISC_CDROM;
-				read_disc_information(drive);
-				drive->media.type = determine_cd_type(drive);
-				read_mediaid_cd(drive);
-			}
+			fallback_detect_disc_type(drive);
 		}
 	} else {
 		read_capacity(drive);
 		if (drive->media.capacity) {
-			drive->media.type = DISC_CDROM;
-			read_disc_information(drive);
+			if (!drive->silent)
+				printf("Disc present (%d sectors) with mmc=%d, attempting structure-based detection\n",
+				       drive->media.capacity, drive->mmc);
+			drive->media.type = DISC_UN;
+			fallback_detect_disc_type(drive);
 		}
 		return 0;
 	}
@@ -3908,15 +3880,44 @@ int detect_mm_capabilities(drive_info* drive) {
 	int i, j;
 	if (mode_sense(drive, MODE_PAGE_MM_CAP_STATUS, 0, 256)) return 1;
 	offs = 0;
-	while (((drive->rd_buf[offs]) & 0x3F) != 0x2A) offs++;
+	while (offs < 248 && ((drive->rd_buf[offs]) & 0x3F) != 0x2A) offs++;
+	if (offs >= 248) return 1;
 	len = drive->rd_buf[offs + 1];
 	if (!drive->silent) printf("CD parameters page length: 0x%02X\n", len);
+	if (len == 0) {
+		// Mode page 2A returned zeroed data. This can happen when the OS or a
+		// packet-writing driver (e.g. Windows UDF) holds the drive busy.
+		if (!drive->silent) printf("Mode page 2A returned empty data, retrying after 3s...\n");
+		msleep(3000);
+		if (!mode_sense(drive, MODE_PAGE_MM_CAP_STATUS, 0, 256)) {
+			offs = 0;
+			while (offs < 248 && ((drive->rd_buf[offs]) & 0x3F) != 0x2A) offs++;
+			if (offs < 248) {
+				len = drive->rd_buf[offs + 1];
+				if (!drive->silent) printf("CD parameters page length after retry: 0x%02X\n", len);
+			}
+		}
+	}
 	if (len >= 28) {
 		drive->mmc = 3;
 	} else if (len >= 24) {
 		drive->mmc = 2;
 	} else {
 		drive->mmc = 1;
+		if (len == 0) {
+			// Mode page 2A is still empty after retry. Try GET_CONFIGURATION
+			// as an alternative: if it succeeds, the drive is at least MMC-2.
+			if (!get_configuration(drive, 0, NULL, NULL, 0)) {
+				if (!drive->silent) printf("GET_CONFIGURATION succeeded despite empty page 2A, setting mmc=2\n");
+				drive->mmc = 2;
+			} else {
+				if (!drive->silent) printf("GET_CONFIGURATION also failed, keeping mmc=1\n");
+			}
+			// rd_buf no longer contains mode page 2A data; skip capability
+			// parsing below. Capabilities will be detected via
+			// GET_CONFIGURATION features in detect_capabilities().
+			return 0;
+		}
 	}
 	if (!drive->silent)
 		for (i = offs; i < (offs + len + 2); i += 8) {
