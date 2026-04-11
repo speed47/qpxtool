@@ -30,15 +30,6 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: configure (debug)
-        run: ./configure --enable-debug
-      - name: make (debug)
-        run: nproc && make -j$(nproc)
-      - name: check executable (debug)
-        run: |
-          file gui/debug/qpxtool.exe
-          file gui/debug/qpxtool.exe | grep -q 'x86-64'
-          file gui/debug/qpxtool.exe | grep -q 'for MS Windows'
       - name: configure (release)
         id: conf
         run: |
@@ -46,7 +37,7 @@ jobs:
           version="$(git describe --dirty --tags --match 'v*')"
           sed -i -re "s/^#define VERSION.*/#define VERSION \"${version:1}-speed47\"/" */*/version.h
           echo "version=${version:1}" >> $GITHUB_OUTPUT
-          make clean && ./configure
+          ./configure
       - name: make (release)
         run: nproc && make -j$(nproc)
       - name: check executable (release)
