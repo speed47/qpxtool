@@ -231,6 +231,8 @@ void QPxToolMW::create_actions() {
 	act_stop = new QAction(QIcon(":images/stop.png"), tr("Stop tests"), this);
 	act_pref = new QAction(QIcon(":images/settings.png"), tr("Preferences"), this);
 	act_pref->setShortcut(QKeySequence("Ctrl+C"));
+	act_screenshot =
+	    new QAction(QIcon::fromTheme("camera-photo", QIcon(":images/screenshot.png")), tr("Save screenshot"), this);
 	act_print = new QAction(QIcon(":images/printer.png"), tr("Print test results"), this);
 	act_print->setShortcut(QKeySequence("Ctrl+P"));
 	act_report = new QAction(QIcon(":images/pdf.png"), tr("Export results to PDF"), this);
@@ -307,6 +309,7 @@ void QPxToolMW::create_actions() {
 	connect(act_test, SIGNAL(triggered()), this, SLOT(select_tests()));
 	connect(act_stop, SIGNAL(triggered()), this, SLOT(terminate_tests()));
 	connect(act_pref, SIGNAL(triggered()), this, SLOT(preferences()));
+	connect(act_screenshot, SIGNAL(triggered()), this, SLOT(screenshot()));
 	connect(act_print, SIGNAL(triggered()), this, SLOT(print_results()));
 	connect(act_export, SIGNAL(triggered()), this, SLOT(export_results()));
 	connect(act_report, SIGNAL(triggered()), this, SLOT(save_report()));
@@ -381,7 +384,8 @@ void QPxToolMW::winit_toolbar() {
 	toolbar->addAction(act_test);    // run tests
 	toolbar->addAction(act_stop);    // terminate tests
 	toolbar->addSeparator();
-	toolbar->addAction(act_pref); // settings button
+	toolbar->addAction(act_pref);       // settings button
+	toolbar->addAction(act_screenshot); // save screenshot
 
 	addToolBar(toolbar);
 }
@@ -1043,6 +1047,19 @@ void QPxToolMW::preferences() {
 	for (int i = 0; i < devices.size(); i++) devices[i]->verbose = verbose;
 
 	mwidget->reconfig();
+}
+
+void QPxToolMW::screenshot() {
+#ifndef QT_NO_DEBUG
+	qDebug("QPxToolMW::screenshot()");
+#endif
+	QString fname = QFileDialog::getSaveFileName(this, tr("Save screenshot"), QString(), "PNG images (*.png)");
+	if (fname.isEmpty()) return;
+	if (!fname.endsWith(".png", Qt::CaseInsensitive)) fname += ".png";
+	QPixmap pixmap = grab();
+	if (!pixmap.save(fname, "PNG")) {
+		QMessageBox::warning(this, tr("Screenshot"), tr("Failed to save screenshot to %1").arg(fname));
+	}
 }
 
 void QPxToolMW::save_report() {

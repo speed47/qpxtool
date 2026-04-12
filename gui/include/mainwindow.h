@@ -113,6 +113,7 @@ private slots:
 	void load_results_db();
 
 	void about();
+	void screenshot();
 
 	void tests_done();
 	void tests_error();
@@ -157,8 +158,8 @@ private:
 	QMenuBar* menubar;
 
 	QToolBar* toolbar;
-	QAction *act_exit, *act_pref, *act_save, *act_save_db, *act_load, *act_load_db, *act_export, *act_report,
-	    *act_print, *act_scanbus, *act_minfo, *act_devctl, *act_test, *act_stop, *act_about;
+	QAction *act_exit, *act_pref, *act_screenshot, *act_save, *act_save_db, *act_load, *act_load_db, *act_export,
+	    *act_report, *act_print, *act_scanbus, *act_minfo, *act_devctl, *act_test, *act_stop, *act_about;
 
 	QAction* act_sb;
 	QList<QAction*> act_sblist;
