@@ -236,12 +236,13 @@ void QPxGraph::mouseMoveEvent(QMouseEvent* e) {
 	int graphW = width() - margin_left - margin_right - 2;
 	if (graphX < 0 || graphX >= graphW) {
 		QToolTip::hideText();
-		lastTooltipX = -1;
+		clearCursorLine();
 		return;
 	}
 
 	if (graphX == lastTooltipX) return;
 	lastTooltipX = graphX;
+	update();
 
 	uint64_t lbaStart = (uint64_t)(graphX * HscaleLBA);
 	uint64_t lbaEnd = (uint64_t)((graphX + 1) * HscaleLBA);
@@ -333,8 +334,20 @@ void QPxGraph::mouseMoveEvent(QMouseEvent* e) {
 	QToolTip::showText(e->globalPosition().toPoint(), tip.trimmed(), this);
 }
 
+QRect QPxGraph::cursorLineRect(int graphX) const {
+	return QRect(margin_left + 1 + graphX, 1, 1, height() - margin_bottom - 2);
+}
+
+void QPxGraph::clearCursorLine() {
+	if (lastTooltipX >= 0) {
+		lastTooltipX = -1;
+		update();
+	}
+}
+
 void QPxGraph::leaveEvent(QEvent* e) {
 	QToolTip::hideText();
+	clearCursorLine();
 	QWidget::leaveEvent(e);
 }
 
@@ -385,6 +398,12 @@ void QPxGraph::paintEvent(QPaintEvent* e) {
 	QPainter p(this);
 	drawGraph(&p, size(), devices->current(), test, e->rect());
 #endif
+	// Invert pixels so cursor line is visible regardless of graph colors
+	if (test == TEST_ERRC && lastTooltipX >= 0) {
+		QRect r = cursorLineRect(lastTooltipX);
+		p.setCompositionMode(QPainter::RasterOp_NotDestination);
+		p.drawLine(r.x(), r.y(), r.x(), r.y() + r.height());
+	}
 }
 
 void QPxGraph::drawGraph(QPainter* p, QSize s, device* dev, int ttype, const QRect& rect, int eflags,
