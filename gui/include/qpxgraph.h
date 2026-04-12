@@ -58,6 +58,8 @@ public:
 
 protected:
 	void contextMenuEvent(QContextMenuEvent*);
+	void mouseMoveEvent(QMouseEvent*);
+	void leaveEvent(QEvent*);
 	void paintEvent(QPaintEvent*);
 	void resizeEvent(QResizeEvent*);
 	void wheelEvent(QWheelEvent*);
@@ -102,6 +104,7 @@ private:
 	uint8_t errcList;
 	bool forceAll;
 	uint64_t lastX;
+	int lastTooltipX;
 #ifdef CACHE_GRAPH
 	QImage* img;
 #endif
