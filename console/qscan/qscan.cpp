@@ -797,7 +797,7 @@ int main(int argc, char** argv) {
 			result = 2;
 			goto end;
 		}
-		if (dev->media.dstatus & !(dev->media.type & (DISC_DVDRAM | DISC_DVDpRW | DISC_DVDpRWDL))) {
+		if (dev->media.dstatus && !(dev->media.type & (DISC_DVDRAM | DISC_DVDpRW | DISC_DVDpRWDL))) {
 			printf("Neither blank media nor DVD-RAM/DVD+RW found!\n");
 			result = 3;
 			goto end;

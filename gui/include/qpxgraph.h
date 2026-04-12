@@ -105,6 +105,8 @@ private:
 	bool forceAll;
 	uint64_t lastX;
 	int lastTooltipX;
+	QRect cursorLineRect(int graphX) const;
+	void clearCursorLine();
 #ifdef CACHE_GRAPH
 	QImage* img;
 #endif
