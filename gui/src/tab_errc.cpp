@@ -12,13 +12,19 @@
 
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QPushButton>
+#include <QCheckBox>
+#include <QRadioButton>
+#include <QFrame>
 
 #include <colorlabel.h>
 #include <qpxgraph.h>
+#include <qpxsettings.h>
 #include <errc_detailed.h>
 #include "tab_errc.h"
 #include <QDebug>
+
 
 tabERRC::tabERRC(QPxSettings* iset, devlist* idev, QString iname, QWidget* p, Qt::WindowFlags fl)
     : GraphTab(iset, idev, iname, TEST_ERRC, p, fl) {
@@ -26,6 +32,8 @@ tabERRC::tabERRC(QPxSettings* iset, devlist* idev, QString iname, QWidget* p, Qt
 	qDebug("STA: tabERRC()");
 #endif
 	xerrc = NULL;
+	isCD = isDVD = isBD = false;
+	currentErrcMask = 0;
 
 	layout_info = new QVBoxLayout(infow);
 	layout_info->setContentsMargins(0, 0, 0, 0);
@@ -100,6 +108,124 @@ tabERRC::tabERRC(QPxSettings* iset, devlist* idev, QString iname, QWidget* p, Qt
 
 	layout_info->addStretch(10);
 
+	// --- CD checkboxes ---
+	w_cb_cd = new QWidget(infow);
+	{
+		QVBoxLayout* vb = new QVBoxLayout(w_cb_cd);
+		vb->setContentsMargins(0, 0, 0, 0);
+		vb->setSpacing(2);
+		cb_cd_bler = new QCheckBox("BLER", w_cb_cd);
+		cb_cd_bler->setChecked(true);
+		cb_cd_e22 = new QCheckBox("E22", w_cb_cd);
+		cb_cd_e22->setChecked(true);
+		cb_cd_e32 = new QCheckBox("E32", w_cb_cd);
+		cb_cd_e32->setChecked(true);
+		cb_cd_uncr = new QCheckBox("UNCR", w_cb_cd);
+		cb_cd_uncr->setChecked(true);
+		vb->addWidget(cb_cd_bler);
+		vb->addWidget(cb_cd_e22);
+		vb->addWidget(cb_cd_e32);
+		vb->addWidget(cb_cd_uncr);
+	}
+	w_cb_cd->setVisible(false);
+	layout_info->addWidget(w_cb_cd);
+
+	// --- DVD checkboxes ---
+	w_cb_dvd = new QWidget(infow);
+	{
+		QVBoxLayout* vb = new QVBoxLayout(w_cb_dvd);
+		vb->setContentsMargins(0, 0, 0, 0);
+		vb->setSpacing(2);
+		cb_dvd_pi8 = new QCheckBox("PI8", w_cb_dvd);
+		cb_dvd_pi8->setChecked(true);
+		cb_dvd_pif = new QCheckBox("PIF", w_cb_dvd);
+		cb_dvd_pif->setChecked(true);
+		cb_dvd_pof = new QCheckBox("POF", w_cb_dvd);
+		cb_dvd_pof->setChecked(true);
+		cb_dvd_uncr = new QCheckBox("UNCR", w_cb_dvd);
+		cb_dvd_uncr->setChecked(true);
+		vb->addWidget(cb_dvd_pi8);
+		vb->addWidget(cb_dvd_pif);
+		vb->addWidget(cb_dvd_pof);
+		vb->addWidget(cb_dvd_uncr);
+	}
+	w_cb_dvd->setVisible(false);
+	layout_info->addWidget(w_cb_dvd);
+
+	// --- BD checkboxes ---
+	w_cb_bd = new QWidget(infow);
+	{
+		QVBoxLayout* vb = new QVBoxLayout(w_cb_bd);
+		vb->setContentsMargins(0, 0, 0, 0);
+		vb->setSpacing(2);
+		cb_bd_ldc = new QCheckBox("LDC", w_cb_bd);
+		cb_bd_ldc->setChecked(true);
+		cb_bd_bis = new QCheckBox("BIS", w_cb_bd);
+		cb_bd_bis->setChecked(true);
+		cb_bd_uncr = new QCheckBox("UNCR", w_cb_bd);
+		cb_bd_uncr->setChecked(true);
+		vb->addWidget(cb_bd_ldc);
+		vb->addWidget(cb_bd_bis);
+		vb->addWidget(cb_bd_uncr);
+	}
+	w_cb_bd->setVisible(false);
+	layout_info->addWidget(w_cb_bd);
+
+	// Connect all checkboxes to the same slot
+	QObject::connect(cb_cd_bler, SIGNAL(toggled(bool)), this, SLOT(onErrcToggled()));
+	QObject::connect(cb_cd_e22, SIGNAL(toggled(bool)), this, SLOT(onErrcToggled()));
+	QObject::connect(cb_cd_e32, SIGNAL(toggled(bool)), this, SLOT(onErrcToggled()));
+	QObject::connect(cb_cd_uncr, SIGNAL(toggled(bool)), this, SLOT(onErrcToggled()));
+	QObject::connect(cb_dvd_pi8, SIGNAL(toggled(bool)), this, SLOT(onErrcToggled()));
+	QObject::connect(cb_dvd_pif, SIGNAL(toggled(bool)), this, SLOT(onErrcToggled()));
+	QObject::connect(cb_dvd_pof, SIGNAL(toggled(bool)), this, SLOT(onErrcToggled()));
+	QObject::connect(cb_dvd_uncr, SIGNAL(toggled(bool)), this, SLOT(onErrcToggled()));
+	QObject::connect(cb_bd_ldc, SIGNAL(toggled(bool)), this, SLOT(onErrcToggled()));
+	QObject::connect(cb_bd_bis, SIGNAL(toggled(bool)), this, SLOT(onErrcToggled()));
+	QObject::connect(cb_bd_uncr, SIGNAL(toggled(bool)), this, SLOT(onErrcToggled()));
+
+	// --- Scale type ---
+	QFrame* sep_scale = new QFrame(infow);
+	sep_scale->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+	layout_info->addWidget(sep_scale);
+
+	{
+		QWidget* w_scaletype = new QWidget(infow);
+		QHBoxLayout* hb = new QHBoxLayout(w_scaletype);
+		hb->setContentsMargins(0, 0, 0, 0);
+		hb->setSpacing(4);
+		rb_log = new QRadioButton("Log", w_scaletype);
+		rb_lin = new QRadioButton("Lin", w_scaletype);
+		hb->addWidget(rb_log);
+		hb->addWidget(rb_lin);
+		layout_info->addWidget(w_scaletype);
+	}
+
+	// --- Zoom buttons ---
+	{
+		QWidget* w_zoom = new QWidget(infow);
+		QHBoxLayout* hb = new QHBoxLayout(w_zoom);
+		hb->setContentsMargins(0, 0, 0, 0);
+		hb->setSpacing(4);
+		pb_scaleIn = new QPushButton("+", w_zoom);
+		pb_scaleOut = new QPushButton("\xe2\x88\x92", w_zoom); // minus sign
+		pb_scaleIn->setMaximumWidth(40);
+		pb_scaleOut->setMaximumWidth(40);
+		hb->addWidget(pb_scaleOut);
+		hb->addWidget(pb_scaleIn);
+		layout_info->addWidget(w_zoom);
+	}
+
+	// Connect scale controls to graph slots
+	QObject::connect(rb_log, SIGNAL(clicked()), graph, SLOT(setScaleTypeLog()));
+	QObject::connect(rb_lin, SIGNAL(clicked()), graph, SLOT(setScaleTypeLin()));
+	QObject::connect(pb_scaleIn, SIGNAL(clicked()), graph, SLOT(scaleIn()));
+	QObject::connect(pb_scaleOut, SIGNAL(clicked()), graph, SLOT(scaleOut()));
+	QObject::connect(graph, SIGNAL(scaleChanged()), this, SLOT(onScaleChanged()));
+
+	// Initialise radio buttons to reflect saved scale type
+	onScaleChanged();
+
 	pb_xerrc = new QPushButton("Detailed");
 	layout_info->addWidget(pb_xerrc);
 
@@ -163,6 +289,44 @@ void tabERRC::updateAll() {
 	l_e2t->setVisible(show_e2);
 	l_e2m->setVisible(show_e2);
 	l_e2a->setVisible(show_e2);
+
+	// Update graph-type checkboxes when media type changes
+	bool newCD = dev->media.type.startsWith("CD");
+	bool newDVD = dev->media.type.startsWith("DVD");
+	bool newBD = dev->media.type.startsWith("BD");
+	if (newCD != isCD || newDVD != isDVD || newBD != isBD) {
+		isCD = newCD;
+		isDVD = newDVD;
+		isBD = newBD;
+		w_cb_cd->setVisible(false);
+		w_cb_dvd->setVisible(false);
+		w_cb_bd->setVisible(false);
+
+		auto setAllChecked = [](QList<QCheckBox*> cbs) {
+			for (QCheckBox* cb : cbs) {
+				cb->blockSignals(true);
+				cb->setChecked(true);
+				cb->blockSignals(false);
+			}
+		};
+
+		if (isCD) {
+			setAllChecked({cb_cd_bler, cb_cd_e22, cb_cd_e32, cb_cd_uncr});
+			currentErrcMask = GRAPH_DFL_CD;
+			w_cb_cd->setVisible(true);
+		} else if (isDVD) {
+			setAllChecked({cb_dvd_pi8, cb_dvd_pif, cb_dvd_pof, cb_dvd_uncr});
+			currentErrcMask = GRAPH_DFL_DVD;
+			w_cb_dvd->setVisible(true);
+		} else if (isBD) {
+			setAllChecked({cb_bd_ldc, cb_bd_bis, cb_bd_uncr});
+			currentErrcMask = GRAPH_DFL_BD;
+			w_cb_bd->setVisible(true);
+		} else {
+			currentErrcMask = 0;
+		}
+		graph->setErrcMask(currentErrcMask);
+	}
 
 	updateLegend();
 	if (xerrc) xerrc->updateAll();
@@ -266,4 +430,41 @@ void tabERRC::XerrcClosed() {
 	xerrc->disconnect();
 	xerrc->deleteLater();
 	xerrc = NULL;
+}
+
+void tabERRC::onErrcToggled() {
+	int mask = 0;
+	if (isCD) {
+		if (cb_cd_bler->isChecked()) mask |= GRAPH_BLER;
+		if (cb_cd_e22->isChecked()) mask |= GRAPH_E22;
+		if (cb_cd_e32->isChecked()) mask |= GRAPH_E32;
+		if (cb_cd_uncr->isChecked()) mask |= GRAPH_UNCR;
+		if (!mask) mask = GRAPH_DFL_CD; // never go fully blank
+	} else if (isDVD) {
+		if (cb_dvd_pi8->isChecked()) mask |= GRAPH_PI8;
+		if (cb_dvd_pif->isChecked()) mask |= GRAPH_PIF;
+		if (cb_dvd_pof->isChecked()) mask |= GRAPH_POF;
+		if (cb_dvd_uncr->isChecked()) mask |= GRAPH_UNCR;
+		if (!mask) mask = GRAPH_DFL_DVD;
+	} else if (isBD) {
+		if (cb_bd_ldc->isChecked()) mask |= GRAPH_LDC;
+		if (cb_bd_bis->isChecked()) mask |= GRAPH_BIS;
+		if (cb_bd_uncr->isChecked()) mask |= GRAPH_UNCR;
+		if (!mask) mask = GRAPH_DFL_BD;
+	}
+	if (mask == currentErrcMask) return;
+	currentErrcMask = mask;
+	graph->setErrcMask(currentErrcMask);
+}
+
+void tabERRC::onScaleChanged() {
+	bool isLog = (graph->getScaleType() == Scale::Log);
+	rb_log->blockSignals(true);
+	rb_lin->blockSignals(true);
+	rb_log->setChecked(isLog);
+	rb_lin->setChecked(!isLog);
+	rb_log->blockSignals(false);
+	rb_lin->blockSignals(false);
+	pb_scaleIn->setEnabled(!isLog);
+	pb_scaleOut->setEnabled(!isLog);
 }
