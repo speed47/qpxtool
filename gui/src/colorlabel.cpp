@@ -37,10 +37,15 @@ void ColorLabel::mousePressEvent(QMouseEvent* e) {
 	}
 }
 
+QSize ColorLabel::sizeHint() const {
+	QFontMetrics fm(font());
+	int h = qMax(20, fm.height() + 4);
+	int w = h + 4 + fm.horizontalAdvance(text) + 2;
+	return QSize(w, h);
+}
+
+
 void ColorLabel::paintEvent(QPaintEvent*) {
-	//#ifndef QT_NO_DEBUG
-	//	wDebug("ColorLabel::paintEvent()");
-	//#endif
 	QRect rect(1, 1, height() - 2, height() - 2);
 	QRect trect(height() + 4, 1, width() - height() - 6, height() - 2);
 	QPainter p(this);
@@ -54,5 +59,4 @@ void ColorLabel::paintEvent(QPaintEvent*) {
 	p.drawRoundedRect(rect, 20, 20);
 
 	p.drawText(trect, Qt::AlignLeft | Qt::AlignVCenter, text);
-	//p.drawRect(rect);
 }

@@ -59,16 +59,19 @@ private:
 	ColorLabel* pl_spd;
 #endif
 	ColorLabel* pl_e0;
+	QLabel* l_e0_info;
 	QLabel* l_e0t;
 	QLabel* l_e0m;
 	QLabel* l_e0a;
 
 	ColorLabel* pl_e1;
+	QLabel* l_e1_info;
 	QLabel* l_e1t;
 	QLabel* l_e1m;
 	QLabel* l_e1a;
 
 	ColorLabel* pl_e2;
+	QLabel* l_e2_info;
 	QLabel* l_e2t;
 	QLabel* l_e2m;
 	QLabel* l_e2a;

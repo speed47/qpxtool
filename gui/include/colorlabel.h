@@ -26,8 +26,10 @@ public:
 	};
 	inline void setText(QString t) {
 		text = t;
+		updateGeometry();
 		update();
 	};
+	QSize sizeHint() const override;
 
 protected:
 	void mousePressEvent(QMouseEvent*);
