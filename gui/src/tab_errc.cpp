@@ -222,6 +222,9 @@ tabERRC::tabERRC(QPxSettings* iset, devlist* idev, QString iname, QWidget* p, Qt
 	// Initialise radio buttons to reflect saved scale type
 	onScaleChanged();
 
+	l_speed = new QLabel();
+	layout_info->addWidget(l_speed);
+
 	pb_xerrc = new QPushButton("Detailed");
 	layout_info->addWidget(pb_xerrc);
 
@@ -358,11 +361,17 @@ void tabERRC::updateLast() {
 	if (!show) return;
 	updateSummary(dev);
 
+	if (!dev->testData.errc.isEmpty()) {
+		float spdx = dev->testData.errc.last().raw.spdx;
+		l_speed->setText(QString("Speed: %1x").arg(spdx, 0, 'f', 2));
+	}
+
 	if (xerrc && xerrc->isVisible()) xerrc->updateAll();
 }
 
 void tabERRC::updateSummary(device* dev) {
 	if (!dev->testData.errc.size()) {
+		l_speed->clear();
 		l_e0t->clear();
 		l_e0m->clear();
 		l_e0a->clear();

@@ -99,6 +99,7 @@ private:
 	bool isCD, isDVD, isBD;
 	int currentErrcMask;
 
+	QLabel* l_speed;
 	QPushButton* pb_xerrc;
 	ErrcDetailedDialog* xerrc;
 };
