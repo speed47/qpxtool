@@ -162,11 +162,8 @@ tabERRC::tabERRC(QPxSettings* iset, devlist* idev, QString iname, QWidget* p, Qt
 		cb_bd_ldc->setChecked(true);
 		cb_bd_bis = new QCheckBox("BIS", w_cb_bd);
 		cb_bd_bis->setChecked(true);
-		cb_bd_uncr = new QCheckBox("UNCR", w_cb_bd);
-		cb_bd_uncr->setChecked(true);
 		vb->addWidget(cb_bd_ldc);
 		vb->addWidget(cb_bd_bis);
-		vb->addWidget(cb_bd_uncr);
 	}
 	w_cb_bd->setVisible(false);
 	layout_info->addWidget(w_cb_bd);
@@ -182,7 +179,6 @@ tabERRC::tabERRC(QPxSettings* iset, devlist* idev, QString iname, QWidget* p, Qt
 	QObject::connect(cb_dvd_uncr, SIGNAL(toggled(bool)), this, SLOT(onErrcToggled()));
 	QObject::connect(cb_bd_ldc, SIGNAL(toggled(bool)), this, SLOT(onErrcToggled()));
 	QObject::connect(cb_bd_bis, SIGNAL(toggled(bool)), this, SLOT(onErrcToggled()));
-	QObject::connect(cb_bd_uncr, SIGNAL(toggled(bool)), this, SLOT(onErrcToggled()));
 
 	// --- Scale type ---
 	QFrame* sep_scale = new QFrame(infow);
@@ -319,7 +315,7 @@ void tabERRC::updateAll() {
 			currentErrcMask = GRAPH_DFL_DVD;
 			w_cb_dvd->setVisible(true);
 		} else if (isBD) {
-			setAllChecked({cb_bd_ldc, cb_bd_bis, cb_bd_uncr});
+			setAllChecked({cb_bd_ldc, cb_bd_bis});
 			currentErrcMask = GRAPH_DFL_BD;
 			w_cb_bd->setVisible(true);
 		} else {
@@ -449,7 +445,6 @@ void tabERRC::onErrcToggled() {
 	} else if (isBD) {
 		if (cb_bd_ldc->isChecked()) mask |= GRAPH_LDC;
 		if (cb_bd_bis->isChecked()) mask |= GRAPH_BIS;
-		if (cb_bd_uncr->isChecked()) mask |= GRAPH_UNCR;
 		if (!mask) mask = GRAPH_DFL_BD;
 	}
 	if (mask == currentErrcMask) return;

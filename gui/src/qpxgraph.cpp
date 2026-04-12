@@ -76,7 +76,7 @@ int errc_logh_hres[] = {1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 100, 200, 300, 400, 5
 
 static const char* errcNames_CD[] = {"BLER", "E11", "E21", "E31", "E12", "E22", "E32", "UNCR"};
 static const char* errcNames_DVD[] = {"", "PIE", "PI8", "PIF", "POE", "PO8", "POF", "UNCR"};
-static const char* errcNames_BD[] = {"", "LDC", "", "", "BIS", "", "", "UNCR"};
+static const char* errcNames_BD[] = {"", "LDC", "", "", "BIS", "", "", ""};
 
 // GRAPH_DFL_CD, GRAPH_DFL_DVD, GRAPH_DFL_BD defined in device.h
 

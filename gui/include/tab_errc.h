@@ -89,7 +89,6 @@ private:
 	QWidget* w_cb_bd;
 	QCheckBox* cb_bd_ldc;
 	QCheckBox* cb_bd_bis;
-	QCheckBox* cb_bd_uncr;
 
 	// Scale controls
 	QRadioButton* rb_log;
