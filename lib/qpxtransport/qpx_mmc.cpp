@@ -2876,13 +2876,21 @@ static void read_bd_structure_info(drive_info* drive) {
 	drive->media.book_type = 0;
 	drive->media.layers = (drive->rd_buf[16] & 0xF0) >> 4;
 	switch (drive->rd_buf[17] & 0x0F) {
-		case 0: case 1: drive->media.gbpl = 25; break;
-		case 2: drive->media.gbpl = 27; break;
-		case 4: drive->media.gbpl = 32; break;
-		case 5: drive->media.gbpl = 33; break;
+		case 0:
+		case 1:
+			drive->media.gbpl = 25;
+			break;
+		case 2:
+			drive->media.gbpl = 27;
+			break;
+		case 4:
+			drive->media.gbpl = 32;
+			break;
+		case 5:
+			drive->media.gbpl = 33;
+			break;
 		default:
-			printf("WARNING: Unknown layer size (%d), defaulting to 25GB\n",
-			       drive->rd_buf[17] & 0x0F);
+			printf("WARNING: Unknown layer size (%d), defaulting to 25GB\n", drive->rd_buf[17] & 0x0F);
 			drive->media.gbpl = 25;
 	}
 	read_mediaid_bd(drive);
@@ -2909,8 +2917,8 @@ static void fallback_detect_disc_type(drive_info* drive) {
 		drive->cmd[8] = di_len >> 8;
 		drive->cmd[9] = di_len & 0xFF;
 		drive->cmd[11] = 0;
-		if (!drive->cmd.transport(READ, drive->rd_buf, di_len) && di_len > 16 &&
-		    drive->rd_buf[4] == 'D' && drive->rd_buf[5] == 'I') {
+		if (!drive->cmd.transport(READ, drive->rd_buf, di_len) && di_len > 16 && drive->rd_buf[4] == 'D' &&
+		    drive->rd_buf[5] == 'I') {
 			if (!drive->silent) printf("Fallback: BD DI header valid, di_len=%u\n", di_len);
 			const char* di_type = (const char*)&drive->rd_buf[4 + 8];
 			if (!strncmp(di_type, "BDW", 3)) {
@@ -2931,8 +2939,8 @@ static void fallback_detect_disc_type(drive_info* drive) {
 			if (drive->mmc < 5) drive->mmc = 5;
 		} else {
 			if (!drive->silent)
-				printf("Fallback: BD DI read failed or invalid header (bytes 4-5: 0x%02X 0x%02X)\n",
-				       drive->rd_buf[4], drive->rd_buf[5]);
+				printf("Fallback: BD DI read failed or invalid header (bytes 4-5: 0x%02X 0x%02X)\n", drive->rd_buf[4],
+				       drive->rd_buf[5]);
 		}
 	} else {
 		if (!drive->silent) printf("Fallback: BD DI initial probe failed\n");

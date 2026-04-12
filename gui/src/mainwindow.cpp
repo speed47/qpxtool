@@ -1040,8 +1040,7 @@ void QPxToolMW::preferences() {
 	act_load_db->setEnabled(dbOpen);
 
 	bool verbose = !!(set.actions_flags & AFLAG_VERBOSE);
-	for (int i = 0; i < devices.size(); i++)
-		devices[i]->verbose = verbose;
+	for (int i = 0; i < devices.size(); i++) devices[i]->verbose = verbose;
 
 	mwidget->reconfig();
 }
