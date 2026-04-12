@@ -41,11 +41,9 @@ int main(int ac, char** av) {
 	QString locale = QLocale::system().name();
 	QPixmap* pix;
 #if defined(_WIN32) || defined(_WIN64)
-	if (qEnvironmentVariableIsSet("QPXTOOL_DEBUG")) {
-		if (AttachConsole(ATTACH_PARENT_PROCESS)) {
-			freopen("CONOUT$", "w", stdout);
-			freopen("CONOUT$", "w", stderr);
-		}
+	if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
 	}
 #endif
 	QPxTool = new QApplication(ac, av);
