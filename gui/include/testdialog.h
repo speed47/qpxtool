@@ -72,6 +72,7 @@ private:
 	QCheckBox* ck_WT_simul;
 	QFrame* hline0;
 	QCheckBox* ck_ERRC;
+	QLabel* l_errc_info;
 	QComboBox* spd_ERRC;
 	QCheckBox* ck_JB;
 	QComboBox* spd_JB;
@@ -83,7 +84,9 @@ private:
 	QFrame* hline1;
 	QCheckBox* ck_liteon_force_old;
 	QCheckBox* ck_hldtst_test_mode;
+	QLabel* l_hldtst_info;
 	QCheckBox* ck_force_probe;
+	QLabel* l_force_probe_info;
 	QLabel* l_plugin;
 	QComboBox* cb_plugin;
 	QLabel* l_plugin_info;

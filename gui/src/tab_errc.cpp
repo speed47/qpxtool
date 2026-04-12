@@ -18,12 +18,72 @@
 #include <QRadioButton>
 #include <QFrame>
 
+#include <QStyle>
+
 #include <colorlabel.h>
 #include <qpxgraph.h>
 #include <qpxsettings.h>
 #include <errc_detailed.h>
 #include "tab_errc.h"
 #include <QDebug>
+
+// clang-format off
+// --- ERRC label names (reused for ColorLabel init and setText) ---
+static const char* const LBL_BLER = "BLER";
+static const char* const LBL_E22  = "E22";
+static const char* const LBL_E32  = "E32";
+static const char* const LBL_UNCR = "UNCR";
+static const char* const LBL_PI8  = "PI8";
+static const char* const LBL_PIF  = "PIF";
+static const char* const LBL_POF  = "POF";
+static const char* const LBL_LDC  = "LDC";
+static const char* const LBL_BIS  = "BIS";
+
+// --- ERRC tooltip strings (reused for checkbox and info-icon tooltips) ---
+static const char* const TT_BLER =
+    "Block Error Rate, C1 frames per second\n"
+    "with at least one erroneous byte. Sum of E11+E21+E31.";
+static const char* const TT_E22 =
+    "C2 correction events with 2 erroneous symbols.\n"
+    "Elevated values indicate C1 is passing\n"
+    "significant errors through to C2.";
+static const char* const TT_E32 =
+    "C2 uncorrectable, errors exceeding C2\n"
+    "Reed-Solomon correction capacity. Means data loss.";
+static const char* const TT_UNCR_CD =
+    "Sectors where all error correction stages\n"
+    "have been exhausted. Data is unrecoverable.";
+static const char* const TT_PI8 =
+    "Sum of Parity Inner error counts over 8 consecutive\n"
+    "ECC blocks. Each PI error is a row requiring\n"
+    "RS(182,172) correction.";
+static const char* const TT_PIF =
+    "PI Failures, PI rows with more than 5 erroneous\n"
+    "bytes, exceeding RS(182,172) correction capacity.";
+static const char* const TT_POF =
+    "PO Failures, PO columns exceeding RS(208,192)\n"
+    "correction capacity. Indicates severe physical damage.";
+static const char* const TT_UNCR_DVD =
+    "Sectors where both PI and PO correction stages\n"
+    "have been exhausted. Data is unrecoverable.";
+static const char* const TT_LDC =
+    "Long Distance Code, number of corrected error symbols in the LDC ECC. Primary quality metric.\n"
+    "\n"
+    "Some indicative values follow, these also depend on your drive and your scan speed so YMMV:\n"
+    "  Perfect:    avg < 5\n"
+    "  Good:       avg < 15\n"
+    "  Acceptable: avg < 30\n"
+    "  Degrading:  avg >= 30";
+static const char* const TT_BIS =
+    "Burst Indication Subcode, uncorrectable errors in the BIS cluster.\n"
+    "More severe than LDC; any significant BIS count indicates data at risk.\n"
+    "\n"
+    "Some indicative values follow, these also depend on your drive and your scan speed so YMMV:\n"
+    "  Perfect:    avg < 0.1\n"
+    "  Good:       avg < 0.5\n"
+    "  Acceptable: avg < 1.0\n"
+    "  Degrading:  avg >= 1.0";
+// clang-format on
 
 
 tabERRC::tabERRC(QPxSettings* iset, devlist* idev, QString iname, QWidget* p, Qt::WindowFlags fl)
@@ -38,6 +98,7 @@ tabERRC::tabERRC(QPxSettings* iset, devlist* idev, QString iname, QWidget* p, Qt
 	layout_info = new QVBoxLayout(infow);
 	layout_info->setContentsMargins(0, 0, 0, 0);
 	layout_info->setSpacing(3);
+	infow->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 #ifdef __LEGEND_SHOW_SPEED
 	pl_spd = new ColorLabel(QColor(Qt::black), "Speed", 0, infow);
@@ -45,9 +106,18 @@ tabERRC::tabERRC(QPxSettings* iset, devlist* idev, QString iname, QWidget* p, Qt
 	layout_info->addWidget(pl_spd);
 #endif
 	pl_e0 = new ColorLabel(QColor(Qt::black), "BLER/PI8", 0, infow);
-	//	pl_e0->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-	//	pl_e0->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-	layout_info->addWidget(pl_e0);
+	l_e0_info = new QLabel(infow);
+	l_e0_info->setPixmap(style()->standardIcon(QStyle::SP_MessageBoxInformation).pixmap(16, 16));
+	l_e0_info->setCursor(Qt::WhatsThisCursor);
+	l_e0_info->setVisible(false);
+	{
+		QHBoxLayout* hb = new QHBoxLayout();
+		hb->setContentsMargins(0, 0, 0, 0);
+		hb->setSpacing(2);
+		hb->addWidget(pl_e0);
+		hb->addWidget(l_e0_info);
+		layout_info->addLayout(hb);
+	}
 
 	l_e0t = new QLabel(infow);
 	l_e0t->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -66,9 +136,18 @@ tabERRC::tabERRC(QPxSettings* iset, devlist* idev, QString iname, QWidget* p, Qt
 
 
 	pl_e1 = new ColorLabel(QColor(Qt::black), "E22/PIF", 0, infow);
-	//	pl_e1->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-	//	pl_e1->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-	layout_info->addWidget(pl_e1);
+	l_e1_info = new QLabel(infow);
+	l_e1_info->setPixmap(style()->standardIcon(QStyle::SP_MessageBoxInformation).pixmap(16, 16));
+	l_e1_info->setCursor(Qt::WhatsThisCursor);
+	l_e1_info->setVisible(false);
+	{
+		QHBoxLayout* hb = new QHBoxLayout();
+		hb->setContentsMargins(0, 0, 0, 0);
+		hb->setSpacing(2);
+		hb->addWidget(pl_e1);
+		hb->addWidget(l_e1_info);
+		layout_info->addLayout(hb);
+	}
 
 	l_e1t = new QLabel(infow);
 	l_e1t->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -87,9 +166,18 @@ tabERRC::tabERRC(QPxSettings* iset, devlist* idev, QString iname, QWidget* p, Qt
 
 
 	pl_e2 = new ColorLabel(QColor(Qt::black), "E32/POF", 0, infow);
-	//	pl_e2->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-	//	pl_e2->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-	layout_info->addWidget(pl_e2);
+	l_e2_info = new QLabel(infow);
+	l_e2_info->setPixmap(style()->standardIcon(QStyle::SP_MessageBoxInformation).pixmap(16, 16));
+	l_e2_info->setCursor(Qt::WhatsThisCursor);
+	l_e2_info->setVisible(false);
+	{
+		QHBoxLayout* hb = new QHBoxLayout();
+		hb->setContentsMargins(0, 0, 0, 0);
+		hb->setSpacing(2);
+		hb->addWidget(pl_e2);
+		hb->addWidget(l_e2_info);
+		layout_info->addLayout(hb);
+	}
 
 	l_e2t = new QLabel(infow);
 	l_e2t->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -114,14 +202,18 @@ tabERRC::tabERRC(QPxSettings* iset, devlist* idev, QString iname, QWidget* p, Qt
 		QVBoxLayout* vb = new QVBoxLayout(w_cb_cd);
 		vb->setContentsMargins(0, 0, 0, 0);
 		vb->setSpacing(2);
-		cb_cd_bler = new QCheckBox("BLER", w_cb_cd);
+		cb_cd_bler = new QCheckBox(LBL_BLER, w_cb_cd);
 		cb_cd_bler->setChecked(true);
-		cb_cd_e22 = new QCheckBox("E22", w_cb_cd);
+		cb_cd_bler->setToolTip(TT_BLER);
+		cb_cd_e22 = new QCheckBox(LBL_E22, w_cb_cd);
 		cb_cd_e22->setChecked(true);
-		cb_cd_e32 = new QCheckBox("E32", w_cb_cd);
+		cb_cd_e22->setToolTip(TT_E22);
+		cb_cd_e32 = new QCheckBox(LBL_E32, w_cb_cd);
 		cb_cd_e32->setChecked(true);
-		cb_cd_uncr = new QCheckBox("UNCR", w_cb_cd);
+		cb_cd_e32->setToolTip(TT_E32);
+		cb_cd_uncr = new QCheckBox(LBL_UNCR, w_cb_cd);
 		cb_cd_uncr->setChecked(true);
+		cb_cd_uncr->setToolTip(TT_UNCR_CD);
 		vb->addWidget(cb_cd_bler);
 		vb->addWidget(cb_cd_e22);
 		vb->addWidget(cb_cd_e32);
@@ -136,14 +228,18 @@ tabERRC::tabERRC(QPxSettings* iset, devlist* idev, QString iname, QWidget* p, Qt
 		QVBoxLayout* vb = new QVBoxLayout(w_cb_dvd);
 		vb->setContentsMargins(0, 0, 0, 0);
 		vb->setSpacing(2);
-		cb_dvd_pi8 = new QCheckBox("PI8", w_cb_dvd);
+		cb_dvd_pi8 = new QCheckBox(LBL_PI8, w_cb_dvd);
 		cb_dvd_pi8->setChecked(true);
-		cb_dvd_pif = new QCheckBox("PIF", w_cb_dvd);
+		cb_dvd_pi8->setToolTip(TT_PI8);
+		cb_dvd_pif = new QCheckBox(LBL_PIF, w_cb_dvd);
 		cb_dvd_pif->setChecked(true);
-		cb_dvd_pof = new QCheckBox("POF", w_cb_dvd);
+		cb_dvd_pif->setToolTip(TT_PIF);
+		cb_dvd_pof = new QCheckBox(LBL_POF, w_cb_dvd);
 		cb_dvd_pof->setChecked(true);
-		cb_dvd_uncr = new QCheckBox("UNCR", w_cb_dvd);
+		cb_dvd_pof->setToolTip(TT_POF);
+		cb_dvd_uncr = new QCheckBox(LBL_UNCR, w_cb_dvd);
 		cb_dvd_uncr->setChecked(true);
+		cb_dvd_uncr->setToolTip(TT_UNCR_DVD);
 		vb->addWidget(cb_dvd_pi8);
 		vb->addWidget(cb_dvd_pif);
 		vb->addWidget(cb_dvd_pof);
@@ -158,10 +254,12 @@ tabERRC::tabERRC(QPxSettings* iset, devlist* idev, QString iname, QWidget* p, Qt
 		QVBoxLayout* vb = new QVBoxLayout(w_cb_bd);
 		vb->setContentsMargins(0, 0, 0, 0);
 		vb->setSpacing(2);
-		cb_bd_ldc = new QCheckBox("LDC", w_cb_bd);
+		cb_bd_ldc = new QCheckBox(LBL_LDC, w_cb_bd);
 		cb_bd_ldc->setChecked(true);
-		cb_bd_bis = new QCheckBox("BIS", w_cb_bd);
+		cb_bd_ldc->setToolTip(TT_LDC);
+		cb_bd_bis = new QCheckBox(LBL_BIS, w_cb_bd);
 		cb_bd_bis->setChecked(true);
+		cb_bd_bis->setToolTip(TT_BIS);
 		vb->addWidget(cb_bd_ldc);
 		vb->addWidget(cb_bd_bis);
 	}
@@ -268,23 +366,43 @@ void tabERRC::updateAll() {
 	GraphTab::updateLast((int)(dev->testData.errc_time), NULL, 1);
 	updateSummary(dev);
 	if (dev->media.type.startsWith("CD")) {
-		pl_e0->setText("BLER");
-		pl_e1->setText("E22");
-		pl_e2->setText("E32");
+		pl_e0->setText(LBL_BLER);
+		l_e0_info->setToolTip(TT_BLER);
+		l_e0_info->setVisible(true);
+		pl_e1->setText(LBL_E22);
+		l_e1_info->setToolTip(TT_E22);
+		l_e1_info->setVisible(true);
+		pl_e2->setText(LBL_E32);
+		l_e2_info->setToolTip(TT_E32);
+		l_e2_info->setVisible(true);
 	} else if (dev->media.type.startsWith("DVD")) {
-		pl_e0->setText("PI8");
-		pl_e1->setText("PIF");
-		pl_e2->setText("POF");
+		pl_e0->setText(LBL_PI8);
+		l_e0_info->setToolTip(TT_PI8);
+		l_e0_info->setVisible(true);
+		pl_e1->setText(LBL_PIF);
+		l_e1_info->setToolTip(TT_PIF);
+		l_e1_info->setVisible(true);
+		pl_e2->setText(LBL_POF);
+		l_e2_info->setToolTip(TT_POF);
+		l_e2_info->setVisible(true);
 	} else if (dev->media.type.startsWith("BD")) {
-		pl_e0->setText("LDC");
-		pl_e1->setText("BIS");
+		pl_e0->setText(LBL_LDC);
+		l_e0_info->setToolTip(TT_LDC);
+		l_e0_info->setVisible(true);
+		pl_e1->setText(LBL_BIS);
+		l_e1_info->setToolTip(TT_BIS);
+		l_e1_info->setVisible(true);
 		show_e2 = false;
 	} else {
 		pl_e0->setText("BLER/PI8/LDC");
+		l_e0_info->setVisible(false);
 		pl_e1->setText("E22/PIF/BIS");
+		l_e1_info->setVisible(false);
 		pl_e2->setText("E32/POF/---");
+		l_e2_info->setVisible(false);
 	}
 	pl_e2->setVisible(show_e2);
+	l_e2_info->setVisible(show_e2 && l_e2_info->isVisible());
 	l_e2t->setVisible(show_e2);
 	l_e2m->setVisible(show_e2);
 	l_e2a->setVisible(show_e2);

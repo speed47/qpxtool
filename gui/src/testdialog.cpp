@@ -152,7 +152,18 @@ void TestDialog::winit() {
 
 
 	ck_ERRC = new QCheckBox(tr("Error Correction"), this);
-	layout_tests->addWidget(ck_ERRC, 5, 0);
+	l_errc_info = new QLabel(this);
+	l_errc_info->setPixmap(style()->standardIcon(QStyle::SP_MessageBoxInformation).pixmap(16, 16));
+	l_errc_info->setCursor(Qt::WhatsThisCursor);
+	l_errc_info->setVisible(false);
+	{
+		QHBoxLayout* hb = new QHBoxLayout();
+		hb->setContentsMargins(0, 0, 0, 0);
+		hb->addWidget(ck_ERRC);
+		hb->addWidget(l_errc_info);
+		hb->addStretch();
+		layout_tests->addLayout(hb, 5, 0);
+	}
 	spd_ERRC = new QComboBox(this);
 	layout_tests->addWidget(spd_ERRC, 5, 1);
 
@@ -183,17 +194,37 @@ void TestDialog::winit() {
 	layout_tests->addWidget(ck_liteon_force_old, 10, 0, 1, 2);
 
 	ck_hldtst_test_mode = new QCheckBox(tr("LiteOn: HL-DT-ST test mode"), this);
-	ck_hldtst_test_mode->setToolTip(tr("Attempt to put the drive in test mode before running the scans.\n"
-	                                   "This is known to make some drives (e.g. BU40N) able to run\n"
-	                                   "error correction tests. This is believed to have been removed\n"
-	                                   "from most recent firmwares."));
-	layout_tests->addWidget(ck_hldtst_test_mode, 11, 0, 1, 2);
+	l_hldtst_info = new QLabel(this);
+	l_hldtst_info->setPixmap(style()->standardIcon(QStyle::SP_MessageBoxInformation).pixmap(16, 16));
+	l_hldtst_info->setToolTip(tr("Attempt to put the drive in test mode before running the scans.\n"
+	                             "This is known to make some drives (e.g. BU40N) able to run\n"
+	                             "error correction tests. This is believed to have been removed\n"
+	                             "from most recent firmwares."));
+	l_hldtst_info->setCursor(Qt::WhatsThisCursor);
+	{
+		QHBoxLayout* hb = new QHBoxLayout();
+		hb->setContentsMargins(0, 0, 0, 0);
+		hb->addWidget(ck_hldtst_test_mode);
+		hb->addWidget(l_hldtst_info);
+		hb->addStretch();
+		layout_tests->addLayout(hb, 11, 0, 1, 2);
+	}
 
 	ck_force_probe = new QCheckBox(tr("Force probe (ignore vendor/drive lists)"), this);
-	ck_force_probe->setToolTip(tr("Ignore hardcoded vendor and drive whitelists/blacklists\n"
-	                              "in plugins. All plugins will attempt to probe the drive\n"
-	                              "regardless of its vendor string."));
-	layout_tests->addWidget(ck_force_probe, 12, 0, 1, 2);
+	l_force_probe_info = new QLabel(this);
+	l_force_probe_info->setPixmap(style()->standardIcon(QStyle::SP_MessageBoxInformation).pixmap(16, 16));
+	l_force_probe_info->setToolTip(tr("Ignore hardcoded vendor and drive whitelists/blacklists\n"
+	                                  "in plugins. All plugins will attempt to probe the drive\n"
+	                                  "regardless of its vendor string."));
+	l_force_probe_info->setCursor(Qt::WhatsThisCursor);
+	{
+		QHBoxLayout* hb = new QHBoxLayout();
+		hb->setContentsMargins(0, 0, 0, 0);
+		hb->addWidget(ck_force_probe);
+		hb->addWidget(l_force_probe_info);
+		hb->addStretch();
+		layout_tests->addLayout(hb, 12, 0, 1, 2);
+	}
 
 	l_plugin = new QLabel(tr("qScan plugin:"), this);
 	layout_tests->addWidget(l_plugin, 13, 0);
@@ -331,6 +362,14 @@ void TestDialog::updateData(bool save, bool setPlugin) {
 
 	ck_ERRC->setEnabled(dev->test_cap & TEST_ERRC && dev->media.creads);
 	ck_ERRC->setChecked(ck_ERRC->isEnabled() && (dev->test_req & TEST_ERRC));
+
+	if (dev->media.type.startsWith("DVD") || dev->media.type.startsWith("BD")) {
+		l_errc_info->setToolTip(tr("A scanning speed around 4x is advised\n"
+		                           "to avoid artificially high error readings."));
+		l_errc_info->setVisible(true);
+	} else {
+		l_errc_info->setVisible(false);
+	}
 
 	ck_JB->setEnabled(dev->test_cap & TEST_JB && dev->media.creads);
 	ck_JB->setChecked(ck_JB->isEnabled() && (dev->test_req & TEST_JB));
