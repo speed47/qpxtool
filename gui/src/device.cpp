@@ -26,6 +26,10 @@
 #include <cstring>
 #include <qpx_mmc_defs.h>
 
+#if defined(_WIN32) || defined(_WIN64)
+#include <windows.h>
+#endif
+
 #ifndef QT_NO_DEBUG
 #include <QDebug>
 static int devcnt = 0;
@@ -898,7 +902,22 @@ bool device::stop_tests() {
 			return false;
 		}
 		qWarning() << "stop_tests(): terminating proc, pid=" << proc->processId() << "state=" << proc->state();
+#if defined(_WIN32) || defined(_WIN64)
+		{
+			char name[64];
+			snprintf(name, sizeof(name), "qpxtool_stop_%lu", (unsigned long)proc->processId());
+			HANDLE hEvent = OpenEventA(EVENT_MODIFY_STATE, FALSE, name);
+			if (hEvent) {
+				SetEvent(hEvent);
+				CloseHandle(hEvent);
+			} else {
+				qWarning() << "stop_tests(): failed to open stop event, falling back to kill";
+				proc->kill();
+			}
+		}
+#else
 		proc->terminate();
+#endif
 	} else if (type == device::DevtypeTCP) {
 		if (!sock) return false;
 #ifndef QT_NO_DEBUG
