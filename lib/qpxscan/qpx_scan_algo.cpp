@@ -483,13 +483,25 @@ int qscanner::run_cd_errc() {
 	wait_unit_ready(dev, 6);
 	printf("\nTesting %d sectors: %d - %d\n", lba_end - lba_sta + 1, lba_sta, lba_end);
 	printf("         lba |        speed        |  BLER |  E11   E21   E31  |  E12   E22   E32  |  UNCR\n");
+	int stale_count = 0;
 	for (; (!stop_req) && lba < lba_end;) {
 		lbao = lba;
 		clock_gettime(CLOCK_MONOTONIC, &blks);
 		if (plugin->scan_block((void*)&err, &lba)) {
 			printf("\nBlock scan error! terminating...\n");
 			stop_req = 1;
+			break;
 		}
+		if (lba == lbao) {
+			// drive hasn't advanced yet - stale poll, skip this sample
+			if (++stale_count >= 64) {
+				printf("\nDrive not advancing, terminating...\n");
+				stop_req = 1;
+				break;
+			}
+			continue;
+		}
+		stale_count = 0;
 		clock_gettime(CLOCK_MONOTONIC, &blke);
 		calc_cur_speed(lba - lbao);
 		printf("cur : %6d | %6.2f X %5d kB/s | %5ld | %5ld %5ld %5ld | %5ld %5ld %5ld | %5ld\r", lba, spdX, spdKB,
