@@ -11,10 +11,12 @@
  */
 
 #include <QMenu>
+#include <QMouseEvent>
 #include <QPainter>
 #include <QPainterPath>
 #include <QPaintEvent>
 #include <QContextMenuEvent>
+#include <QToolTip>
 
 #include <math.h>
 #include "qpxgraph.h"
@@ -72,6 +74,10 @@ int errc_logh_lres[] = {1, 2, 5, 10, 20, 50, 100, 200, 500, 0};
 int errc_logh_hres[] = {1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 0};
 //int	errc_loghl[]={1,10,100,1000,0};
 
+static const char* errcNames_CD[] = {"BLER", "E11", "E21", "E31", "E12", "E22", "E32", "UNCR"};
+static const char* errcNames_DVD[] = {"", "PIE", "PI8", "PIF", "POE", "PO8", "POF", "UNCR"};
+static const char* errcNames_BD[] = {"", "LDC", "", "", "BIS", "", "", "UNCR"};
+
 // GRAPH_DFL_CD, GRAPH_DFL_DVD, GRAPH_DFL_BD defined in device.h
 
 QPxGraph::QPxGraph(QPxSettings* iset, devlist* idev, QString iname, int ttype, QWidget* p, Qt::WindowFlags fl)
@@ -87,6 +93,7 @@ QPxGraph::QPxGraph(QPxSettings* iset, devlist* idev, QString iname, int ttype, Q
 	showspeed = 1;
 	forceAll = 1;
 	lastX = 0;
+	lastTooltipX = -1;
 	errcList = 0;
 	scale[0] = NULL;
 	scale[1] = NULL;
@@ -115,6 +122,7 @@ QPxGraph::QPxGraph(QPxSettings* iset, devlist* idev, QString iname, int ttype, Q
 			//	settings->loadScale(name);
 			setScaleValue(256);
 			setContextMenuPolicy(Qt::DefaultContextMenu);
+			setMouseTracking(true);
 			break;
 		case TEST_JB:
 			name[0] = "Jitter";
@@ -188,6 +196,7 @@ void QPxGraph::resizeEvent(QResizeEvent*) {
 //	qDebug("QPxGraph::resizeEvent()");
 #endif
 	forceAll = 1;
+	lastTooltipX = -1;
 #ifdef CACHE_GRAPH
 	delete img;
 #endif
@@ -210,6 +219,124 @@ void QPxGraph::setLayerTA(int layer) {
 	taLayer = layer;
 	update();
 };
+
+void QPxGraph::mouseMoveEvent(QMouseEvent* e) {
+	if (test != TEST_ERRC) {
+		QWidget::mouseMoveEvent(e);
+		return;
+	}
+
+	device* dev = devices->current();
+	if (!dev || !dev->testData.errc.size() || HscaleLBA <= 0) {
+		QToolTip::hideText();
+		return;
+	}
+
+	int graphX = e->pos().x() - margin_left - 1;
+	int graphW = width() - margin_left - margin_right - 2;
+	if (graphX < 0 || graphX >= graphW) {
+		QToolTip::hideText();
+		lastTooltipX = -1;
+		return;
+	}
+
+	if (graphX == lastTooltipX) return;
+	lastTooltipX = graphX;
+
+	uint64_t lbaStart = (uint64_t)(graphX * HscaleLBA);
+	uint64_t lbaEnd = (uint64_t)((graphX + 1) * HscaleLBA);
+
+	const char** names = errcNames_CD;
+	if (dev->media.type.startsWith("DVD"))
+		names = errcNames_DVD;
+	else if (dev->media.type.startsWith("BD"))
+		names = errcNames_BD;
+
+	int errc_mask = errcList;
+	if (!errc_mask) {
+		if (dev->media.type.startsWith("CD"))
+			errc_mask = GRAPH_DFL_CD;
+		else if (dev->media.type.startsWith("DVD"))
+			errc_mask = GRAPH_DFL_DVD;
+		else if (dev->media.type.startsWith("BD"))
+			errc_mask = GRAPH_DFL_BD;
+	}
+
+	// Binary search for the first sample in this pixel column (data is LBA-sorted)
+	const auto& errc = dev->testData.errc;
+	int lo = 0, hi = errc.size();
+	while (lo < hi) {
+		int mid = lo + (hi - lo) / 2;
+		if (errc[mid].raw.lba < lbaStart)
+			lo = mid + 1;
+		else
+			hi = mid;
+	}
+
+	// Collect stats using running sums (no per-event heap allocations)
+	int count = 0;
+	uint64_t lbaMin = UINT64_MAX, lbaMax = 0;
+	int emin[8], emax[8], ecnt[8];
+	double esum[8], esumSq[8];
+	for (int ei = 0; ei < 8; ei++) {
+		emin[ei] = INT_MAX;
+		emax[ei] = 0;
+		ecnt[ei] = 0;
+		esum[ei] = 0;
+		esumSq[ei] = 0;
+	}
+
+	for (int i = lo; i < errc.size() && (uint64_t)errc[i].raw.lba < lbaEnd; i++) {
+		uint64_t lba = errc[i].raw.lba;
+		count++;
+		if (lba < lbaMin) lbaMin = lba;
+		if (lba > lbaMax) lbaMax = lba;
+		for (int ei = 0; ei < 8; ei++) {
+			if (((1 << ei) & errc_mask) && names[ei][0] && errc[i].raw.err[ei] >= 0) {
+				int v = errc[i].raw.err[ei];
+				if (v < emin[ei]) emin[ei] = v;
+				if (v > emax[ei]) emax[ei] = v;
+				esum[ei] += v;
+				esumSq[ei] += (double)v * v;
+				ecnt[ei]++;
+			}
+		}
+	}
+
+	if (!count) {
+		QToolTip::hideText();
+		return;
+	}
+
+	QString tip;
+	if (count == 1) {
+		tip = QString("LBA: %1\n").arg(lbaMin);
+	} else {
+		tip = QString("LBA: %1 .. %2\nSamples: %3\n").arg(lbaMin).arg(lbaMax).arg(count);
+	}
+
+	for (int ei = 0; ei < 8; ei++) {
+		if (!((1 << ei) & errc_mask) || !names[ei][0] || !ecnt[ei]) continue;
+
+		if (count == 1) {
+			tip += QString("%1: %2\n").arg(names[ei]).arg(emin[ei]);
+		} else {
+			double mean = esum[ei] / ecnt[ei];
+			double stddev = sqrt(esumSq[ei] / ecnt[ei] - mean * mean);
+			int p95lo = qMax(0, (int)(mean - 2 * stddev));
+			int p95hi = qMin(emax[ei], (int)(mean + 2 * stddev));
+			tip +=
+			    QString("%1: %2..%3 (P95: %4..%5)\n").arg(names[ei]).arg(emin[ei]).arg(emax[ei]).arg(p95lo).arg(p95hi);
+		}
+	}
+
+	QToolTip::showText(e->globalPosition().toPoint(), tip.trimmed(), this);
+}
+
+void QPxGraph::leaveEvent(QEvent* e) {
+	QToolTip::hideText();
+	QWidget::leaveEvent(e);
+}
 
 void QPxGraph::wheelEvent(QWheelEvent* e) {
 #ifndef QT_NO_DEBUG
