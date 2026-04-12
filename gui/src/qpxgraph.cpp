@@ -72,9 +72,7 @@ int errc_logh_lres[] = {1, 2, 5, 10, 20, 50, 100, 200, 500, 0};
 int errc_logh_hres[] = {1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 0};
 //int	errc_loghl[]={1,10,100,1000,0};
 
-#define GRAPH_DFL_CD (GRAPH_BLER | GRAPH_E22 | GRAPH_E32 | GRAPH_UNCR)
-#define GRAPH_DFL_DVD (GRAPH_PI8 | GRAPH_PIF | GRAPH_POF | GRAPH_UNCR)
-#define GRAPH_DFL_BD (GRAPH_LDC | GRAPH_BIS | GRAPH_UNCR)
+// GRAPH_DFL_CD, GRAPH_DFL_DVD, GRAPH_DFL_BD defined in device.h
 
 QPxGraph::QPxGraph(QPxSettings* iset, devlist* idev, QString iname, int ttype, QWidget* p, Qt::WindowFlags fl)
     : QWidget(p, fl) {
@@ -159,6 +157,17 @@ void QPxGraph::setDataNames(QStringList dn) { dataNames = dn; update(); }
 void QPxGraph::setZeroPos(float zp) { zeropos = zp; update(); }
 float QPxGraph::zeroPos() { return zeropos; }
 */
+
+int QPxGraph::getScaleType() const {
+	if (!scale[0]) return Scale::Log;
+	return scale[0]->type;
+}
+
+void QPxGraph::setErrcMask(uint8_t mask) {
+	if (errcList == mask) return;
+	errcList = mask;
+	update();
+}
 
 void QPxGraph::setErrcList(int el, QString glabel) {
 	errcList = el;
@@ -1145,6 +1154,7 @@ void QPxGraph::setScaleTypeLog() {
 #ifdef CACHE_GRAPH
 	if (img) delete img;
 #endif
+	update();
 	emit scaleChanged();
 }
 
@@ -1155,6 +1165,7 @@ void QPxGraph::setScaleTypeLin() {
 #ifdef CACHE_GRAPH
 	if (img) delete img;
 #endif
+	update();
 	emit scaleChanged();
 }
 
@@ -1222,6 +1233,7 @@ void QPxGraph::scaleIn(int idx) {
 #ifdef CACHE_GRAPH
 	if (img) delete img;
 #endif
+	update();
 	emit scaleChanged();
 }
 
@@ -1251,6 +1263,7 @@ void QPxGraph::scaleOut(int idx) {
 #ifdef CACHE_GRAPH
 	if (img) delete img;
 #endif
+	update();
 	emit scaleChanged();
 }
 

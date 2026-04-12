@@ -47,6 +47,14 @@ public slots:
 	void setModeTA(bool mode) { taMode = mode; };
 
 	void changeScale(int idx = 0);
+	void setScaleTypeLog();
+	void setScaleTypeLin();
+	void scaleIn(int idx = 0);
+	void scaleOut(int idx = 0);
+	void setErrcMask(uint8_t mask);
+
+public:
+	int getScaleType() const;
 
 protected:
 	void contextMenuEvent(QContextMenuEvent*);
@@ -65,11 +73,7 @@ protected:
 private slots:
 	void setScalePolicyAuto();
 	void setScalePolicyFixed();
-	void setScaleTypeLog();
-	void setScaleTypeLin();
 	void setScaleValue(int val, int idx = -1);
-	void scaleIn(int idx = 0);
-	void scaleOut(int idx = 0);
 
 signals:
 	void scaleChanged();

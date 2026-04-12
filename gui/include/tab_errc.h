@@ -17,6 +17,9 @@ class QLabel;
 class ColorLabel;
 class QPushButton;
 class QBoxLayout;
+class QCheckBox;
+class QRadioButton;
+class QFrame;
 class ErrcDetailedDialog;
 
 #include <graphtab.h>
@@ -42,6 +45,8 @@ public slots:
 private slots:
 	void updateSummary(device*);
 	void toggleXErrc();
+	void onErrcToggled();
+	void onScaleChanged();
 
 protected:
 	virtual void updateLegend();
@@ -67,6 +72,33 @@ private:
 	QLabel* l_e2t;
 	QLabel* l_e2m;
 	QLabel* l_e2a;
+
+	// Graph type checkboxes (per media type)
+	QWidget* w_cb_cd;
+	QCheckBox* cb_cd_bler;
+	QCheckBox* cb_cd_e22;
+	QCheckBox* cb_cd_e32;
+	QCheckBox* cb_cd_uncr;
+
+	QWidget* w_cb_dvd;
+	QCheckBox* cb_dvd_pi8;
+	QCheckBox* cb_dvd_pif;
+	QCheckBox* cb_dvd_pof;
+	QCheckBox* cb_dvd_uncr;
+
+	QWidget* w_cb_bd;
+	QCheckBox* cb_bd_ldc;
+	QCheckBox* cb_bd_bis;
+	QCheckBox* cb_bd_uncr;
+
+	// Scale controls
+	QRadioButton* rb_log;
+	QRadioButton* rb_lin;
+	QPushButton* pb_scaleIn;
+	QPushButton* pb_scaleOut;
+
+	bool isCD, isDVD, isBD;
+	int currentErrcMask;
 
 	QPushButton* pb_xerrc;
 	ErrcDetailedDialog* xerrc;
