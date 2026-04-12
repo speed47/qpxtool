@@ -26,7 +26,7 @@ static const char* labels_cd[8] = {"BLER", "E11", "E21", "E31", "E12", "E22", "E
 
 static const char* labels_dvd[8] = {"", "PIE", "PI8", "PIF", "POE", "PO8", "POF", "UNCR"};
 
-static const char* labels_bd[8] = {"", "LDC", "", "", "BIS", "", "", "UNCR"};
+static const char* labels_bd[8] = {"", "LDC", "", "", "BIS", "", "", ""};
 
 static const char* labels_null[8] = {"", "", "", "", "", "", "", ""};
 
@@ -102,17 +102,22 @@ ErrcDetailedDialog::ErrcDetailedDialog(QPxSettings* iset, devlist* idev, QWidget
 	layout_summary->addWidget(hline0, 1, 0, 1, 5);
 
 	for (int i = 0; i < 8; i++) {
+		bool show = strlen(labels[i]) > 0;
 		pl_name[i] = new QLabel(labels[i], this);
 		pl_name[i]->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+		pl_name[i]->setVisible(show);
 		layout_summary->addWidget(pl_name[i], i + 2, 0);
 		l_tot[i] = new QLabel(this);
 		l_tot[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+		l_tot[i]->setVisible(show);
 		layout_summary->addWidget(l_tot[i], i + 2, 1, 1, 2);
 		l_max[i] = new QLabel(this);
 		l_max[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+		l_max[i]->setVisible(show);
 		layout_summary->addWidget(l_max[i], i + 2, 3);
 		l_avg[i] = new QLabel(this);
 		l_avg[i]->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+		l_avg[i]->setVisible(show);
 		layout_summary->addWidget(l_avg[i], i + 2, 4);
 	}
 
@@ -153,6 +158,11 @@ void ErrcDetailedDialog::updateAll() {
 	for (int i = 0; i < 8; i++) {
 		pl_name[i]->setText(labels[i]);
 		graph[i]->setErrcList(1 << i, labels[i]);
+		bool show = strlen(labels[i]) > 0;
+		pl_name[i]->setVisible(show);
+		l_tot[i]->setVisible(show);
+		l_max[i]->setVisible(show);
+		l_avg[i]->setVisible(show);
 	}
 
 	updateGraphs(dev);
@@ -171,6 +181,7 @@ void ErrcDetailedDialog::updateGraphs(device* idev) {
 	graph[3]->setVisible(labels != labels_bd);
 	graph[5]->setVisible(labels != labels_bd);
 	graph[6]->setVisible(labels != labels_bd);
+	graph[7]->setVisible(labels != labels_bd);
 	for (int i = 0; i < 8; i++) {
 		//		if (!dev->media.tdata_errc || (dev->media.tdata_errc & (1<<i))) {
 		l_tot[i]->setText(QString::number(dev->testData.errcTOT.raw.err[i]));
