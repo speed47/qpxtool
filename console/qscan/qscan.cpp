@@ -91,6 +91,41 @@ BOOL WINAPI sigint_handler(DWORD) {
 	return true;
 	//	printf("\nwaiting scanner to stop\n");
 }
+
+static HANDLE hStopEvent = NULL;
+static HANDLE hStopThread = NULL;
+
+static DWORD WINAPI stop_event_thread(LPVOID) {
+	if (!hStopEvent) return 1;
+	WaitForSingleObject(hStopEvent, INFINITE);
+	printf("\nStop event received\n");
+	if (scanner) {
+		printf("Terminating scan...\n");
+		scanner->stop();
+	}
+	return 0;
+}
+
+static void create_stop_event() {
+	char name[64];
+	snprintf(name, sizeof(name), "qpxtool_stop_%lu", (unsigned long)GetCurrentProcessId());
+	hStopEvent = CreateEventA(NULL, TRUE, FALSE, name);
+	if (!hStopEvent) return;
+	hStopThread = CreateThread(NULL, 0, stop_event_thread, NULL, 0, NULL);
+}
+
+static void cleanup_stop_event() {
+	if (hStopEvent) {
+		SetEvent(hStopEvent); // unblock the thread
+		if (hStopThread) {
+			WaitForSingleObject(hStopThread, 2000);
+			CloseHandle(hStopThread);
+			hStopThread = NULL;
+		}
+		CloseHandle(hStopEvent);
+		hStopEvent = NULL;
+	}
+}
 #endif
 
 void detect_vendor_features(drive_info* dev) {
@@ -784,6 +819,7 @@ int main(int argc, char** argv) {
 #endif
 #elif defined(_WIN32) || defined(_WIN64)
 		SetConsoleCtrlHandler(&sigint_handler, 1);
+		create_stop_event();
 #endif
 
 		// starting test...
@@ -835,6 +871,9 @@ int main(int argc, char** argv) {
 		}
 	}
 end:
+#if defined(_WIN32) || defined(_WIN64)
+	cleanup_stop_event();
+#endif
 	if (scanner) {
 		if (!dev->silent) printf(MSGPREF "destroying scanner...\n");
 		delete scanner;
