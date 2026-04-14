@@ -70,7 +70,7 @@ jobs:
                     echo "relname=Continuous Build" >> $GITHUB_OUTPUT
                     ;;
             v*)     tagname=$GITHUB_REF_NAME
-                    echo "draft=false" >> $GITHUB_OUTPUT
+                    echo "draft=true" >> $GITHUB_OUTPUT
                     echo "relname=$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
                     ;;
             *)      exit 1;;
