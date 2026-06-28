@@ -45,10 +45,6 @@ jobs:
           file gui/release/qpxtool.exe
           file gui/release/qpxtool.exe | grep -q 'x86-64'
           file gui/release/qpxtool.exe | grep -q 'for MS Windows'
-      - name: install UPX
-        run: |
-          wget -q https://github.com/upx/upx/releases/download/v5.1.1/upx-5.1.1-win64.zip
-          unzip upx-5.1.1-win64.zip
       - name: prepare dist
         id: dist
         run: ./.github/workflows/make-dist.sh ${{ steps.conf.outputs.version }}

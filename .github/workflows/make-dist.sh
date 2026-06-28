@@ -31,11 +31,6 @@ cp -va $MINGW_PREFIX/share/qt6/plugins/platforms/* dist/share/qt6/plugins/platfo
 mkdir -p dist/plugins
 cp -va plugins/lib/libqscan_*.dll dist/plugins/
 
-upx=$(find . -iname "upx.exe" -type f -print -quit)
-if [ -e "$upx" ]; then
-    "./$upx" dist/*.exe dist/*.dll || true
-fi
-
 if command -v zip >/dev/null; then
     mv dist ${archive/.zip/}
     zip -9r $archive ${archive/.zip/}
