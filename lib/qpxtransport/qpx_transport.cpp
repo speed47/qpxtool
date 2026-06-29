@@ -943,7 +943,7 @@ int Scsi_Command::transport(Direction dir, void* buf, size_t sz) {
 	SCSITaskInterface** cmd;
 	SCSITaskStatus stat;
 	UInt64 bytes;
-	IOVirtualRange range = {(IOVirtualAddress)buf, sz};
+	IOVirtualRange range = {(IOVirtualAddress)buf, static_cast<IOByteCount>(sz)};
 
 	/* cmd length fix */
 	//	printf("CMD: (%2d)  %02x\n", cdblen, cdb[0]);

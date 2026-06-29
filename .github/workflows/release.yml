@@ -190,3 +190,103 @@ jobs:
           name: "${{ steps.tag.outputs.relname }}"
           tag_name: "${{ steps.tag.outputs.tagname }}"
           files: ${{ steps.dist.outputs.archive }}
+
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runs-on: macos-15
+          - arch: x86_64
+            runs-on: macos-15-intel
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: install prerequisites
+        env:
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: brew install qt@6 create-dmg
+      - name: configure
+        id: conf
+        env:
+          CFLAGS: -L/opt/homebrew/opt/qt@6/lib -I/opt/homebrew/opt/qt@6/include
+          CXXFLAGS: -L/opt/homebrew/opt/qt@6/lib -I/opt/homebrew/opt/qt@6/include
+          PKG_CONFIG_PATH: /opt/homebrew/opt/qt@6/lib/pkgconfig
+        run: |
+          git describe --dirty --tags --match 'v*'
+          version="$(git describe --dirty --tags --match 'v*')"
+          sed -i '' -re "s/^#define VERSION.*/#define VERSION \"${version:1}-speed47\"/" */*/version.h
+          echo "version=${version:1}" >> $GITHUB_OUTPUT
+          export PATH="$(brew --prefix qt@6)/bin:$PATH"
+          ./configure --prefix=/usr --libdir=/usr/lib
+      - name: make
+        run: |
+          export PATH="$(brew --prefix qt@6)/bin:$PATH"
+          make -j$(sysctl -n hw.ncpu || echo 2)
+      - name: make install (staging)
+        run: |
+          export PATH="$(brew --prefix qt@6)/bin:$PATH"
+          make install DESTDIR="$PWD/staging"
+      - name: check executable
+        run: |
+          file staging/usr/bin/qpxtool
+          file staging/usr/bin/qpxtool | grep -q 'Mach-O'
+      - name: prepare dist
+        id: dist
+        run: |
+          export PATH="$(brew --prefix qt@6)/bin:$PATH"
+          ./.github/workflows/make-mac-app.sh "${{ steps.conf.outputs.version }}" "${{ matrix.arch }}" "$PWD/staging"
+      - name: verify dmg mounts and app launches
+        run: |
+          set -x
+          hdiutil attach "${{ steps.dist.outputs.archive }}"
+          open "/Volumes/qpxtool-"*/qpxtool.app
+          sleep 5
+          pgrep -f qpxtool.bin && echo "qpxtool is running"
+      - name: Tag if needed
+        id: tag
+        if: github.ref_type == 'branch'
+        run: |
+          case "$GITHUB_REF_NAME" in
+            dev)    tagname=devel
+                    git tag -f $tagname
+                    git push -f origin $tagname
+                    echo "draft=true" >> $GITHUB_OUTPUT
+                    echo "relname=Dev Build" >> $GITHUB_OUTPUT
+                    ;;
+            master) tagname=latest
+                    git tag -f $tagname
+                    git push -f origin $tagname
+                    echo "draft=false" >> $GITHUB_OUTPUT
+                    echo "relname=Continuous Build" >> $GITHUB_OUTPUT
+                    ;;
+            v*)     tagname=$GITHUB_REF_NAME
+                    echo "draft=true" >> $GITHUB_OUTPUT
+                    echo "relname=$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
+                    ;;
+            *)      exit 1;;
+          esac
+          echo "prerelease=true" >> $GITHUB_OUTPUT
+          echo "tagname=$tagname" >> $GITHUB_OUTPUT
+      - name: Delete old assets
+        if: github.ref_type == 'branch'
+        uses: mknejp/delete-release-assets@v1
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          tag: "refs/tags/${{ steps.tag.outputs.tagname }}"
+          fail-if-no-assets: false
+          fail-if-no-release: false
+          assets: |
+            qpxtool-*-macos-${{ matrix.arch }}.dmg
+      - name: Upload new assets
+        uses: softprops/action-gh-release@v2
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: "${{ steps.tag.outputs.prerelease }}"
+          draft: "${{ steps.tag.outputs.draft }}"
+          name: "${{ steps.tag.outputs.relname }}"
+          tag_name: "${{ steps.tag.outputs.tagname }}"
+          files: ${{ steps.dist.outputs.archive }}
