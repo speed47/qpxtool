@@ -60,6 +60,7 @@ static std::vector<std::string> get_plugin_paths() {
 		// plugins are bundled under $APPDIR/usr/lib(64)/qpxtool.
 		raw.push_back(std::string(appdir) + "/usr/lib/qpxtool");
 		raw.push_back(std::string(appdir) + "/usr/lib64/qpxtool");
+		return raw;
 	}
 #endif
 	for (int i = 0; strlen(ppaths[i]); i++) raw.push_back(ppaths[i]);
