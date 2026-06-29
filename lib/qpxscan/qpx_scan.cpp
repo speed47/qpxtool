@@ -40,12 +40,46 @@ char* dlerror() {
 #include <sys/types.h>
 #include <dirent.h>
 
+#include <set>
+#include <string>
+#include <vector>
+
 // #include <qpx_scan.h> // <-- moved above to avoid having to include <windows.h> twice
 // #include <qpx_mmc.h> // <-- removed, already called in <qpx_scan.h>
 #include <qpx_writer.h>
 #include <plextor_features.h>
 
 const char* FALLBACK_PLUGIN_NAME = "C2P"; // modernization
+
+static std::vector<std::string> get_plugin_paths() {
+	std::vector<std::string> raw;
+#if defined(__unix) || defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+	const char* appdir = getenv("APPDIR");
+	if (appdir && *appdir) {
+		// When running from an AppImage, the APPDIR envvar is the AppDir root,
+		// plugins are bundled under $APPDIR/usr/lib(64)/qpxtool.
+		raw.push_back(std::string(appdir) + "/usr/lib/qpxtool");
+		raw.push_back(std::string(appdir) + "/usr/lib64/qpxtool");
+	}
+#endif
+	for (int i = 0; strlen(ppaths[i]); i++) raw.push_back(ppaths[i]);
+
+	// Deduplicate entries that resolve to the same directory.
+	std::vector<std::string> paths;
+	std::set<std::string> seen;
+	for (size_t i = 0; i < raw.size(); i++) {
+		std::string key = raw[i];
+#if !defined(_WIN32) && !defined(_WIN64)
+		char* canon = realpath(raw[i].c_str(), NULL);
+		if (canon) {
+			key = canon;
+			free(canon);
+		}
+#endif
+		if (seen.insert(key).second) paths.push_back(raw[i]);
+	}
+	return paths;
+}
 
 qscanner::qscanner(drive_info* idev) {
 	dev = idev;
@@ -191,10 +225,10 @@ int qscanner::plugins_probe(bool test, bool probe_enable) {
 	char* ppath;
 	DIR* dir;
 	struct dirent* dentry;
-	int i;
 	int r = 1;
-	for (i = 0; strlen(ppaths[i]) && !attached; i++) {
-		ppath = (char*)ppaths[i];
+	std::vector<std::string> plugin_paths = get_plugin_paths();
+	for (size_t i = 0; i < plugin_paths.size() && !attached; i++) {
+		ppath = (char*)plugin_paths[i].c_str();
 		if (!dev->silent) printf("Looking for plugins in %s...\n", ppath);
 		dir = opendir(ppath);
 		if (dir) {
@@ -236,12 +270,12 @@ int qscanner::plugins_probe_all(probe_result* results, int max_results) {
 	char* ppath;
 	DIR* dir;
 	struct dirent* dentry;
-	int i;
 	int count = 0;
 	bool was_silent = dev->silent;
 
-	for (i = 0; strlen(ppaths[i]) && count < max_results; i++) {
-		ppath = (char*)ppaths[i];
+	std::vector<std::string> plugin_paths = get_plugin_paths();
+	for (size_t i = 0; i < plugin_paths.size() && count < max_results; i++) {
+		ppath = (char*)plugin_paths[i].c_str();
 		if (!dev->silent) printf("Looking for plugins in %s...\n", ppath);
 		dir = opendir(ppath);
 		if (dir) {
@@ -293,12 +327,12 @@ int qscanner::plugin_attach(const char* name) { // modernization
 	char* ppath;
 	DIR* dir;
 	struct dirent* dentry;
-	int i;
 	int r = 1;
 	if (attached || !name) return 2;
 
-	for (i = 0; strlen(ppaths[i]) && !attached; i++) {
-		ppath = (char*)ppaths[i];
+	std::vector<std::string> plugin_paths = get_plugin_paths();
+	for (size_t i = 0; i < plugin_paths.size() && !attached; i++) {
+		ppath = (char*)plugin_paths[i].c_str();
 		if (!dev->silent) printf("Looking for plugins in %s...\n", ppath);
 		dir = opendir(ppath);
 		if (dir) {
