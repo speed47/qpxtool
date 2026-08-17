@@ -195,10 +195,12 @@ public:
 	~Scsi_Command();
 	int associate(const char* file, const struct stat* ref);
 	unsigned char& operator[](size_t i);
+	unsigned char peek(size_t i) const;
 	unsigned char& operator()(size_t i);
 	unsigned char* sense();
 	void timeout(int i);
 	size_t residue();
+	size_t residue(size_t) { return residue(); }
 	int transport(Direction dir = NONE, void* buf = NULL, size_t sz = 0);
 	int umount(int f);
 	int is_reload_needed();
@@ -235,10 +237,12 @@ public:
 	~Scsi_Command();
 	int associate(const char* file, const struct stat* ref);
 	unsigned char& operator[](size_t i);
+	unsigned char peek(size_t i) const;
 	unsigned char& operator()(size_t i);
 	unsigned char* sense();
 	void timeout(int i);
 	size_t residue();
+	size_t residue(size_t) { return residue(); }
 	int transport(Direction dir = NONE, void* buf = NULL, size_t sz = 0);
 	int umount(int f);
 	int is_reload_needed();
@@ -283,10 +287,12 @@ public:
 
 	int associate(const char* file, const struct stat* ref);
 	unsigned char& operator[](size_t i);
+	unsigned char peek(size_t i) const;
 	unsigned char& operator()(size_t i);
 	unsigned char* sense();
 	void timeout(int i);
 	size_t residue();
+	size_t residue(size_t) { return residue(); }
 	int transport(Direction dir = NONE, void* buf = NULL, size_t sz = 0);
 	int umount(int f);
 #define RELOAD_NEVER_NEEDED // according to Matthew Dillon
@@ -325,10 +331,15 @@ public:
 	~Scsi_Command();
 	int associate(const char* file, const struct stat* ref = NULL);
 	unsigned char& operator[](size_t i);
+	unsigned char peek(size_t i) const;
 	unsigned char& operator()(size_t i);
 	unsigned char* sense();
 	void timeout(int i);
 	size_t residue() { return 0; } // bogus
+	// Windows reports bytes transferred, so the caller must supply the original request size.
+	size_t residue(size_t requested) {
+		return requested > p.spt.DataTransferLength ? requested - p.spt.DataTransferLength : 0;
+	}
 	int transport(Direction dir = NONE, void* buf = NULL, size_t sz = 0);
 	int umount(int f = -1);
 
@@ -405,10 +416,12 @@ public:
 	int associate(const char* file, const struct stat* ref = NULL);
 
 	unsigned char& operator[](size_t i);
+	unsigned char peek(size_t i) const;
 	unsigned char& operator()(size_t i);
 	unsigned char* sense();
 	void timeout(int i);
 	size_t residue();
+	size_t residue(size_t) { return residue(); }
 	int transport(Direction dir = NONE, void* buf = NULL, size_t sz = 0);
 	int umount(int f = -1);
 #define RELOAD_NEVER_NEEDED

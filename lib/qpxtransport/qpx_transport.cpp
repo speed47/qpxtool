@@ -278,6 +278,8 @@ unsigned char& Scsi_Command::operator[](size_t i) {
 	return cgc.cmd[i];
 }
 
+unsigned char Scsi_Command::peek(size_t i) const { return cgc.cmd[i]; }
+
 unsigned char& Scsi_Command::operator()(size_t i) { return _sense.u[i]; }
 unsigned char* Scsi_Command::sense() { return _sense.u; }
 
@@ -402,6 +404,8 @@ unsigned char& Scsi_Command::operator[](size_t i) {
 	req.cmdlen = i + 1;
 	return req.cmd[i];
 }
+
+unsigned char Scsi_Command::peek(size_t i) const { return req.cmd[i]; }
 
 unsigned char& Scsi_Command::operator()(size_t i) { return req.sense[i]; }
 
@@ -577,6 +581,8 @@ unsigned char& Scsi_Command::operator[](size_t i) {
 	return ccb.csio.cdb_io.cdb_bytes[i];
 }
 
+unsigned char Scsi_Command::peek(size_t i) const { return ccb.csio.cdb_io.cdb_bytes[i]; }
+
 unsigned char& Scsi_Command::operator()(size_t i) { return ((unsigned char*)&ccb.csio.sense_data)[i]; }
 
 unsigned char* Scsi_Command::sense() { return (unsigned char*)&ccb.csio.sense_data; }
@@ -704,6 +710,8 @@ unsigned char& Scsi_Command::operator[](size_t i) {
 	p.spt.CdbLength = i + 1;
 	return p.spt.Cdb[i];
 }
+
+unsigned char Scsi_Command::peek(size_t i) const { return p.spt.Cdb[i]; }
 
 unsigned char& Scsi_Command::operator()(size_t i) { return p.sense[i]; }
 unsigned char* Scsi_Command::sense() { return p.sense; };
@@ -931,6 +939,8 @@ unsigned char& Scsi_Command::operator[](size_t i) {
 	cdblen = i + 1;
 	return cdb[i];
 }
+
+unsigned char Scsi_Command::peek(size_t i) const { return cdb[i]; }
 
 unsigned char& Scsi_Command::operator()(size_t i) { return _sense.u[i]; }
 unsigned char* Scsi_Command::sense() { return _sense.u; }

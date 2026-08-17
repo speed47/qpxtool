@@ -67,6 +67,7 @@ private:
 	uint32_t lba;
 	int fete_idx;
 	int fete_rsize;
+	bool auth_open;
 	/*
 	int plextor_init_fete(fete *data);
 	int plextor_init_dvd_ta();

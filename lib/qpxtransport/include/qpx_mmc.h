@@ -497,6 +497,7 @@ extern int detect_mm_capabilities(drive_info* drive);
 
 
 extern int plextor_px755_do_auth(drive_info* dev);
+extern int plextor_px755_clear_auth_status(drive_info* dev);
 extern int plextor_px755_get_auth_code(drive_info* dev, unsigned char* auth_code);
 extern int plextor_px755_send_auth_code(drive_info* dev, unsigned char* auth_code);
 //	extern int cmd_px755_clear_auth_status(drive_info* dev);

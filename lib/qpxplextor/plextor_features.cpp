@@ -30,6 +30,56 @@ static const char progress[] = {'-', '\\', '|', '/', 0};
 // #define DEBUG_SECUREC
 //#define SHOW_RAW_TIME
 
+/*
+ * Late Plextor drives protect E9 feature commands and F1 EEPROM access with
+ * a D4/D5 challenge-response exchange. Other commands and older drives use
+ * the normal transport path unchanged.
+ */
+static int plextor_feature_transport(drive_info* drive, Direction dir, void* buf, size_t sz) {
+	const unsigned char opcode = drive->cmd.peek(0);
+	if ((opcode != (unsigned char)PLEXTOR_MODE && opcode != (unsigned char)PLEXTOR_EEPROM_READ) ||
+	    !isPlextorLockPresent(drive))
+		return drive->cmd.transport(dir, buf, sz);
+
+	unsigned char cdb[12];
+	for (int i = 0; i < 12; ++i) cdb[i] = drive->cmd.peek(i);
+	const auto restore_cdb = [&]() {
+		for (int i = 0; i < 12; ++i) drive->cmd[i] = cdb[i];
+	};
+
+	int err = plextor_px755_do_auth(drive);
+	if (err) {
+		restore_cdb();
+		drive->err = err;
+		return err;
+	}
+
+	/* Authentication uses the same Scsi_Command object, so rebuild the
+	 * protected command before sending it. */
+	restore_cdb();
+	if (dir == READ && sz) memset(buf, 0, sz);
+	int command_err = drive->cmd.transport(dir, buf, sz);
+	/* These protected feature/EEPROM reads require the full requested reply.
+	 * Check before cleanup replaces the transport's transfer status. */
+	if (!command_err && dir == READ && drive->cmd.residue(sz)) {
+		if (!drive->silent) printf("Incomplete Plextor feature reply (opcode %02X)\n", opcode);
+		errno = EIO;
+		command_err = -1;
+	}
+	const int command_errno = errno;
+
+	const int close_err = plextor_px755_clear_auth_status(drive);
+	if (!command_err && close_err && !drive->silent) sperror("PLEXTOR_CLOSE_AUTH", close_err);
+
+	/* A cleanup failure leaves the drive in an authentication session and must
+	 * be visible to the caller when the protected command itself succeeded. */
+	const int result = command_err ? command_err : close_err;
+	restore_cdb();
+	if (command_err) errno = command_errno;
+	drive->err = result;
+	return result;
+}
+
 int plextor_reboot(drive_info* drive) {
 	drive->cmd[0] = 0xEE;
 	if ((drive->err = drive->cmd.transport(NONE, NULL, 0))) {
@@ -50,7 +100,12 @@ int plextor_get_TLA(drive_info* drive) {
 	drive->cmd[10] = 0x00;
 	drive->cmd[11] = 0x00;
 	// The Plextor PX-716 does not understand this command....
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 0x100))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 0x100))) {
+		if (isPlextorLockPresent(drive)) {
+			sperror("Plextor get TLA", drive->err);
+			strcpy(drive->TLA, "N/A\0");
+			return 1;
+		}
 		//printf("Possible PX-716...\n");
 		drive->cmd[0] = 0xF1;
 		drive->cmd[1] = 0x01;
@@ -58,7 +113,7 @@ int plextor_get_TLA(drive_info* drive) {
 		drive->cmd[9] = 0x00;
 		drive->cmd[10] = 0x00;
 		drive->cmd[11] = 0x00;
-		if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 0x100))) {
+		if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 0x100))) {
 			sperror("Plextor get TLA", drive->err);
 			strcpy(drive->TLA, "N/A\0");
 			return 1;
@@ -79,7 +134,7 @@ int plextor_read_eeprom_CDR(drive_info* drive) {
 	drive->cmd[9] = 0x00;
 	drive->cmd[10] = 0x00;
 	drive->cmd[11] = 0x00;
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 256))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 256))) {
 		sperror("Plextor read CDR EEPROM", drive->err);
 		return drive->err;
 	}
@@ -96,7 +151,7 @@ int plextor_read_eeprom_PX712(drive_info* drive) {
 	drive->cmd[9] = 0x00;
 	drive->cmd[10] = 0x00;
 	drive->cmd[11] = 0x00;
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 512))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 512))) {
 		sperror("Plextor read PX712 EEPROM", drive->err);
 		return drive->err;
 	}
@@ -114,8 +169,8 @@ int plextor_read_eeprom_block(drive_info* drive, unsigned char idx, unsigned int
 	drive->cmd[9] = sz & 0xFF;
 	drive->cmd[10] = 0x00;
 	drive->cmd[11] = 0x00;
-	//	if ((drive->err=drive->cmd.transport(READ,buf,sz) ))
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf + offs, sz))) {
+	//	if ((drive->err=plextor_feature_transport(drive, READ,buf,sz) ))
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf + offs, sz))) {
 		sperror("Plextor read EEPROM", drive->err);
 		return drive->err;
 	}
@@ -365,11 +420,11 @@ int plextor_get_silentmode(drive_info* drive) {
 	drive->cmd[2] = PLEX_MODE_SILENT;
 	drive->cmd[3] = 0x04;
 	drive->cmd[10] = 0x08;
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 8))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 8))) {
 		if (!drive->silent) sperror("GET_SILENT_MODE", drive->err);
 		return drive->err;
 	}
-	if ((drive->err = drive->cmd.transport(READ, (void*)&(drive->plextor_silent), 8))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, (void*)&(drive->plextor_silent), 8))) {
 		if (!drive->silent) sperror("GET_SILENT_MODE", drive->err);
 		return drive->err;
 	}
@@ -385,7 +440,7 @@ int plextor_set_silentmode_tray(drive_info* drive, int disc_type, int permanent)
 	drive->cmd[3] = disc_type | 2 * !!permanent;
 	drive->cmd[4] = drive->plextor_silent.eject;
 	drive->cmd[6] = drive->plextor_silent.load;
-	if ((drive->err = drive->cmd.transport(NONE, NULL, 0))) {
+	if ((drive->err = plextor_feature_transport(drive, NONE, NULL, 0))) {
 		if (!drive->silent) sperror("SET_SILENT_MODE_DISC", drive->err);
 		return drive->err;
 	}
@@ -405,7 +460,7 @@ int plextor_set_silentmode_disc(drive_info* drive, int disc_type, int permanent)
 		drive->cmd[5] = 0xFF;
 	}
 	drive->cmd[6] = drive->plextor_silent.access;
-	if ((drive->err = drive->cmd.transport(NONE, NULL, 0))) {
+	if ((drive->err = plextor_feature_transport(drive, NONE, NULL, 0))) {
 		if (!drive->silent) sperror("SET_SILENT_MODE_DISC", drive->err);
 		return drive->err;
 	}
@@ -417,11 +472,11 @@ int plextor_set_silentmode_disable(drive_info* drive, int permanent) {
 	drive->plextor_silent.rd = 0x07;
 	drive->plextor_silent.wr = 0x07;
 	drive->plextor_silent.access = 0;
-	plextor_set_silentmode_disc(drive, 0, permanent);
+	int err = plextor_set_silentmode_disc(drive, 0, permanent);
+	if (err) return err;
 	drive->plextor_silent.eject = 0x50;
 	drive->plextor_silent.load = 0x50;
-	plextor_set_silentmode_tray(drive, 0, permanent);
-	return 0;
+	return plextor_set_silentmode_tray(drive, 0, permanent);
 }
 
 void print_gigarec_value(drive_info* drive) {
@@ -439,22 +494,42 @@ void print_gigarec_value(drive_info* drive) {
 }
 
 int plextor_set_gigarec(drive_info* drive) {
-	// 	printf("  applying gigarec setting... ");
-	// 	print_gigarec_value(i);
+	const unsigned char requested = drive->plextor.gigarec;
 	drive->cmd[0] = PLEXTOR_MODE;
 	drive->cmd[1] = PLEX_SET_MODE;
 	drive->cmd[2] = PLEX_MODE_GIGAREC;
-	drive->cmd[3] = (drive->plextor.gigarec ? 1 : 0);
-	drive->cmd[4] = drive->plextor.gigarec;
+	/* Premium2 uses E9 10 04 00 RR ...; older models use byte 3 as
+	 * an enable flag and byte 4 as the rate. */
+	drive->cmd[3] = (drive->dev_ID == PLEXTOR_PREMIUM2) ? 0x00 : (requested ? 1 : 0);
+	drive->cmd[4] = requested;
 	drive->cmd[10] = 0x08;
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 8))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 8))) {
 		if (!drive->silent) sperror("SET_GIGAREC", drive->err);
 		return drive->err;
 	}
-	drive->plextor.gigarec = drive->rd_buf[3];
-	drive->plextor.gigarec_disc = drive->rd_buf[4];
-	//	print_gigarec_value(drive);
-	//	printf("\t"); for (int i=0; i<8; i++) printf("0x%02X ",drive->rd_buf[i]&0xFF); printf("\n");
+
+	if (drive->dev_ID == PLEXTOR_PREMIUM2) {
+		/* Premium2 reply: 04 06 EE RR 00 00 00 00. */
+		if (drive->rd_buf[0] != 0x04 || drive->rd_buf[1] != 0x06) {
+			if (!drive->silent)
+				printf("Unexpected Premium2 GigaRec reply: %02X %02X\n", drive->rd_buf[0] & 0xFF,
+				       drive->rd_buf[1] & 0xFF);
+			return drive->err = 1;
+		}
+		const bool enabled = drive->rd_buf[2] != 0;
+		drive->plextor.gigarec = enabled ? drive->rd_buf[3] : GIGAREC_OFF;
+		drive->plextor.gigarec_disc = GIGAREC_OFF;
+		if ((requested == GIGAREC_OFF && enabled) ||
+		    (requested != GIGAREC_OFF && (!enabled || drive->rd_buf[3] != requested))) {
+			if (!drive->silent)
+				printf("GigaRec state did not change as requested (requested=%02X, returned=%02X)\n", requested & 0xFF,
+				       drive->rd_buf[3] & 0xFF);
+			return drive->err = 1;
+		}
+	} else {
+		drive->plextor.gigarec = drive->rd_buf[3];
+		drive->plextor.gigarec_disc = drive->rd_buf[4];
+	}
 	return 0;
 }
 
@@ -463,13 +538,24 @@ int plextor_get_gigarec(drive_info* drive) {
 	drive->cmd[1] = PLEX_GET_MODE;
 	drive->cmd[2] = PLEX_MODE_GIGAREC;
 	drive->cmd[10] = 0x08;
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 8))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 8))) {
 		if (!drive->silent) sperror("GET_GIGAREC", drive->err);
 		return drive->err;
 	}
-	drive->plextor.gigarec = drive->rd_buf[3];
-	drive->plextor.gigarec_disc = drive->rd_buf[4];
-	//	printf("\t"); for (int i=0; i<8; i++) printf("0x%02X ",drive->rd_buf[i]&0xFF); printf("\n");
+
+	if (drive->dev_ID == PLEXTOR_PREMIUM2) {
+		if (drive->rd_buf[0] != 0x04 || drive->rd_buf[1] != 0x06) {
+			if (!drive->silent)
+				printf("Unexpected Premium2 GigaRec reply: %02X %02X\n", drive->rd_buf[0] & 0xFF,
+				       drive->rd_buf[1] & 0xFF);
+			return drive->err = 1;
+		}
+		drive->plextor.gigarec = drive->rd_buf[2] ? drive->rd_buf[3] : GIGAREC_OFF;
+		drive->plextor.gigarec_disc = GIGAREC_OFF;
+	} else {
+		drive->plextor.gigarec = drive->rd_buf[3];
+		drive->plextor.gigarec_disc = drive->rd_buf[4];
+	}
 	return 0;
 }
 
@@ -503,7 +589,7 @@ int plextor_set_varirec(drive_info* drive, int disc_type) {
 		drive->cmd[5] = drive->plextor.varirec_str_cd;
 	}
 	drive->cmd[10] = 0x08;
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 8))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 8))) {
 		if (!drive->silent) sperror("SET_VARIREC", drive->err);
 		return drive->err;
 	}
@@ -526,7 +612,7 @@ int plextor_get_varirec(drive_info* drive, int disc_type) {
 	drive->cmd[2] = PLEX_MODE_VARIREC;
 	drive->cmd[3] = 0x02 | disc_type;
 	drive->cmd[10] = 0x08;
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 8))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 8))) {
 		if (!drive->silent) sperror("GET_VARIREC", drive->err);
 		return drive->err;
 	}
@@ -554,7 +640,7 @@ int plextor_get_securec_state(drive_info* drive) {
 	drive->cmd[0] = PLEXTOR_MODE;
 	drive->cmd[2] = PLEX_MODE_SECUREC;
 	drive->cmd[10] = 0x08;
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 8))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 8))) {
 		if (!drive->silent) sperror("PLEXTOR_GET_SECUREC", drive->err);
 		return drive->err;
 	}
@@ -589,12 +675,14 @@ int plextor_set_securec(drive_info* drive, char len, char* passwd) {
 				drive->rd_buf[i + 2] = passwd[i];
 			else
 				drive->rd_buf[i + 2] = 0;
+		drive->cmd[11] = 0x00;
 		if ((drive->err = drive->cmd.transport(WRITE, drive->rd_buf, 0x10))) {
 			if (!drive->silent) sperror("PLEXTOR_SET_SECUREC", drive->err);
 			return drive->err;
 		}
 	} else {
 		printf("Turning SecuRec OFF\n");
+		drive->cmd[11] = 0x00;
 		if ((drive->err = drive->cmd.transport(NONE, NULL, 0))) {
 			if (!drive->silent) sperror("PLEXTOR_SET_SECUREC", drive->err);
 			return drive->err;
@@ -612,7 +700,7 @@ int plextor_set_speedread(drive_info* drive, int state) {
 	drive->cmd[2] = PLEX_MODE_SPDREAD;
 	drive->cmd[3] = !!state;
 	drive->cmd[10] = 0x08;
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 8))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 8))) {
 		if (!drive->silent) sperror("SET_SPDREAD", drive->err);
 		return drive->err;
 	}
@@ -628,7 +716,7 @@ int plextor_get_speedread(drive_info* drive) {
 	drive->cmd[2] = PLEX_MODE_SPDREAD;
 	drive->cmd[3] = 0;
 	drive->cmd[10] = 0x08;
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 8))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 8))) {
 		if (!drive->silent) sperror("GET_SPDREAD", drive->err);
 		return drive->err;
 	}
@@ -645,7 +733,7 @@ int plextor_get_hidecdr_singlesession(drive_info* drive) {
 	drive->cmd[1] = PLEX_GET_MODE;
 	drive->cmd[2] = PLEX_MODE_SS_HIDE;
 	drive->cmd[9] = 0x08;
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 8))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 8))) {
 		if (!drive->silent) sperror("GET_HCDR_SSS", drive->err);
 		return drive->err;
 	}
@@ -662,7 +750,7 @@ int plextor_set_hidecdr_singlesession(drive_info* drive, int hidecdr_state, int 
 	drive->cmd[2] = PLEX_MODE_SS_HIDE;
 	drive->cmd[3] = 2 * !!hidecdr_state + !!singlesession_state;
 	drive->cmd[9] = 0x08;
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 8))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 8))) {
 		if (!drive->silent) sperror("SET_HCDR_SSS", drive->err);
 		return drive->err;
 	}
@@ -690,7 +778,7 @@ int plextor_get_bitset(drive_info* drive, int disc_type) {
 	drive->cmd[2] = PLEX_MODE_BITSET;
 	drive->cmd[3] = disc_type;
 	drive->cmd[9] = 0x08;
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 8))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 8))) {
 		if (!drive->silent) sperror("PLEXTOR_GET_BITSET", drive->err);
 		return drive->err;
 	}
@@ -724,7 +812,7 @@ int plextor_set_bitset(drive_info* drive, int disc_type) {
 	drive->cmd[3] = disc_type;
 	drive->cmd[5] = book;
 	drive->cmd[9] = 0x08;
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 8))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 8))) {
 		if (!drive->silent) sperror("PLEXTOR_SET_BITSET", drive->err);
 		return drive->err;
 	}
@@ -736,7 +824,7 @@ int plextor_get_testwrite_dvdplus(drive_info* drive) {
 	drive->cmd[1] = PLEX_GET_MODE;
 	drive->cmd[2] = PLEX_MODE_TESTWRITE_DVDPLUS;
 	drive->cmd[10] = 0x08;
-	if ((drive->err = drive->cmd.transport(READ, drive->rd_buf, 8))) {
+	if ((drive->err = plextor_feature_transport(drive, READ, drive->rd_buf, 8))) {
 		if (!drive->silent) sperror("PLEXTOR_GET_TESTWRITE_DVDPLUS", drive->err);
 		return drive->err;
 	}
@@ -749,7 +837,7 @@ int plextor_set_testwrite_dvdplus(drive_info* drive) {
 	drive->cmd[1] = PLEX_SET_MODE;
 	drive->cmd[2] = PLEX_MODE_TESTWRITE_DVDPLUS;
 	drive->cmd[3] = drive->plextor.testwrite_dvdplus;
-	if ((drive->err = drive->cmd.transport(NONE, NULL, 0))) {
+	if ((drive->err = plextor_feature_transport(drive, NONE, NULL, 0))) {
 		if (!drive->silent) sperror("PLEXTOR_SET_TESTWRITE_DVDPLUS", drive->err);
 		return drive->err;
 	}

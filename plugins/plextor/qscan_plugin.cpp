@@ -29,7 +29,7 @@ void plugin_destroy(scan_plugin* iplugin) {
 	if (iplugin != NULL) delete iplugin;
 }
 
-scan_plextor::scan_plextor(drive_info* idev) : scan_plugin(), lba(0), fete_idx(0), fete_rsize(0) {
+scan_plextor::scan_plextor(drive_info* idev) : scan_plugin(), lba(0), fete_idx(0), fete_rsize(0), auth_open(false) {
 	dev = idev;
 	if (!dev->silent) printf("scan_plextor()\n");
 	devlist = (drivedesc*)&drivelist;
@@ -37,22 +37,27 @@ scan_plextor::scan_plextor(drive_info* idev) : scan_plugin(), lba(0), fete_idx(0
 }
 
 scan_plextor::~scan_plextor() {
+	if (test || auth_open) (void)end_test();
 	if (!dev->silent) printf("~scan_plextor()\n");
 }
 
 
 int scan_plextor::probe_drive() {
-	if (isPlextor(dev)) plextor_px755_do_auth(dev);
+	if (isPlextor(dev) && plextor_px755_do_auth(dev)) return DEV_FAIL;
+	auth_open = isPlextorLockPresent(dev);
+
+	int result = DEV_FAIL;
 	if (dev->media.type & DISC_CD) {
-		if (cmd_cd_errc_init()) return DEV_FAIL;
-		if (cmd_scan_end()) return DEV_FAIL;
+		if (!cmd_cd_errc_init() && !cmd_scan_end()) result = DEV_PROBED;
 	} else if (dev->media.type & DISC_DVD) {
-		if (cmd_dvd_errc_init()) return DEV_FAIL;
-		if (cmd_scan_end()) return DEV_FAIL;
-	} else {
-		return DEV_FAIL;
+		if (!cmd_dvd_errc_init() && !cmd_scan_end()) result = DEV_PROBED;
 	}
-	return DEV_PROBED;
+
+	if (auth_open) {
+		if (plextor_px755_clear_auth_status(dev)) return DEV_FAIL;
+		auth_open = false;
+	}
+	return result;
 }
 
 int scan_plextor::errc_data() {
@@ -105,7 +110,9 @@ int* scan_plextor::get_test_speeds(unsigned int itest) {
 
 int scan_plextor::start_test(unsigned int itest, long ilba, int& speed) {
 	int r = -1;
-	plextor_px755_do_auth(dev);
+	if (plextor_px755_do_auth(dev)) return -1;
+	auth_open = isPlextorLockPresent(dev);
+
 	switch (itest) {
 		case CHK_ERRC_CD:
 			lba = ilba;
@@ -151,12 +158,15 @@ int scan_plextor::start_test(unsigned int itest, long ilba, int& speed) {
 			}
 			break;
 		default:
+			if (auth_open && !plextor_px755_clear_auth_status(dev)) auth_open = false;
 			return -1;
 	}
+
 	if (!r) {
 		test = itest;
 	} else {
 		test = 0;
+		if (auth_open && !plextor_px755_clear_auth_status(dev)) auth_open = false;
 	}
 	return r;
 }
@@ -200,12 +210,13 @@ int scan_plextor::scan_block(void* data, uint32_t* ilba) {
 }
 
 int scan_plextor::end_test() {
+	int err = 0;
 	switch (test) {
 		case CHK_ERRC_CD:
 		case CHK_ERRC_DVD:
 		case CHK_JB_CD:
 		case CHK_JB_DVD:
-			cmd_scan_end();
+			err = cmd_scan_end();
 			break;
 #if 1
 		case CHK_FETE:
@@ -215,7 +226,7 @@ int scan_plextor::end_test() {
 		case CHK_FETE_DVD:
 		case CHK_FETE_DVDROM:
 #endif
-			cmd_fete_end();
+			err = cmd_fete_end();
 			break;
 		case CHK_TA:
 		case CHK_TA_CD:
@@ -226,8 +237,13 @@ int scan_plextor::end_test() {
 		default:
 			break;
 	}
+
 	test = 0;
-	return 0;
+	const int close_err = auth_open ? plextor_px755_clear_auth_status(dev) : 0;
+	if (!close_err) auth_open = false;
+	const int result = err ? err : close_err;
+	dev->err = result;
+	return result;
 }
 
 /*

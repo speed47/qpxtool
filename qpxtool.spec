@@ -1,7 +1,7 @@
 %define summary  CD/DVD media check/drive control tools
 %define name     qpxtool
-%define version  0.7.2
-%define release  1
+%define version  0.8.1
+%define release  pl8
 %define vendor   Gennady "ShultZ" Kozlov
 %define packager Gennady "ShultZ" Kozlov
 %define email    qpxtool@mail.ru
@@ -11,11 +11,11 @@ Name: %{name}
 Version: %{version}
 Release: %{release}
 Group: Applications/Media
-License: GPL
+License: GPL-2.0-or-later AND BSD-3-Clause AND LicenseRef-Openwall-MD5
 URL: http://qpxtool.sourceforge.net
 Vendor: %{vendor}
 Packager: %{packager} %{email}
-Source: %{name}-%{version}.tar.bz2
+Source: %{name}-%{version}-%{release}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-%(%{__id_u} -n)
 
 #BuildRequires:  libpng-devel
@@ -80,7 +80,7 @@ Authors:
     Gennady "ShultZ" Kozlov <qpxtool@mail.ru>
 
 %prep
-%setup -q -n %{name}
+%setup -q -n %{name}-%{version}-%{release}
 
 %build
 ####
@@ -106,12 +106,15 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %{_mandir}/man1/*
 %{_mandir}/man8/*
 %{_libdir}/qpxtool/libqscan_*
-%doc AUTHORS COPYING ChangeLog README TODO
+%doc AUTHORS ChangeLog README TODO
 %exclude /usr/bin/qpxtool
 
 %files lib
 %defattr(-,root,root)
 %{_libdir}/libqpx*
+%dir %{_datadir}/doc/qpxtool
+%license %{_datadir}/doc/qpxtool/COPYING
+%license %{_datadir}/doc/qpxtool/THIRD_PARTY_NOTICES
 
 %files gui
 %defattr(-,root,root)

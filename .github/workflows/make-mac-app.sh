@@ -129,7 +129,7 @@ if [ -d "$staging/usr/share/qpxtool/locale" ]; then
   cp "$staging/usr/share/qpxtool/locale/"*.qm "$CONTENTS/Resources/share/qpxtool/locale/" 2>/dev/null || true
 fi
 mkdir -p "$CONTENTS/Resources/documentation"
-cp COPYING README README.md ChangeLog AUTHORS "$CONTENTS/Resources/documentation/" 2>/dev/null || true
+cp COPYING THIRD_PARTY_NOTICES README README.md ChangeLog AUTHORS "$CONTENTS/Resources/documentation/" 2>/dev/null || true
 
 # --- launcher --------------------------------------------------------------
 # Wrap the real binary so we can point the plugin loader at the bundled
