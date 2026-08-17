@@ -21,6 +21,7 @@
 //#include <sys/time.h>
 
 #include "qpx_mmc.h"
+#include "qpx_plextor_auth.h"
 #include "colors.h"
 
 #define SPINUP_REVERSE
@@ -4041,52 +4042,74 @@ int convert_to_ID(drive_info* drive) {
 //  PX-755 AUTH   //
 //----------------//
 
+int plextor_px755_clear_auth_status(drive_info* dev) {
+	/* D5 01 00 00 00 00 00 00 00 00 00 00, no data phase. */
+	dev->cmd[0] = PLEXTOR_SEND_AUTH;
+	dev->cmd[1] = 0x01;
+	dev->cmd[2] = 0x00;
+	dev->cmd[11] = 0x00;
+	return dev->err = dev->cmd.transport(NONE, NULL, 0);
+}
+
 int plextor_px755_do_auth(drive_info* dev) {
-	if (!isPlextorLockPresent(dev)) {
-		if (!dev->silent) printf("Plextor dev is older than PX-755, auth not needed\n");
-		return 0;
+	if (!isPlextorLockPresent(dev)) return dev->err = 0;
+
+	unsigned char challenge[16];
+	unsigned char response[16];
+
+	int err = plextor_px755_get_auth_code(dev, challenge);
+	if (err) {
+		/* A previous interrupted operation can leave authentication open.
+		 * Close it and retry the challenge once. */
+		(void)plextor_px755_clear_auth_status(dev);
+		err = plextor_px755_get_auth_code(dev, challenge);
+		if (err) return err;
 	}
-	//	cmd_px755_clear_auth_status();
-	plextor_px755_get_auth_code(dev, dev->rd_buf);
-	plextor_px755_calc_auth_code(dev, dev->rd_buf);
-	if (plextor_px755_send_auth_code(dev, dev->rd_buf)) {
-		printf(" _______________________________________________________ \n");
-		printf("|                                                       |\n");
-		printf("|       WARNING!!!  Detected locked PX-755/PX-760       |\n");
-		printf("|                     or Premium-II                     |\n");
-		printf("|           Device has 'protected' commands             |\n");
-		printf("|    you'll not get full fucntionality of this drive    |\n");
-		printf("|_______________________________________________________|\n");
-		return 1;
-	} else {
-		if (!dev->silent) printf("PX-755/PX-760/Premium-II auth successful:)\n");
-		return 0;
+
+	memcpy(response, challenge, sizeof(response));
+	if (plextor_px755_calc_auth_code(dev, response)) return dev->err = 1;
+	err = plextor_px755_send_auth_code(dev, response);
+	if (err) {
+		const int auth_errno = errno;
+		(void)plextor_px755_clear_auth_status(dev);
+		errno = auth_errno;
 	}
+	return dev->err = err;
 }
 
 int plextor_px755_get_auth_code(drive_info* dev, unsigned char* auth_code) {
+	/* D4 00 00 00 00 00 00 00 00 00 10 00, 16 bytes in. */
+	memset(auth_code, 0, 16);
 	dev->cmd[0] = PLEXTOR_GET_AUTH;
 	dev->cmd[10] = 0x10;
+	dev->cmd[11] = 0x00;
 	if ((dev->err = dev->cmd.transport(READ, auth_code, 16))) {
-		if (!dev->silent) sperror("PLEXTOR_PX755_GET_AUTH_CODE", dev->err);
+		if (!dev->silent) sperror("PLEXTOR_GET_CHALLENGE", dev->err);
 		return dev->err;
 	}
-	if (!dev->silent) {
-		printf("** Get PX755 auth: ");
-		for (int i = 0; i < 16; i++) printf("0x%02X ", dev->rd_buf[i] & 0xFF);
-		printf("\n");
+	if (dev->cmd.residue(16)) {
+		if (!dev->silent) printf("Incomplete Plextor authentication challenge\n");
+		errno = EIO;
+		return dev->err = -1;
 	}
 	return 0;
 }
 
 int plextor_px755_send_auth_code(drive_info* dev, unsigned char* auth_code) {
+	/* D5 01 01 00 00 00 00 00 00 00 10 00, 16 bytes out. */
 	dev->cmd[0] = PLEXTOR_SEND_AUTH;
 	dev->cmd[1] = 0x01;
 	dev->cmd[2] = 0x01;
 	dev->cmd[10] = 0x10;
+	dev->cmd[11] = 0x00;
 	if ((dev->err = dev->cmd.transport(WRITE, auth_code, 16))) {
-		if (!dev->silent) sperror("PLEXTOR_PX755_SEND_AUTH_CODE", dev->err);
+		if (!dev->silent) sperror("PLEXTOR_SEND_RESPONSE", dev->err);
 		return dev->err;
+	}
+	if (dev->cmd.residue(16)) {
+		if (!dev->silent) printf("Incomplete Plextor authentication response transfer\n");
+		errno = EIO;
+		return dev->err = -1;
 	}
 	return 0;
 }
@@ -4104,4 +4127,7 @@ int scan_plextor::cmd_px755_clear_auth_status(drive_info* dev)
 }
 */
 
-int plextor_px755_calc_auth_code(drive_info* dev, unsigned char* auth_code) { return 0; }
+int plextor_px755_calc_auth_code(drive_info* dev, unsigned char* auth_code) {
+	(void)dev;
+	return qpx_plextor_auth_response(auth_code, auth_code);
+}

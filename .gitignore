@@ -2,6 +2,7 @@ Makefile
 */Makefile.*
 config.h
 */*/*.o
+lib/qpxtransport/third_party/*/*.o
 */.qmake.stash
 */*/lib*.so*
 build*
