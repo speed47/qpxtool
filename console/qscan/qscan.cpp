@@ -131,9 +131,6 @@ static void cleanup_stop_event() {
 void detect_vendor_features(drive_info* dev) {
 	if (isPlextor(dev)) {
 		plextor_get_life(dev);
-		//		if ((dev->dev_ID == PLEXTOR_755) || (dev->dev_ID == PLEXTOR_760) || (dev->dev_ID == PLEXTOR_PREMIUM2))
-		//		if (isPlextorLockPresent(dev))
-		plextor_px755_do_auth(dev);
 		if (!plextor_get_hidecdr_singlesession(dev)) dev->ven_features |= PX_HCDRSS;
 		if (!plextor_get_speedread(dev)) dev->ven_features |= PX_SPDREAD;
 		if (dev->wr_capabilities) {

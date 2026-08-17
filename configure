@@ -491,7 +491,9 @@ cli_install:" >> Makefile
 	echo "	\$(MAKE) -C lib install
 	\$(MAKE) -C console install
 	\$(MAKE) -C plugins install
-	\$(MAKE) -C man install" >> Makefile
+	\$(MAKE) -C man install
+	mkdir -p \$(DESTDIR)\$(PREFIX)/share/doc/qpxtool
+	install -m 644 COPYING THIRD_PARTY_NOTICES \$(DESTDIR)\$(PREFIX)/share/doc/qpxtool" >> Makefile
 
 	echo "
 gui_install:" >> Makefile
@@ -507,7 +509,9 @@ cli_uninstall:" >> Makefile
 	echo "	\$(MAKE) -C lib uninstall
 	\$(MAKE) -C console uninstall
 	\$(MAKE) -C plugins uninstall
-	\$(MAKE) -C man uninstall" >> Makefile
+	\$(MAKE) -C man uninstall
+	rm -f \$(DESTDIR)\$(PREFIX)/share/doc/qpxtool/COPYING
+	rm -f \$(DESTDIR)\$(PREFIX)/share/doc/qpxtool/THIRD_PARTY_NOTICES" >> Makefile
 
 	echo "
 gui_uninstall:" >> Makefile
@@ -520,13 +524,13 @@ lint:
 	@command -v \$(CLANG_FORMAT) >/dev/null 2>&1 || { echo \"Error: \$(CLANG_FORMAT) not found\"; exit 1; }
 	@echo \"Checking C/C++ formatting...\"
 	@fail=0; \
-	for f in \$(shell find lib console plugins gui/src gui/include -name '*.cpp' -o -name '*.h' -o -name '*.c' 2>/dev/null); do \
+	for f in \$(shell find lib console plugins gui/src gui/include \( -name '*.cpp' -o -name '*.h' -o -name '*.c' \) ! -path '*/third_party/*' 2>/dev/null); do \
 		\$(CLANG_FORMAT) --dry-run -Werror \"\$\$f\" || { echo \"  # FAILED: \$\$f\"; fail=1; }; \
 	done; \
 	if [ \"\$\$fail\" -ne 0 ]; then \
 		echo \"\"; \
 		echo \"Lint failed. To fix:\"; \
-		echo \"  find lib console plugins gui/src gui/include -name '*.cpp' -o -name '*.h' -o -name '*.c' | xargs \$(CLANG_FORMAT) -i\"; \
+		echo \"  find lib console plugins gui/src gui/include \\( -name '*.cpp' -o -name '*.h' -o -name '*.c' \\) ! -path '*/third_party/*' | xargs \$(CLANG_FORMAT) -i\"; \
 		exit 1; \
 	else \
 		echo \"All files formatted correctly.\"; \
@@ -1056,4 +1060,3 @@ echo "  man      : "$__mandir
 echo "** Configuration finished! run \`$MAKE\` now"
 
 cleanup
-
