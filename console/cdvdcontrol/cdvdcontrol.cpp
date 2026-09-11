@@ -98,8 +98,6 @@ int get_device_info(drive_info* dev) {
 				printf("  DVD Wr : %4d:%02d:%02d\n", dev->life.dw.h, dev->life.dw.m, dev->life.dw.s);
 		}
 
-		//		if ( isPlextorLockPresent(dev) )
-		plextor_px755_do_auth(dev);
 		if (!plextor_get_hidecdr_singlesession(dev)) dev->ven_features |= PX_HCDRSS;
 		if (!plextor_get_speedread(dev)) dev->ven_features |= PX_SPDREAD;
 		if (dev->wr_capabilities) {

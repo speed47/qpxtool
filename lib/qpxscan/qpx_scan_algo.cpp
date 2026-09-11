@@ -512,7 +512,7 @@ int qscanner::run_cd_errc() {
 		fflush(stdout);
 #endif
 	}
-	plugin->end_test();
+	const int end_err = plugin->end_test();
 	clock_gettime(CLOCK_MONOTONIC, &e);
 	show_avg_speed(lba);
 	printf("\n%d sectors tested: %d - %d\n", lba - lba_sta, lba_sta, lba - 1);
@@ -528,7 +528,8 @@ int qscanner::run_cd_errc() {
 #ifdef USE_FFLUSH
 	fflush(stdout);
 #endif
-	return 0;
+	if (end_err) printf("Scan cleanup failed!\n");
+	return end_err ? 3 : 0;
 }
 
 int qscanner::run_cd_jb() {
@@ -565,7 +566,7 @@ int qscanner::run_cd_jb() {
 		fflush(stdout);
 #endif
 	}
-	plugin->end_test();
+	const int end_err = plugin->end_test();
 	clock_gettime(CLOCK_MONOTONIC, &e);
 	show_avg_speed(lba);
 	printf("\n%d sectors tested: %d - %d\n", lba - lba_sta, lba_sta, lba - 1);
@@ -577,7 +578,8 @@ int qscanner::run_cd_jb() {
 #ifdef USE_FFLUSH
 	fflush(stdout);
 #endif
-	return 0;
+	if (end_err) printf("Scan cleanup failed!\n");
+	return end_err ? 3 : 0;
 }
 
 int qscanner::run_cd_ta() {
@@ -648,7 +650,7 @@ int qscanner::run_dvd_errc() {
 		fflush(stdout);
 #endif
 	}
-	plugin->end_test();
+	const int end_err = plugin->end_test();
 	clock_gettime(CLOCK_MONOTONIC, &e);
 	show_avg_speed(lba);
 	printf("\n%d sectors tested: %d - %d\n", lba - lba_sta, lba_sta, lba - 1);
@@ -666,7 +668,8 @@ int qscanner::run_dvd_errc() {
 #ifdef USE_FFLUSH
 	fflush(stdout);
 #endif
-	return 0;
+	if (end_err) printf("Scan cleanup failed!\n");
+	return end_err ? 3 : 0;
 }
 
 int qscanner::run_dvd_jb() {
@@ -703,7 +706,7 @@ int qscanner::run_dvd_jb() {
 		fflush(stdout);
 #endif
 	}
-	plugin->end_test();
+	const int end_err = plugin->end_test();
 	clock_gettime(CLOCK_MONOTONIC, &e);
 	show_avg_speed(lba);
 	printf("\n%d sectors tested: %d - %d\n", lba - lba_sta, lba_sta, lba - 1);
@@ -715,7 +718,8 @@ int qscanner::run_dvd_jb() {
 #ifdef USE_FFLUSH
 	fflush(stdout);
 #endif
-	return 0;
+	if (end_err) printf("Scan cleanup failed!\n");
+	return end_err ? 3 : 0;
 }
 
 #define MAX_RETRY 16
@@ -779,7 +783,7 @@ int qscanner::run_fete() {
 		fflush(stdout);
 #endif
 	}
-	plugin->end_test();
+	const int end_err = plugin->end_test();
 	clock_gettime(CLOCK_MONOTONIC, &e);
 	show_avg_speed(lba);
 	printf("\n%d sectors tested: %d - %d\n", lba - lba_sta, lba_sta, lba - 1);
@@ -789,7 +793,8 @@ int qscanner::run_fete() {
 #ifdef USE_FFLUSH
 	fflush(stdout);
 #endif
-	return 0;
+	if (end_err) printf("Scan cleanup failed!\n");
+	return end_err ? 3 : 0;
 }
 
 int qscanner::run_dvd_ta() {
@@ -811,6 +816,7 @@ int qscanner::run_dvd_ta() {
 	}
 
 	// not implemented
+	if (plugin->end_test()) printf("Scan cleanup failed!\n");
 	return -1;
 }
 
@@ -858,7 +864,7 @@ int qscanner::run_bd_errc() {
 		fflush(stdout);
 #endif
 	}
-	plugin->end_test();
+	const int end_err = plugin->end_test();
 	clock_gettime(CLOCK_MONOTONIC, &e);
 	show_avg_speed(lba);
 	printf("\n%d sectors tested: %d - %d\n", lba - lba_sta, lba_sta, lba - 1);
@@ -872,5 +878,6 @@ int qscanner::run_bd_errc() {
 #ifdef USE_FFLUSH
 	fflush(stdout);
 #endif
-	return 0;
+	if (end_err) printf("Scan cleanup failed!\n");
+	return end_err ? 3 : 0;
 }

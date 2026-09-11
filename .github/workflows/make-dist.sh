@@ -26,6 +26,7 @@ mkdir dist
 for i in $(ntldd -R gui/$flavor/qpxtool.exe  | awk '/mingw/ {print $3}' | tr \\\\ / | grep -Eo '[^/]+$'); do cp -va $MINGW_PREFIX/bin/$i dist/; done
 cp -va gui/$flavor/qpxtool.exe console/*/*.exe dist/
 find lib/lib -name "*.dll" | xargs cp -vat dist/
+cp -va COPYING THIRD_PARTY_NOTICES dist/
 mkdir -p dist/share/qt6/plugins/platforms
 cp -va $MINGW_PREFIX/share/qt6/plugins/platforms/* dist/share/qt6/plugins/platforms/
 mkdir -p dist/plugins
