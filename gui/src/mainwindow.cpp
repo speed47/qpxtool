@@ -487,7 +487,7 @@ void QPxToolMW::run_tests()
 	testDialog = NULL;
 
 	connect(dev, SIGNAL(testsDone()), this, SLOT(tests_done()));
-	connect(dev, SIGNAL(testsError()), this, SLOT(tests_error()));
+	connect(dev, SIGNAL(testsError(QString)), this, SLOT(tests_error(QString)));
 	connect(dev, SIGNAL(testsStopped()), this, SLOT(tests_stopped()));
 
 	set.tests = dev->test_req;
@@ -533,7 +533,7 @@ void QPxToolMW::terminate_tests() {
 void QPxToolMW::tests_done() {
 	device* dev = (device*)sender();
 	disconnect(dev, SIGNAL(testsDone()), this, SLOT(tests_done()));
-	disconnect(dev, SIGNAL(testsError()), this, SLOT(tests_error()));
+	disconnect(dev, SIGNAL(testsError(QString)), this, SLOT(tests_error(QString)));
 	disconnect(dev, SIGNAL(testsStopped()), this, SLOT(tests_stopped()));
 
 	if (set.report_autosave || set.report_autosave_db) {
@@ -546,9 +546,14 @@ void QPxToolMW::tests_done() {
 	QMessageBox::information(this, tr("Done"), dev->id + ":\n" + tr("All tests finished"));
 }
 
-void QPxToolMW::tests_error() {
+void QPxToolMW::tests_error(const QString& message) {
+	device* dev = (device*)sender();
+	disconnect(dev, SIGNAL(testsDone()), this, SLOT(tests_done()));
+	disconnect(dev, SIGNAL(testsError(QString)), this, SLOT(tests_error(QString)));
+	disconnect(dev, SIGNAL(testsStopped()), this, SLOT(tests_stopped()));
 	QMessageBox::warning(this, tr("Error"),
-	                     tr("Error performing test!") + "\n" + tr("qScan finished with non-zero exit code"));
+	                     tr("Error performing test!") + "\n" +
+	                         (message.isEmpty() ? tr("qScan finished with non-zero exit code") : message));
 	mwidget->selectTab(8);
 }
 

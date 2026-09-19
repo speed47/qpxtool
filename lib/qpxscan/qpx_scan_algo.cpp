@@ -46,6 +46,25 @@ void qscanner::calc_cur_speed(long sects) {
 	//	printf("\nTest time: %6.2fs\navg speed: %5.3f X  %5d kB/s\n", btime, spdX, spdKB);
 }
 
+// Sequential scans must validate the drive position before using a sample.
+int qscanner::scan_block(void* data, uint32_t* lba) {
+	uint32_t previous = *lba;
+	int result = plugin->scan_block(data, lba);
+	if (*lba < previous) {
+		printf("\nScan error: drive position moved backwards from LBA %u to %u. "
+		       "Scan aborted; results are incomplete.\n",
+		       previous, *lba);
+	} else if (result) {
+		printf("\nScan error: block scan failed at LBA %u. Scan aborted; results are incomplete.\n", previous);
+	} else {
+		return 0;
+	}
+	*lba = previous;
+	stop_req = 1;
+	fflush(stdout);
+	return 3;
+}
+
 int qscanner::readline(int fd, char* buf, int maxlen) {
 	int cnt = 0;
 	char* cbuf = buf;
@@ -487,10 +506,9 @@ int qscanner::run_cd_errc() {
 	for (; (!stop_req) && lba < lba_end;) {
 		lbao = lba;
 		clock_gettime(CLOCK_MONOTONIC, &blks);
-		if (plugin->scan_block((void*)&err, &lba)) {
-			printf("\nBlock scan error! terminating...\n");
-			stop_req = 1;
-			break;
+		if (scan_block((void*)&err, &lba)) {
+			plugin->end_test();
+			return 3;
 		}
 		if (lba == lbao) {
 			// drive hasn't advanced yet - stale poll, skip this sample
@@ -553,9 +571,9 @@ int qscanner::run_cd_jb() {
 	for (; (!stop_req) && lba < lba_end;) {
 		lbao = lba;
 		clock_gettime(CLOCK_MONOTONIC, &blks);
-		if (plugin->scan_block((void*)&jb, &lba)) {
-			printf("\nBlock scan error! terminating...\n");
-			stop_req = 1;
+		if (scan_block((void*)&jb, &lba)) {
+			plugin->end_test();
+			return 3;
 		}
 		clock_gettime(CLOCK_MONOTONIC, &blke);
 		calc_cur_speed(lba - lbao);
@@ -623,9 +641,9 @@ int qscanner::run_dvd_errc() {
 	for (; (!stop_req) && lba < lba_end;) {
 		lbao = lba;
 		clock_gettime(CLOCK_MONOTONIC, &blks);
-		if (plugin->scan_block((void*)&err, &lba)) {
-			printf("\nBlock scan error! terminating...\n");
-			stop_req = 1;
+		if (scan_block((void*)&err, &lba)) {
+			plugin->end_test();
+			return 3;
 		}
 		err_tot += err;
 		err_max.EMAX(err);
@@ -693,9 +711,9 @@ int qscanner::run_dvd_jb() {
 	for (; (!stop_req) && lba < lba_end;) {
 		lbao = lba;
 		clock_gettime(CLOCK_MONOTONIC, &blks);
-		if (plugin->scan_block((void*)&jb, &lba)) {
-			printf("\nBlock scan error! terminating...\n");
-			stop_req = 1;
+		if (scan_block((void*)&jb, &lba)) {
+			plugin->end_test();
+			return 3;
 		}
 		clock_gettime(CLOCK_MONOTONIC, &blke);
 		calc_cur_speed(lba - lbao);
@@ -757,14 +775,9 @@ int qscanner::run_fete() {
 	for (; (!stop_req) && lba < lba_end;) {
 		lbao = lba;
 	block_retry:
-		if (plugin->scan_block((void*)&ft, &lba)) {
-			printf("\nBlock scan error! terminating...\n");
-			stop_req = 1;
-		}
-		if (lba < 0) {
-			if (retry--) goto block_retry;
-			printf("\nDrive returned negative LBA %d times! terminating...\n", MAX_RETRY);
-			stop_req = 1;
+		if (scan_block((void*)&ft, &lba)) {
+			plugin->end_test();
+			return 3;
 		}
 		if (lba == lbao) {
 			if (retry--) goto block_retry;
@@ -850,9 +863,9 @@ int qscanner::run_bd_errc() {
 	for (; (!stop_req) && lba < lba_end;) {
 		lbao = lba;
 		clock_gettime(CLOCK_MONOTONIC, &blks);
-		if (plugin->scan_block((void*)&err, &lba)) {
-			printf("\nBlock scan error! terminating...\n");
-			stop_req = 1;
+		if (scan_block((void*)&err, &lba)) {
+			plugin->end_test();
+			return 3;
 		}
 		err_tot += err;
 		err_max.EMAX(err);
