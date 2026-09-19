@@ -67,4 +67,8 @@ extern char** add_arg(char** args, int* argc, const char* arg);
 //extern int createchild(char **argv, pipe_t &rdpipe, bool r, pipe_t &wrpipe, bool w);
 extern int createChildProcess(char** argv, pipe_t* rdpipe = NULL, pipe_t* wrpipe = NULL);
 
+// Probe qscan on this host without supplying any device or test arguments.
+// Returns false for old/missing scanners, failures, and a five-second timeout.
+extern bool qscan_supports_exclusive();
+
 #endif // DR_THREADS_H

@@ -59,6 +59,15 @@ ATA device
 
 .SH "OPTIONS"
 
+\fB\-\-exclusive\fR
+.br
+Require OS drive locking for the selected test (requires \-t).
+Lock acquisition failure aborts the scan. Windows uses the CD-ROM exclusive
+lock and may lock/dismount the volume first. Linux uses an O_EXCL block-device
+claim: unmount the disc first; raw SCSI clients may bypass this protection.
+macOS already uses IOKit exclusive access. BSD and GNU/Hurd report unsupported.
+The lock is released when qscan closes the drive or exits.
+
 \fB\-l, \-\-scanbus\fR
 .br
 		scan busses for all available optical devices

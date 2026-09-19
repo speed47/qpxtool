@@ -236,7 +236,14 @@ void TestDialog::winit() {
 	l_plugin_info = new QLabel(this);
 	layout_tests->addWidget(l_plugin_info, 14, 0, 1, 2);
 
-	layout_tests->setRowStretch(15, 10);
+	ck_exclusive = new QCheckBox(tr("Request exclusive drive access"), this);
+	ck_exclusive->setToolTip(tr("Acquire the operating system's drive lock before each test.\n"
+	                            "The test fails if locking is unavailable or the drive is busy.\n"
+	                            "Close applications using the disc. Windows may dismount it;\n"
+	                            "on Linux, unmount it first. Linux raw SCSI clients can bypass the claim.\n"
+	                            "macOS already uses exclusive access. BSD is unsupported."));
+	layout_tests->addWidget(ck_exclusive, 15, 0, 1, 2);
+	layout_tests->setRowStretch(16, 10);
 
 /*
 // media summary
@@ -384,6 +391,7 @@ void TestDialog::updateData(bool save, bool setPlugin) {
 	ck_liteon_force_old->setChecked(dev->liteon_force_old);
 	ck_hldtst_test_mode->setChecked(dev->hldtst_test_mode);
 	ck_force_probe->setChecked(dev->force_probe);
+	ck_exclusive->setChecked(dev->exclusive);
 
 	spd_RT->clear();
 	spd_RT->setEnabled(ck_RT->isChecked());
@@ -461,6 +469,7 @@ void TestDialog::saveData() {
 	dev->liteon_force_old = ck_liteon_force_old->isChecked();
 	dev->hldtst_test_mode = ck_hldtst_test_mode->isChecked();
 	dev->force_probe = ck_force_probe->isChecked();
+	dev->exclusive = ck_exclusive->isChecked();
 
 	dev->tspeeds.rt = (int)spd_RT->currentText().remove(QRegularExpression("[Xx]")).toFloat();
 	dev->tspeeds.wt = (int)spd_WT->currentText().remove(QRegularExpression("[Xx]")).toFloat();

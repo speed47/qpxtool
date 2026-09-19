@@ -53,6 +53,7 @@ list|scanbus    list available devices\n\
 dinfo           show device info (have to set device first)\n\
 minfo           show media info (have to set device first)\n\
 run             run test (have to set device and test type first)\n\
+run exclusive   run test requiring exclusive drive access\n\
 \n\
 get             get current parameters\n\
 set <PAR>=<VAL> set parameter. PAR can be:\n\
@@ -66,6 +67,7 @@ set <PAR>=<VAL> set parameter. PAR can be:\n\
                         ta   - time analyser\n\
                 speed - set test speed, VAL should be integer\n\
                 simul - set test speed, VAL should be 0 or 1 (default: 1)\n\
+                exclusive - require drive locking, VAL is 0 or 1 (default: 0)\n\
 ";
 
 const int helpstr_sz = sizeof(helpstr);
@@ -138,7 +140,13 @@ int readline(int fd, char* buf, int maxlen, fdtype_t fdtype) {
 						return -1;
 				}
 			}
-			if (!r) return -1;
+			if (!r) {
+				if (!cnt) return -1;
+				// The pipe reader looks ahead past CR/LF. Preserve its final line at EOF,
+				// including output without a trailing line ending.
+				if (buf[cnt - 1] == '\n' || buf[cnt - 1] == '\r') cnt--;
+				break;
+			}
 			// look for CR/LF/CR+LF
 			if (fdtype == FD_SOCKET) {
 				if (buf[cnt] == 0x0A || buf[cnt] == 0x0D) goto readline_end;
@@ -171,6 +179,7 @@ void child_proc(child_arg_t* arg) {
 	char test[8] = "\0";
 	int speed = -1;
 	bool WT_simul = 1;
+	bool exclusive = false;
 #if defined(_WIN32) || defined(_WIN64)
 	send(arg->connfd, IDENTV, IDENTV_LEN, 0);
 #else
@@ -218,9 +227,12 @@ void child_proc(child_arg_t* arg) {
 			mode = minfo;
 		} else if (!strcmp(linei, "run\n")) {
 			mode = scan;
+		} else if (!strcmp(linei, "run exclusive\n")) {
+			exclusive = true;
+			mode = scan;
 		} else if (!strcmp(linei, "get\n")) {
-			sprintf(lineo, "current parameters:\ndevice: '%s'\ntest  : '%s'\nspeed : %d\nsimul : %s\n", device, test,
-			        speed, WT_simul ? "on" : "off");
+			sprintf(lineo, "current parameters:\ndevice: '%s'\ntest  : '%s'\nspeed : %d\nsimul : %s\nexclusive : %s\n",
+			        device, test, speed, WT_simul ? "on" : "off", exclusive ? "on" : "off");
 #if defined(_WIN32) || defined(_WIN64)
 			send(arg->connfd, lineo, strlen(lineo), 0);
 #else
@@ -271,6 +283,20 @@ void child_proc(child_arg_t* arg) {
 			} else if (!strncmp(linet, "simul=", 6)) {
 				linet += 6;
 				WT_simul = atol(linet) ? 1 : 0;
+			} else if (!strncmp(linet, "exclusive=", 10)) {
+				if (!strcmp(linet + 10, "1\n"))
+					exclusive = true;
+				else if (!strcmp(linet + 10, "0\n"))
+					exclusive = false;
+				else {
+					const char* error = "Scan error: exclusive must be 0 or 1.\n";
+#if defined(_WIN32) || defined(_WIN64)
+					send(arg->connfd, error, strlen(error), 0);
+#else
+					write(arg->connfd, error, strlen(error));
+#endif
+					return;
+				}
 			} else {
 				sprintf(lineo, "QSCAND: set: invalid parameter!\n");
 #if defined(_WIN32) || defined(_WIN64)
@@ -293,6 +319,18 @@ void child_proc(child_arg_t* arg) {
 		}
 
 		if (mode != none) {
+			// Probe on the scanning host before passing any device/test arguments.
+			// Older qscan versions ignore unknown options and otherwise still scan.
+			if (mode == scan && exclusive && !qscan_supports_exclusive()) {
+				const char* error = "Scan error: qscan does not support the exclusive-access handshake or could not "
+				                    "be checked. Upgrade qscan on the scanning host. No test was started.\n";
+#if defined(_WIN32) || defined(_WIN64)
+				send(arg->connfd, error, strlen(error), 0);
+#else
+				write(arg->connfd, error, strlen(error));
+#endif
+				return;
+			}
 			int argc = 0;
 			char** argv = (char**)malloc(sizeof(char*));
 			argv[0] = NULL;
@@ -331,6 +369,7 @@ void child_proc(child_arg_t* arg) {
 					argv = add_arg(argv, &argc, speeds);
 
 					if (!strcmp(test, "wt") && !WT_simul) argv = add_arg(argv, &argc, "-W");
+					if (exclusive) argv = add_arg(argv, &argc, "--exclusive");
 					break;
 				case dinfo:
 					argv = add_arg(argv, &argc, "-d");

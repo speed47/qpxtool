@@ -55,8 +55,7 @@ void MediaWatcher::run() {
 #ifndef QT_NO_DEBUG
 	qDebug() << dev->device << ": watcher started";
 #endif
-	sreq = 0;
-	preq = 0;
+	if (sreq) return;
 	// initialising surrent status
 	op = cp = test_unit_ready(dev);
 	while (!sreq) {
