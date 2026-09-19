@@ -177,6 +177,7 @@ private:
 	int fd, autoclose;
 	char* filename;
 	struct cdrom_generic_command cgc;
+	bool exclusive = false;
 	union sense_union {
 		struct request_sense s;
 		unsigned char u[18];
@@ -194,6 +195,7 @@ public:
 	Scsi_Command(void* f);
 	~Scsi_Command();
 	int associate(const char* file, const struct stat* ref);
+	int acquire_exclusive(); // 0 on success; released when the owned device handle closes
 	unsigned char& operator[](size_t i);
 	unsigned char& operator()(size_t i);
 	unsigned char* sense();
@@ -234,6 +236,7 @@ public:
 	Scsi_Command(void* f);
 	~Scsi_Command();
 	int associate(const char* file, const struct stat* ref);
+	int acquire_exclusive();
 	unsigned char& operator[](size_t i);
 	unsigned char& operator()(size_t i);
 	unsigned char* sense();
@@ -282,6 +285,7 @@ public:
 	~Scsi_Command();
 
 	int associate(const char* file, const struct stat* ref);
+	int acquire_exclusive();
 	unsigned char& operator[](size_t i);
 	unsigned char& operator()(size_t i);
 	unsigned char* sense();
@@ -318,12 +322,14 @@ private:
 	int autoclose;
 	char* filename;
 	SPKG p;
+	bool exclusive = false;
 
 public:
 	Scsi_Command();
 	Scsi_Command(void* f);
 	~Scsi_Command();
 	int associate(const char* file, const struct stat* ref = NULL);
+	int acquire_exclusive();
 	unsigned char& operator[](size_t i);
 	unsigned char& operator()(size_t i);
 	unsigned char* sense();
@@ -403,6 +409,7 @@ public:
 	~Scsi_Command();
 
 	int associate(const char* file, const struct stat* ref = NULL);
+	int acquire_exclusive();
 
 	unsigned char& operator[](size_t i);
 	unsigned char& operator()(size_t i);

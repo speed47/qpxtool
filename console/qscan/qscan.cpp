@@ -168,6 +168,8 @@ enum {
 	OPT_LITEON_FORCE_OLD = 256,
 	OPT_HLDTST_TEST_MODE,
 	OPT_FORCE_PROBE,
+	OPT_EXCLUSIVE,
+	OPT_CHECK_EXCLUSIVE_SUPPORT,
 };
 
 static struct option long_options[] = {{"help", 0, NULL, 'h'},
@@ -189,6 +191,8 @@ static struct option long_options[] = {{"help", 0, NULL, 'h'},
                                        {"liteon-force-old", 0, NULL, OPT_LITEON_FORCE_OLD},
                                        {"hldtst-test-mode", 0, NULL, OPT_HLDTST_TEST_MODE},
                                        {"force-probe", 0, NULL, OPT_FORCE_PROBE},
+                                       {"exclusive", 0, NULL, OPT_EXCLUSIVE},
+                                       {"check-exclusive-support", 0, NULL, OPT_CHECK_EXCLUSIVE_SUPPORT},
                                        {0, 0, 0, 0}};
 
 void show_available_errc_data(qscanner* scanner) {
@@ -208,6 +212,19 @@ void show_available_errc_data(qscanner* scanner) {
 			if (errc_data & (1 << i)) printf(" %s", errc_names_bd[i]);
 	}
 	printf("\n");
+}
+
+static void exclusive_access_error(const char* device) {
+#if defined(_WIN32) || defined(_WIN64)
+	printf("Scan error: cannot acquire exclusive drive access to '%s' (Windows error %lu). "
+	       "Close other applications using the disc and try again.\n",
+	       device, (unsigned long)GetLastError());
+#else
+	printf("Scan error: cannot acquire exclusive drive access to '%s': %s. "
+	       "Close other applications and unmount the disc, or disable exclusive access.\n",
+	       device, strerror(errno));
+#endif
+	fflush(stdout);
 }
 
 int main(int argc, char** argv) {
@@ -233,6 +250,7 @@ int main(int argc, char** argv) {
 	bool liteon_force_old = false;
 	bool hldtst_test_mode = false;
 	bool force_probe = false;
+	bool exclusive = false;
 	printf("qScan " VERSION " (C) 2007-2009  Gennady \"ShultZ\" Kozlov\n");
 	while (1) {
 		c = getopt_long(argc, argv, "hvliImMd:pf:t:WSs:r:w:", long_options, NULL);
@@ -263,6 +281,7 @@ int main(int argc, char** argv) {
 				printf("   --liteon-force-old  LiteOn: force old CD ERRC commands\n");
 				printf("   --hldtst-test-mode  LiteOn: try to enable test mode on some LG/Hitachi (HL-DT-ST) drives\n");
 				printf("   --force-probe       ignore hardcoded vendor/drive lists, always probe\n");
+				printf("   --exclusive         require OS drive locking for the test\n");
 				printf("-I --shortinfo      print device info\n");
 				printf("-i --info           print device info (with supported features list)\n");
 				printf("-m --media          print media info\n");
@@ -349,6 +368,12 @@ int main(int argc, char** argv) {
 			case OPT_FORCE_PROBE:
 				force_probe = true;
 				break;
+			case OPT_EXCLUSIVE:
+				exclusive = true;
+				break;
+			case OPT_CHECK_EXCLUSIVE_SUPPORT:
+				// A version handshake only: do not open a drive or start any test.
+				return 0;
 			default:
 				break;
 		}
@@ -357,6 +382,22 @@ int main(int argc, char** argv) {
 		printf(MSGPREF "no device specified! Try using -l to see list\n");
 		return 1;
 	}
+	if (exclusive && !test) {
+		printf("Scan error: --exclusive requires --test.\n");
+		return 1;
+	}
+#ifdef DISABLE_INTERNAL_WT
+	if (exclusive && !strcmp(test, "wt")) {
+		printf("Scan error: exclusive access requires the internal write-test implementation.\n");
+		return 2;
+	}
+#endif
+#if !defined(__linux) && !defined(_WIN32) && !defined(_WIN64) && !(defined(__APPLE__) && defined(__MACH__))
+	if (exclusive) {
+		printf("Scan error: exclusive drive access is not supported on this OS.\n");
+		return 2;
+	}
+#endif
 
 	// LITEON_FORCE_OLD env var kept for backwards compatibility
 	if (!liteon_force_old) {
@@ -366,9 +407,27 @@ int main(int argc, char** argv) {
 
 	dev = new drive_info(device);
 	if (dev->mmc < 0) {
-		printf(MSGPREF " can't open device %s!\n", device);
+		if (exclusive)
+			exclusive_access_error(device);
+		else
+			printf(MSGPREF " can't open device %s!\n", device);
 		delete dev;
 		return 2;
+	}
+	// Acquire before discovery and plugin probing, and keep the same handle
+	// through plugin cleanup. Deleting dev releases the OS lock on every exit.
+	if (exclusive) {
+		if (dev->cmd.acquire_exclusive()) {
+			exclusive_access_error(device);
+			delete dev;
+			return 2;
+		}
+#if defined(__linux)
+		printf("Exclusive access: Linux block-device claim acquired (raw SCSI access is not excluded).\n");
+#else
+		printf("Exclusive access: native drive lock acquired.\n");
+#endif
+		fflush(stdout);
 	}
 	switch (inquiry(dev)) {
 		case 0:

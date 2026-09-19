@@ -17,6 +17,7 @@ class device;
 class drive_info;
 
 #include <QThread>
+#include <atomic>
 
 class MediaWatcher : public QThread {
 	Q_OBJECT
@@ -39,7 +40,7 @@ protected:
 	virtual void run();
 
 private:
-	bool preq, sreq;
+	std::atomic<bool> preq{false}, sreq{false};
 	drive_info* dev;
 };
 

@@ -12,6 +12,17 @@ qscand \- network wrapper for qscan
 .SH "DESCRIPTION"
 qscand is a network wrapper which gives you access to your devices through the TCP/IP stacK. 
 
+.SH "EXCLUSIVE ACCESS"
+The protocol command \fBrun exclusive\fR requires OS drive locking for the test.
+Alternatively, use \fBset exclusive=1\fR followed by \fBrun\fR; use
+\fBset exclusive=0\fR to disable it. The default is off for each connection.
+The server passes \fB\-\-exclusive\fR to qscan. Both programs on the server must
+support this option. Lock failures are forwarded as Scan error messages.
+Before launching an exclusive test, qscand runs a no-device capability probe.
+If the scanner does not support the handshake or the probe fails or times out,
+qscand reports an error without starting the test.
+Protection depends on the server OS; see qscan(1).
+
 .SH "OPTIONS"
 
 \fB\-h, \-\-help\fR

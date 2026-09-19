@@ -25,6 +25,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <qpx_mmc_defs.h>
+#include <threads.h>
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
@@ -188,6 +189,7 @@ device::device(QObject* p) : QObject(p) {
 	liteon_force_old = (env_liteon && strcmp(env_liteon, "1") == 0);
 	hldtst_test_mode = false;
 	force_probe = false;
+	exclusive = false;
 	verbose = false;
 
 	tspeeds.rt = 1;
@@ -325,6 +327,15 @@ bool device::start() {
 			start_update_info();
 			break;
 		case threadTest:
+			if (exclusive && mwatcher) {
+				// Pausing alone retains the drive handle (and IOKit lock on macOS).
+				restartWatcherAfterTests = true;
+				mwatcher->disconnect(this);
+				mwatcher->stop();
+				mwatcher->wait();
+				delete mwatcher;
+				mwatcher = NULL;
+			}
 			next_test();
 			break;
 		default:
@@ -931,6 +942,10 @@ bool device::stop_tests() {
 
 bool device::next_test() {
 	ctest = 0;
+	exclusiveConfirmed = false;
+	testStarted = false;
+	// Initialize before any QProcess/socket signal can invoke the output parser.
+	clock_gettime(CLOCK_MONOTONIC, &timeSta);
 	QString stest;
 #ifndef QT_NO_DEBUG
 	qDebug("STA: device::next_test()");
@@ -983,6 +998,7 @@ bool device::next_test() {
 		qDebug("END: device::next_test(): to tests remaining");
 #endif
 		//		nprocess = "";
+		restoreWatcherAfterTests();
 		emit testsDone();
 		return false;
 	}
@@ -1028,7 +1044,13 @@ bool device::next_test() {
 		//		QObject::connect(proc, SIGNAL(readyReadStandardOutput()),
 		//				this, SLOT(qscan_process_test()));
 
+		if (exclusive && !qscan_supports_exclusive()) {
+			testError = tr("qscan does not support the exclusive-access handshake or could not be checked. "
+			               "Upgrade qscan on the scanning host. No test was started.");
+			goto next_test_err;
+		}
 		qopts << "-d" << path << "-t" << stest << "-s" << QString::number(test_spd);
+		if (exclusive) qopts << "--exclusive";
 		if (verbose) qopts << "-v";
 		if (stest == "wt" && !WT_simul) qopts << "-W";
 		if (stest != "rt" && stest != "wt" && !plugin.isEmpty()) { qopts << "--force-plugin" << plugin; }
@@ -1047,8 +1069,9 @@ bool device::next_test() {
 #endif
 			goto next_test_err;
 		}
-		QObject::connect(proc, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(qscan_callback_test()));
 		clock_gettime(CLOCK_MONOTONIC, &timeSta);
+		testStarted = true;
+		QObject::connect(proc, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(qscan_callback_test()));
 #ifndef QT_NO_DEBUG
 		qDebug("qscan (local) started");
 #endif
@@ -1073,13 +1096,16 @@ bool device::next_test() {
 #endif
 			goto next_test_err;
 		}
+		clock_gettime(CLOCK_MONOTONIC, &timeSta);
+		testStarted = true;
 		QObject::connect(sock, SIGNAL(disconnected()), this, SLOT(qscan_callback_test()));
 
 		sock->write("set dev=" + path.toLatin1() + "\n");
 		sock->write("set test=" + stest.toLatin1() + "\n");
 		sock->write("set speed=" + QString::number(test_spd).toLatin1() + "\n");
 		if (stest == "wt") sock->write("set simul=" + QString::number(WT_simul).toLatin1() + "\n");
-		sock->write("run\n");
+		// Old qscand versions reject this command rather than scan without the lock.
+		sock->write(exclusive ? "run exclusive\n" : "run\n");
 		sock->write("close\n");
 		clock_gettime(CLOCK_MONOTONIC, &timeSta);
 #ifndef QT_NO_DEBUG
@@ -1089,7 +1115,8 @@ bool device::next_test() {
 	}
 
 next_test_err:
-	qscan_callback_info();
+	if (testError.isEmpty()) testError = tr("Unable to start the scan process or connect to the remote scanner.");
+	qscan_callback_test();
 #ifndef QT_NO_DEBUG
 	qDebug("END: device::next_test()");
 #endif
@@ -1783,38 +1810,42 @@ void device::qscan_callback_test() {
 	nprocess = "";
 	emit process_finished();
 
-	clock_gettime(CLOCK_MONOTONIC, &timeEnd);
-	time = (int)((timeEnd.tv_sec - timeSta.tv_sec) + (timeEnd.tv_nsec - timeSta.tv_nsec) / 1000000000.0);
+	if (testStarted) {
+		clock_gettime(CLOCK_MONOTONIC, &timeEnd);
+		time = (int)((timeEnd.tv_sec - timeSta.tv_sec) + (timeEnd.tv_nsec - timeSta.tv_nsec) / 1000000000.0);
 
-	switch (ctest) {
-		case TEST_RT:
-			testData.rt_time = time;
-			emit block_RT();
-			break;
-		case TEST_WT:
-			testData.wt_time = time;
-			emit block_WT();
-			break;
-		case TEST_ERRC:
-			testData.errc_time = time;
-			emit block_ERRC();
-			break;
-		case TEST_JB:
-			testData.jb_time = time;
-			emit block_JB();
-			break;
-		case TEST_FT:
-			testData.ft_time = time;
-			emit block_FT();
-			break;
-		case TEST_TA:
-			testData.ta_time = time;
-			emit block_TA();
-			break;
-		default:
-			break;
+		switch (ctest) {
+			case TEST_RT:
+				testData.rt_time = time;
+				emit block_RT();
+				break;
+			case TEST_WT:
+				testData.wt_time = time;
+				emit block_WT();
+				break;
+			case TEST_ERRC:
+				testData.errc_time = time;
+				emit block_ERRC();
+				break;
+			case TEST_JB:
+				testData.jb_time = time;
+				emit block_JB();
+				break;
+			case TEST_FT:
+				testData.ft_time = time;
+				emit block_FT();
+				break;
+			case TEST_TA:
+				testData.ta_time = time;
+				emit block_TA();
+				break;
+			default:
+				break;
+		}
 	}
 
+	if (exclusive && !exclusiveConfirmed && testError.isEmpty() && !stopped)
+		testError = tr("The scanner did not confirm exclusive drive access. Upgrade qscan on the scanning host.");
 	if (stopped) {
 		emit testsStopped();
 	} else if (xcode || !testError.isEmpty()) {
@@ -1824,6 +1855,7 @@ void device::qscan_callback_test() {
 		threadType = threadNone;
 		running = 0;
 		mutex->unlock();
+		restoreWatcherAfterTests();
 		emit testsError(testError);
 		return;
 	}
@@ -1862,6 +1894,10 @@ void device::qscan_process_test() {
 		emit outputLine(qout);
 		// Also recognize scan failures forwarded by qscand, which has no exit code here.
 		if (qout.startsWith("Scan error:")) testError = qout;
+		if (exclusive && qout.startsWith("QSCAND: invalid command"))
+			testError =
+			    tr("The remote qscand does not support exclusive access. Upgrade qscand and qscan on the server.");
+		if (qout.startsWith("Exclusive access:")) exclusiveConfirmed = true;
 #ifndef QT_NO_DEBUG
 		qDebug() << qout;
 #endif
@@ -2144,6 +2180,12 @@ void device::load(QIODevice* f) {
 bool device::isLoading() { return resReader->isRunning(); };
 bool device::loadResult() { return resReader->result(); };
 
+void device::restoreWatcherAfterTests() {
+	if (!restartWatcherAfterTests) return;
+	restartWatcherAfterTests = false;
+	startWatcher();
+}
+
 void device::startWatcher() {
 	if (mwatcher) return;
 	mwatcher = new MediaWatcher(this);
@@ -2174,12 +2216,14 @@ void device::unpauseWatcher() {
 }
 
 void device::watcherStarted() {
+	if (!mwatcher || sender() != mwatcher) return;
 #ifndef QT_NO_DEBUG
 	qDebug() << "device: " << path << ": watcher started";
 #endif
 }
 
 void device::watcherStoped() {
+	if (!mwatcher || sender() != mwatcher) return;
 #ifndef QT_NO_DEBUG
 	qDebug() << "device: " << path << ": watcher stoped";
 #endif
@@ -2189,11 +2233,13 @@ void device::watcherStoped() {
 }
 
 void device::watcherEventLoading() {
+	if (!mwatcher || sender() != mwatcher) return;
 	nprocess = tr("Loading media...");
 	emit process_started();
 }
 
 void device::watcherEventRemoved() {
+	if (!mwatcher || sender() != mwatcher) return;
 #ifndef QT_NO_DEBUG
 	qDebug("device::watcherEventRemoved()");
 #endif
@@ -2202,6 +2248,7 @@ void device::watcherEventRemoved() {
 }
 
 void device::watcherEventNew() {
+	if (!mwatcher || sender() != mwatcher) return;
 #ifndef QT_NO_DEBUG
 	qDebug("device::watcherEventNew()");
 #endif
@@ -2210,6 +2257,7 @@ void device::watcherEventNew() {
 }
 
 void device::watcherEventNoMedia() {
+	if (!mwatcher || sender() != mwatcher) return;
 	nprocess = "";
 	emit process_finished();
 }

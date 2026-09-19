@@ -90,6 +90,7 @@ private:
 	QLabel* l_plugin;
 	QComboBox* cb_plugin;
 	QLabel* l_plugin_info;
+	QCheckBox* ck_exclusive;
 	/*
 	QGroupBox		*grp_media;
 	QBoxLayout		*layout_media;

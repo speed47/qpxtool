@@ -485,6 +485,7 @@ public:
 	bool liteon_force_old;
 	bool hldtst_test_mode;
 	bool force_probe;
+	bool exclusive;
 	bool verbose;
 	struct timespec timeSta;
 
@@ -565,6 +566,10 @@ private:
 	QString testError;
 	bool running;
 	bool preserveMediaInfo;
+	bool restartWatcherAfterTests = false;
+	bool exclusiveConfirmed = false;
+	bool testStarted = false;
+	void restoreWatcherAfterTests();
 
 	int taIdx;
 	MediaWatcher* mwatcher;

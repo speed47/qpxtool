@@ -18,6 +18,11 @@
 #include "threads.h"
 
 #include <fcntl.h>
+#include <chrono>
+#if !defined(_WIN32) && !defined(_WIN64)
+#include <signal.h>
+#include <sys/wait.h>
+#endif
 
 /*
  * sync_pipe_add_arg & protect_arg functions from ethereal
@@ -172,6 +177,48 @@ int WIN32_thread_join(HANDLE& tid, void** ret) {
 #endif
 
 //int createchild(char **argv, pipe_t &rdpipe, bool r, pipe_t &wrpipe, bool w)
+bool qscan_supports_exclusive() {
+#if defined(_WIN32) || defined(_WIN64)
+	char command[] = "qscan --check-exclusive-support";
+	STARTUPINFOA si = {};
+	si.cb = sizeof(si);
+	PROCESS_INFORMATION pi = {};
+	if (!CreateProcessA(NULL, command, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) return false;
+	CloseHandle(pi.hThread);
+	DWORD exit_code = 1;
+	bool supported = WaitForSingleObject(pi.hProcess, 5000) == WAIT_OBJECT_0 &&
+	                 GetExitCodeProcess(pi.hProcess, &exit_code) && exit_code == 0;
+	if (!supported) {
+		TerminateProcess(pi.hProcess, 1);
+		WaitForSingleObject(pi.hProcess, INFINITE);
+	}
+	CloseHandle(pi.hProcess);
+	return supported;
+#else
+	pid_t child = fork();
+	if (child < 0) return false;
+	if (!child) {
+		int nullfd = open("/dev/null", O_WRONLY);
+		if (nullfd < 0) _exit(127);
+		if (dup2(nullfd, STDOUT_FILENO) < 0 || dup2(nullfd, STDERR_FILENO) < 0) _exit(127);
+		if (nullfd > STDERR_FILENO) close(nullfd);
+		execlp("qscan", "qscan", "--check-exclusive-support", (char*)NULL);
+		_exit(127);
+	}
+	auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+	int status;
+	while (std::chrono::steady_clock::now() < deadline) {
+		pid_t result = waitpid(child, &status, WNOHANG);
+		if (result == child) return WIFEXITED(status) && WEXITSTATUS(status) == 0;
+		if (result < 0 && errno != EINTR) return false;
+		usleep(10000);
+	}
+	kill(child, SIGKILL);
+	while (waitpid(child, &status, 0) < 0 && errno == EINTR) {}
+	return false;
+#endif
+}
+
 int createChildProcess(char** argv, pipe_t* rdpipe, pipe_t* wrpipe) {
 	printf("createchild(): pipes: %p, %p\n", rdpipe, wrpipe);
 

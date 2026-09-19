@@ -62,6 +62,31 @@ long getusecs() {
 
 #elif defined(_WIN32) || defined(_WIN64)
 
+#include <ntddcdrm.h>
+
+// MinGW-w64's ntddcdrm.h omits these Windows SDK declarations.
+#ifndef IOCTL_CDROM_EXCLUSIVE_ACCESS
+#define IOCTL_CDROM_EXCLUSIVE_ACCESS \
+	CTL_CODE(FILE_DEVICE_CD_ROM, 0x0017, METHOD_BUFFERED, FILE_READ_ACCESS | FILE_WRITE_ACCESS)
+#define CDROM_EXCLUSIVE_CALLER_LENGTH 64
+typedef enum _EXCLUSIVE_ACCESS_REQUEST_TYPE {
+	ExclusiveAccessQueryState,
+	ExclusiveAccessLockDevice,
+	ExclusiveAccessUnlockDevice
+} EXCLUSIVE_ACCESS_REQUEST_TYPE;
+typedef struct _CDROM_EXCLUSIVE_ACCESS {
+	EXCLUSIVE_ACCESS_REQUEST_TYPE RequestType;
+	ULONG Flags;
+} CDROM_EXCLUSIVE_ACCESS;
+typedef struct _CDROM_EXCLUSIVE_LOCK {
+	CDROM_EXCLUSIVE_ACCESS Access;
+	UCHAR CallerName[CDROM_EXCLUSIVE_CALLER_LENGTH];
+} CDROM_EXCLUSIVE_LOCK;
+#endif
+static_assert(sizeof(CDROM_EXCLUSIVE_ACCESS) == 8, "CD-ROM exclusive-access ABI mismatch");
+static_assert(offsetof(CDROM_EXCLUSIVE_LOCK, CallerName) == 8 && sizeof(CDROM_EXCLUSIVE_LOCK) == 72,
+              "CD-ROM exclusive-lock ABI mismatch");
+
 #define EMEDIUMTYPE ERROR_MEDIA_INCOMPATIBLE
 #define ENOMEDIUM ERROR_MEDIA_OFFLINE
 
@@ -205,6 +230,33 @@ int Scsi_Command::associate(const char* file, const struct stat* ref = NULL) {
 	}
 	filename = strdup(file);
 	return 1;
+}
+
+int Scsi_Command::acquire_exclusive() {
+#if defined(__linux)
+	if (exclusive) return 0;
+	if (!filename || !autoclose) return errno = EINVAL, -1;
+	// O_EXCL claims the block device against mounts and other exclusive opens.
+	// It does not exclude non-cooperating raw SCSI clients.
+	int locked = open(filename, O_RDWR | O_NONBLOCK | O_EXCL | O_CLOEXEC);
+	if (locked < 0) return -1;
+	struct stat original, claimed;
+	if (fstat(fd, &original) < 0 || fstat(locked, &claimed) < 0) {
+		int error = errno;
+		close(locked);
+		return errno = error, -1;
+	}
+	if (!S_ISBLK(claimed.st_mode) || original.st_rdev != claimed.st_rdev) {
+		close(locked);
+		return errno = ENXIO, -1;
+	}
+	close(fd);
+	fd = locked;
+	exclusive = true;
+	return 0;
+#else
+	return errno = ENOTSUP, -1;
+#endif
 }
 
 int Scsi_Command::transport(Direction dir, void* buf, size_t sz) {
@@ -352,6 +404,8 @@ typedef off_t off64_t;
 #define pwrite64 pwrite
 #define lseek64 lseek
 
+int Scsi_Command::acquire_exclusive() { return errno = ENOTSUP, -1; }
+
 Scsi_Command::Scsi_Command() {
 	fd = -1, autoclose = 1;
 	filename = NULL;
@@ -490,6 +544,8 @@ typedef off_t off64_t;
 #define lseek64 lseek
 
 #define ioctl_fd (((struct cam_device*)ioctl_handle)->fd)
+
+int Scsi_Command::acquire_exclusive() { return errno = ENOTSUP, -1; }
 
 Scsi_Command::Scsi_Command() {
 	cam = NULL, fd = -1, autoclose = 1;
@@ -691,6 +747,34 @@ int Scsi_Command::associate(const char* file, const struct stat* ref) {
 	return fd != INVALID_HANDLE_VALUE;
 }
 
+int Scsi_Command::acquire_exclusive() {
+	if (exclusive) return 0;
+	if (fd == INVALID_HANDLE_VALUE || !autoclose) return errno = ERROR_INVALID_HANDLE, -1;
+	CDROM_EXCLUSIVE_LOCK lock = {};
+	lock.Access.RequestType = ExclusiveAccessLockDevice;
+	memcpy(lock.CallerName, "QPxTool", sizeof("QPxTool"));
+	DWORD bytes;
+	if (DeviceIoControl(fd, IOCTL_CDROM_EXCLUSIVE_ACCESS, &lock, sizeof(lock), NULL, 0, &bytes, NULL)) {
+		exclusive = true;
+		return 0;
+	}
+	// A mounted filesystem must be locked and dismounted first. Never force a
+	// dismount or ignore the volume check while other applications have it open.
+	if (GetLastError() != ERROR_BAD_COMMAND) return -1;
+	if (!DeviceIoControl(fd, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &bytes, NULL)) return -1;
+	if (!DeviceIoControl(fd, FSCTL_DISMOUNT_VOLUME, NULL, 0, NULL, 0, &bytes, NULL) ||
+	    !DeviceIoControl(fd, IOCTL_CDROM_EXCLUSIVE_ACCESS, &lock, sizeof(lock), NULL, 0, &bytes, NULL)) {
+		DWORD error = GetLastError();
+		DeviceIoControl(fd, FSCTL_UNLOCK_VOLUME, NULL, 0, NULL, 0, &bytes, NULL);
+		SetLastError(error);
+		return -1;
+	}
+	autoclose++;
+	exclusive = true;
+	// The CD-ROM class driver releases this lock on CloseHandle, even on a crash.
+	return 0;
+}
+
 
 unsigned char& Scsi_Command::operator[](size_t i) {
 	if (i == 0) {
@@ -808,6 +892,12 @@ Scsi_Command::Scsi_Command() {
 	scsiob = IO_OBJECT_NULL, plugin = NULL, mmcdif = NULL, taskif = NULL;
 	autoclose = 1;
 	filename = NULL;
+}
+
+int Scsi_Command::acquire_exclusive() {
+	// associate() already obtains IOKit exclusive access for every owned handle.
+	if (taskif && autoclose) return 0;
+	return errno = EBUSY, -1;
 }
 
 Scsi_Command::Scsi_Command(void* f) {
