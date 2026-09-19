@@ -89,6 +89,7 @@ private:
 	void show_avg_speed(uint32_t lba);
 	//void	calc_cur_speed(long sects, int* spdKB, float* spdX);
 	void calc_cur_speed(long sects);
+	int scan_block(void* data, uint32_t* lba);
 
 	int readline(int fd, char* buf, int maxlen);
 

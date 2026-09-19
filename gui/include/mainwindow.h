@@ -116,7 +116,7 @@ private slots:
 	void screenshot();
 
 	void tests_done();
-	void tests_error();
+	void tests_error(const QString& message);
 	void tests_stopped();
 
 protected:

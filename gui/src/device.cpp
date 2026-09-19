@@ -886,6 +886,7 @@ bool device::start_tests() {
 	threadType = threadTest;
 	tests = test_req;
 	stopped = false;
+	testError.clear();
 	return start();
 }
 
@@ -1816,8 +1817,15 @@ void device::qscan_callback_test() {
 
 	if (stopped) {
 		emit testsStopped();
-	} else if (xcode) {
-		emit testsError();
+	} else if (xcode || !testError.isEmpty()) {
+		// Finish the failed run without starting queued tests or reporting success.
+		tests = 0;
+		ctest = 0;
+		threadType = threadNone;
+		running = 0;
+		mutex->unlock();
+		emit testsError(testError);
+		return;
 	}
 
 	next_test();
@@ -1852,6 +1860,8 @@ void device::qscan_process_test() {
 		qout.remove("\n");
 		qout.remove("\r");
 		emit outputLine(qout);
+		// Also recognize scan failures forwarded by qscand, which has no exit code here.
+		if (qout.startsWith("Scan error:")) testError = qout;
 #ifndef QT_NO_DEBUG
 		qDebug() << qout;
 #endif

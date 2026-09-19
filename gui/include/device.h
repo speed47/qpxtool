@@ -537,7 +537,7 @@ signals:
 	void process_progress();
 
 	void testsDone();
-	void testsError();
+	void testsError(const QString& message);
 	void testsStopped();
 
 	void block_RT();
@@ -562,6 +562,7 @@ private:
 	ThreadType threadType;
 	bool stop;
 	bool stopped;
+	QString testError;
 	bool running;
 	bool preserveMediaInfo;
 
