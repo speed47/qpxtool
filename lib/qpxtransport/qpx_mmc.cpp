@@ -101,6 +101,9 @@ drive_info::drive_info(const char* _device) {
 
 
 drive_info::~drive_info() {
+	if (parms.status & STATUS_LOCK) {
+		unlock_drive(this);
+	}
 	//	delete urd_buf;
 	busy = 1;
 	//	delete pthread_t;
@@ -3707,6 +3710,25 @@ int set_lock(drive_info* drive) {
 		return (drive->err);
 	}
 	get_lock(drive);
+	return 0;
+}
+
+int lock_drive(drive_info* drive) {
+	if (!drive) return -1;
+	// 1. OS-level exclusive locking (Linux flock/ioctl, Windows cdrom.sys/volume lock)
+	drive->cmd.lock_device();
+	// 2. Hardware tray lock (SPC_PREVENT_ALLOW_MEDIUM_REMOVAL)
+	drive->parms.status |= STATUS_LOCK;
+	return set_lock(drive);
+}
+
+int unlock_drive(drive_info* drive) {
+	if (!drive) return -1;
+	// 1. Hardware tray unlock (SPC_PREVENT_ALLOW_MEDIUM_REMOVAL)
+	drive->parms.status &= ~STATUS_LOCK;
+	set_lock(drive);
+	// 2. OS-level unlock
+	drive->cmd.unlock_device();
 	return 0;
 }
 

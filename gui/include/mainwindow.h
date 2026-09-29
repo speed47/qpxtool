@@ -41,6 +41,7 @@ class QPxIODevice;
 class QPxMainWidget;
 class ProgressWidget;
 class TestDialog;
+class QCloseEvent;
 
 class QTextDocument;
 
@@ -122,6 +123,7 @@ private slots:
 protected:
 	virtual void dragEnterEvent(QDragEnterEvent*);
 	virtual void dropEvent(QDropEvent*);
+	virtual void closeEvent(QCloseEvent* event);
 
 private:
 	ProgressWidget* progress;

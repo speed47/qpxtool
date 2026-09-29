@@ -39,6 +39,7 @@ QPxSettings::QPxSettings() {
 
 	useLocal = 1;
 	useRemote = 0;
+	lock_drive = 1;
 	hosts.clear();
 	ports.clear();
 
@@ -83,6 +84,7 @@ QPxSettings& QPxSettings::operator=(const QPxSettings& o) {
 
 	useLocal = o.useLocal;
 	useRemote = o.useRemote;
+	lock_drive = o.lock_drive;
 	hosts = o.hosts;
 	ports = o.ports;
 
@@ -155,6 +157,7 @@ void QPxSettings::load() {
 	settings->beginGroup("/devices");
 	useLocal = settings->value("local", 1).toBool();
 	useRemote = settings->value("remote", 0).toBool();
+	lock_drive = settings->value("lock_drive", 1).toBool();
 	hosts = settings->value("hosts", QStringList()).toStringList();
 	ports = settings->value("ports", QStringList()).toStringList();
 	hosts.removeAll("");
@@ -225,6 +228,7 @@ void QPxSettings::save() {
 	settings->beginGroup("/devices");
 	settings->setValue("local", useLocal);
 	settings->setValue("remote", useRemote);
+	settings->setValue("lock_drive", lock_drive);
 	settings->setValue("hosts", hosts);
 	settings->setValue("ports", ports);
 	settings->setValue("tests", tests);

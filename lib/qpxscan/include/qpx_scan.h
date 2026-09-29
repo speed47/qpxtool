@@ -75,9 +75,13 @@ public:
 	};
 	void stop();
 	void stat();
+	void set_lock_drive(bool enable) { lock_drive_enabled = enable; }
+	bool is_lock_drive_enabled() const { return lock_drive_enabled; }
 
 private:
 	bool stop_req, stat_req;
+	bool lock_drive_enabled;
+	bool drive_is_locked;
 	struct timespec s, e, blks, blke;
 	uint32_t lba_sta, lba_end;
 	int spd1X;

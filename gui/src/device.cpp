@@ -25,6 +25,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <qpx_mmc_defs.h>
+#include <qpx_mmc.h>
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
@@ -188,6 +189,7 @@ device::device(QObject* p) : QObject(p) {
 	liteon_force_old = (env_liteon && strcmp(env_liteon, "1") == 0);
 	hldtst_test_mode = false;
 	force_probe = false;
+	lock_drive = true;
 	verbose = false;
 
 	tspeeds.rt = 1;
@@ -227,6 +229,9 @@ device::~device() {
 #ifndef QT_NO_DEBUG
 	qDebug() << "* STA: ~device(): " << this << " #" << --devcnt;
 #endif
+	if (running || (proc && proc->state() != QProcess::NotRunning)) {
+		force_stop_and_unlock(500);
+	}
 	stopWatcher();
 	if (mwatcher) { delete mwatcher; }
 	QTreeWidgetItem* item;
@@ -894,6 +899,13 @@ bool device::stop_tests() {
 		qWarning() << "stop_tests(): not running, aborting";
 		return false;
 	}
+	if (stopped && proc && proc->state() != QProcess::NotRunning) {
+		qWarning() << "stop_tests(): already requested stop, force killing hung proc pid=" << proc->processId();
+		proc->kill();
+		proc->waitForFinished(500);
+		force_unlock();
+		return true;
+	}
 	tests = 0;
 	stopped = true;
 	if (type == DevtypeLocal) {
@@ -913,6 +925,8 @@ bool device::stop_tests() {
 			} else {
 				qWarning() << "stop_tests(): failed to open stop event, falling back to kill";
 				proc->kill();
+				proc->waitForFinished(500);
+				force_unlock();
 			}
 		}
 #else
@@ -926,6 +940,42 @@ bool device::stop_tests() {
 		sock->disconnectFromHost();
 	}
 	return true;
+}
+
+bool device::force_stop_and_unlock(int timeout_ms) {
+	qDebug() << "device::force_stop_and_unlock():" << path << "running=" << running;
+	if (type == DevtypeLocal) {
+		if (proc && proc->state() != QProcess::NotRunning) {
+			if (!stopped) {
+				stop_tests();
+			}
+			if (!proc->waitForFinished(timeout_ms)) {
+				qWarning() << "force_stop_and_unlock(): proc did not terminate within timeout, killing pid=" << proc->processId();
+				proc->kill();
+				proc->waitForFinished(500);
+			}
+		}
+		force_unlock();
+	} else if (type == DevtypeTCP) {
+		if (sock) {
+			sock->disconnectFromHost();
+		}
+	}
+	tests = 0;
+	stopped = true;
+	running = 0;
+	threadType = threadNone;
+	return true;
+}
+
+void device::force_unlock() {
+	if (type == DevtypeLocal && !path.isEmpty()) {
+		qDebug() << "device::force_unlock(): sending hardware unlock to" << path;
+		drive_info d(path.toLocal8Bit().constData());
+		if (d.mmc >= 0) {
+			unlock_drive(&d);
+		}
+	}
 }
 
 bool device::next_test() {
@@ -1034,6 +1084,7 @@ bool device::next_test() {
 		if (liteon_force_old) qopts << "--liteon-force-old";
 		if (hldtst_test_mode) qopts << "--hldtst-test-mode";
 		if (force_probe) qopts << "--force-probe";
+		if (!lock_drive) qopts << "--no-lock";
 
 #if (!defined(QT_NO_DEBUG) && 0)
 		for (int i = 0; i < qopts.size(); i++) qDebug("[" + QString::number(i) + "] " + qopts[i]);

@@ -95,9 +95,15 @@ qscanner::qscanner(drive_info* idev) {
 	lba_sta = 0;
 	lba_end = -1;
 	tchar = -1;
+	lock_drive_enabled = true;
+	drive_is_locked = false;
 }
 
 qscanner::~qscanner() {
+	if (drive_is_locked) {
+		unlock_drive(dev);
+		drive_is_locked = false;
+	}
 	if (attached) plugin_detach();
 }
 
@@ -170,6 +176,13 @@ int qscanner::run(char* test) {
 		printf("Unsupported media!\n");
 		return 2;
 	}
+
+	if (lock_drive_enabled) {
+		if (!dev->silent) printf("Locking drive for exclusive test access...\n");
+		lock_drive(dev);
+		drive_is_locked = true;
+	}
+
 	//	set_speed(dev,speed);
 	if (!strcmp(test, "rt")) {
 		if (lba_end < 0 || lba_end > dev->media.capacity) lba_end = dev->media.capacity - 1;
@@ -203,6 +216,13 @@ int qscanner::run(char* test) {
 			r = run_dvd_ta();
 		}
 	}
+
+	if (drive_is_locked) {
+		if (!dev->silent) printf("Unlocking drive...\n");
+		unlock_drive(dev);
+		drive_is_locked = false;
+	}
+
 	return r;
 }
 

@@ -44,6 +44,7 @@
 #include <QDropEvent>
 #include <QDragEnterEvent>
 #include <QDragLeaveEvent>
+#include <QCloseEvent>
 
 #include <QApplication>
 #include <QPageSize>
@@ -491,6 +492,7 @@ void QPxToolMW::run_tests()
 	connect(dev, SIGNAL(testsStopped()), this, SLOT(tests_stopped()));
 
 	set.tests = dev->test_req;
+	dev->lock_drive = set.lock_drive;
 	//	dev->mutex->unlock();
 	dev->start_tests();
 	mutex_dev.unlock();
@@ -2076,4 +2078,42 @@ void QPxToolMW::dropEvent(QDropEvent* e) {
 	QUrl url(e->mimeData()->text().simplified());
 	load_results(url.path());
 	e->acceptProposedAction();
+}
+
+void QPxToolMW::closeEvent(QCloseEvent* e) {
+#ifndef QT_NO_DEBUG
+	qDebug("QPxToolMW::closeEvent()");
+#endif
+	bool any_running = false;
+	for (int i = 0; i < devices.size(); i++) {
+		if (devices[i] && devices[i]->isRunning()) {
+			any_running = true;
+			break;
+		}
+	}
+
+	if (any_running) {
+		QMessageBox::StandardButton reply = QMessageBox::question(
+			this,
+			tr("Tests in progress"),
+			tr("A test is currently in progress.\n\n"
+			   "Exiting now will terminate the test and unlock the optical drive.\n\n"
+			   "Are you sure you want to exit?"),
+			QMessageBox::Yes | QMessageBox::No,
+			QMessageBox::No
+		);
+
+		if (reply != QMessageBox::Yes) {
+			e->ignore();
+			return;
+		}
+
+		for (int i = 0; i < devices.size(); i++) {
+			if (devices[i] && devices[i]->isRunning()) {
+				devices[i]->force_stop_and_unlock(1000);
+			}
+		}
+	}
+
+	e->accept();
 }

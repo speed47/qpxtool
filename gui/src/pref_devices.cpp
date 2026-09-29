@@ -44,6 +44,10 @@ prefDevices::prefDevices(QPxSettings* iset, QWidget* p, Qt::WindowFlags f) : QWi
 	ck_remote->setChecked(set->useRemote);
 	layout->addWidget(ck_remote);
 
+	ck_lock_drive = new QCheckBox(tr("Lock drive during scan tests (prevent external interference)"), this);
+	ck_lock_drive->setChecked(set->lock_drive);
+	layout->addWidget(ck_lock_drive);
+
 	//	g_hosts = new QGroupBox(tr("Hosts"), this);
 	//g_hosts->setCheckable(true);
 	//	layout->addWidget(g_hosts);
@@ -88,6 +92,7 @@ prefDevices::~prefDevices() {
 
 	set->useLocal = ck_local->isChecked();
 	set->useRemote = ck_remote->isChecked();
+	set->lock_drive = ck_lock_drive->isChecked();
 	set->hosts.clear();
 	set->ports.clear();
 
