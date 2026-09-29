@@ -419,6 +419,8 @@ public:
 
 	bool start_tests();
 	bool stop_tests();
+	bool force_stop_and_unlock(int timeout_ms = 1000);
+	void force_unlock();
 
 	void startWatcher();
 	void stopWatcher();
