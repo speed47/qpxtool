@@ -1873,6 +1873,9 @@ void device::qscan_process_test() {
 						di.spdk = sl[5].toInt();
 #ifndef DISABLE_INTERNAL_WT
 						if (ctest == TEST_WT) {
+							if (!testData.wt.isEmpty() && di.lba < testData.wt.last().lba) {
+								break;
+							}
 							testData.wt.append(di);
 							testData.wt_time = time;
 							emit block_WT();
@@ -1882,6 +1885,9 @@ void device::qscan_process_test() {
 						} else if (ctest == TEST_RT)
 #endif
 						{
+							if (!testData.rt.isEmpty() && di.lba < testData.rt.last().lba) {
+								break;
+							}
 							testData.rt.append(di);
 							testData.rt_time = time;
 							emit block_RT();
@@ -1907,6 +1913,9 @@ void device::qscan_process_test() {
 							if (sl.size() >= 12) {
 								di.spdx = sl[11].remove("x.").toDouble();
 								di.spdk = (uint32_t)(di.spdx * media.spd1X);
+								if (!testData.wt.isEmpty() && di.lba < testData.wt.last().lba) {
+									break;
+								}
 								testData.wt.append(di);
 								testData.wt_time = time;
 								emit block_WT();
@@ -1915,6 +1924,9 @@ void device::qscan_process_test() {
 							if (sl.size() >= 10) {
 								di.spdx = sl[9].remove("x.").toDouble();
 								di.spdk = (uint32_t)(di.spdx * media.spd1X);
+								if (!testData.wt.isEmpty() && di.lba < testData.wt.last().lba) {
+									break;
+								}
 								testData.wt.append(di);
 								testData.wt_time = time;
 								emit block_WT();
@@ -1947,6 +1959,10 @@ void device::qscan_process_test() {
 						di.cd.e32 = sl[12].toInt();
 						di.cd.uncr = sl[13].toInt();
 
+						if (!testData.errc.isEmpty() && di.cd.lba < testData.errc.last().cd.lba) {
+							break;
+						}
+
 						ErrcADD(&testData.errcTOT, di);
 						ErrcMAX(&testData.errcMAX, di);
 						CDErrcAVG(&testData.errcAVG, &testData.errcTOT, di.cd.lba / 75);
@@ -1968,6 +1984,10 @@ void device::qscan_process_test() {
 						di.dvd.po8 = sl[10].toInt();
 						di.dvd.pof = sl[11].toInt();
 						di.dvd.uncr = sl[12].toInt();
+
+						if (!testData.errc.isEmpty() && di.dvd.lba < testData.errc.last().dvd.lba) {
+							break;
+						}
 
 						ErrcADD(&testData.errcTOT, di);
 						ErrcMAX(&testData.errcMAX, di);
@@ -1991,9 +2011,13 @@ void device::qscan_process_test() {
 						di.bd.res4 = 0;
 						di.bd.uncr = sl[8].toInt();
 
+						if (!testData.errc.isEmpty() && di.bd.lba < testData.errc.last().bd.lba) {
+							break;
+						}
+
 						ErrcADD(&testData.errcTOT, di);
 						ErrcMAX(&testData.errcMAX, di);
-						DVDErrcAVG(&testData.errcAVG, &testData.errcTOT, di.dvd.lba >> 5);
+						BDErrcAVG(&testData.errcAVG, &testData.errcTOT, di.bd.lba >> 5);
 						testData.errc.append(di);
 						testData.errc_time = time;
 						emit block_ERRC();
@@ -2015,6 +2039,10 @@ void device::qscan_process_test() {
 
 						di.jitter = sl[6].toFloat();
 						di.asymm = sl[7].toFloat();
+
+						if (!testData.jb.isEmpty() && di.lba < testData.jb.last().lba) {
+							break;
+						}
 
 						if (!testData.jb.size()) {
 							testData.jbMM.jmin = di.jitter;
@@ -2049,6 +2077,10 @@ void device::qscan_process_test() {
 
 						di.fe = sl[6].toInt();
 						di.te = sl[7].toInt();
+
+						if (!testData.ft.isEmpty() && di.lba < testData.ft.last().lba) {
+							break;
+						}
 
 						if (testData.ftMAX.fe < di.fe) testData.ftMAX.fe = di.fe;
 						if (testData.ftMAX.te < di.te) testData.ftMAX.te = di.te;
