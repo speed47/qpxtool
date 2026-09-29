@@ -93,6 +93,7 @@ int scan_liteon::cmd_cd_errc_init_new() {
 	// check if ERRC command works
 	dev->cmd[0] = 0xF3;
 	dev->cmd[1] = 0x0E;
+	dev->cmd[8] = 0x10;
 	dev->cmd[11] = 0x00;
 	if ((dev->err = dev->cmd.transport(READ, dev->rd_buf, 0x10))) {
 		sperror("LiteOn_errc_cd_probe NEW", dev->err);
@@ -303,14 +304,37 @@ int scan_liteon::cmd_cd_errc_block_old(cd_errc* data) {
 }
 
 int scan_liteon::cmd_cd_errc_block_new(cd_errc* data) {
-	dev->cmd[0] = 0xF3;
-	dev->cmd[1] = 0x0E;
-	dev->cmd[11] = 0x00;
-	if ((dev->err = dev->cmd.transport(READ, dev->rd_buf, 0x10))) {
-		sperror("LiteOn_errc_cd_read_block", dev->err);
+	uint32_t nlba = 0;
+	int retries = 0;
+	const int max_retries = 1500; // max ~1.5s wait for drive to finish reading interval (1X CD takes 1000ms)
+
+	while (retries < max_retries) {
+		dev->cmd[0] = 0xF3;
+		dev->cmd[1] = 0x0E;
+		dev->cmd[8] = 0x10;
+		dev->cmd[11] = 0x00;
+		if ((dev->err = dev->cmd.transport(READ, dev->rd_buf, 0x10))) {
+			sperror("LiteOn_errc_cd_read_block", dev->err);
+			return 1;
+		}
+		nlba = dev->rd_buf[1] * 60 * 75 + dev->rd_buf[2] * 75 + dev->rd_buf[3];
+
+		// If this is the start of scan (lba == 0), accept any valid LBA (even 0).
+		// If scan has already started (lba > 0), ensure nlba is progressing (> lba).
+		if (lba == 0 || nlba > lba) {
+			break;
+		}
+
+		msleep(1);
+		retries++;
+	}
+
+	if (lba > 0 && nlba <= lba) {
+		// Drive stalled or returned invalid/regressed LBA after max retries
 		return 1;
 	}
-	lba = dev->rd_buf[1] * 60 * 75 + dev->rd_buf[2] * 75 + dev->rd_buf[3];
+
+	lba = nlba;
 
 	data->bler = ntoh16(dev->rd_buf + 4);
 	data->e11 = 0;
@@ -331,7 +355,7 @@ int scan_liteon::cmd_cd_errc_block(cd_errc* data) {
 int scan_liteon::cmd_dvd_errc_block(dvd_errc* data) {
 	uint32_t nlba = 0;
 	int retries = 0;
-	const int max_retries = 200; // max ~200ms wait for drive to finish reading ECC block
+	const int max_retries = 500; // max ~500ms wait for drive to finish reading ECC block
 
 	while (retries < max_retries) {
 		dev->cmd[0] = 0xF3;
@@ -372,7 +396,7 @@ int scan_liteon::cmd_dvd_errc_block(dvd_errc* data) {
 int scan_liteon::cmd_bd_errc_block(bd_errc* data) {
 	uint32_t nlba = 0;
 	int retries = 0;
-	const int max_retries = 200; // max ~200ms wait for drive to finish reading cluster
+	const int max_retries = 500; // max ~500ms wait for drive to finish reading cluster
 
 	while (retries < max_retries) {
 		dev->cmd[0] = 0xF3;

@@ -31,6 +31,12 @@ void qscanner::show_avg_speed(uint32_t lba) {
 	int spdKB;
 	float spdX;
 	btime = (e.tv_sec - s.tv_sec) + (e.tv_nsec - s.tv_nsec) / 1000000000.0;
+	if (btime <= 0.000001 || lba < lba_sta) {
+		spdKB = 0;
+		spdX = 0.0f;
+		printf("\nTest time: %6.2fs\navg speed: %5.3f X  %5d kB/s\n", btime, spdX, spdKB);
+		return;
+	}
 	spdKB = (int)(((lba - lba_sta + 1) << 1) / btime);
 	spdX = spdKB / (float)spd1X;
 	printf("\nTest time: %6.2fs\navg speed: %5.3f X  %5d kB/s\n", btime, spdX, spdKB);
@@ -40,7 +46,17 @@ void qscanner::calc_cur_speed(long sects) {
 	double btime;
 	//	int spdKB;
 	//	float spdX;
+	if (sects <= 0) {
+		spdKB = 0;
+		spdX = 0.0f;
+		return;
+	}
 	btime = (blke.tv_sec - blks.tv_sec) + (blke.tv_nsec - blks.tv_nsec) / 1000000000.0;
+	if (btime <= 0.000001) {
+		spdKB = 0;
+		spdX = 0.0f;
+		return;
+	}
 	spdKB = (int)((sects << 1) / btime);
 	spdX = spdKB / (float)spd1X;
 	//	printf("\nTest time: %6.2fs\navg speed: %5.3f X  %5d kB/s\n", btime, spdX, spdKB);
@@ -492,6 +508,11 @@ int qscanner::run_cd_errc() {
 			stop_req = 1;
 			break;
 		}
+		if (lba < lbao) {
+			printf("\nLBA regression detected (%u < %u)! Drive head may have slipped or recalibrated, terminating scan...\n", lba, lbao);
+			stop_req = 1;
+			break;
+		}
 		if (lba == lbao) {
 			// drive hasn't advanced yet - stale poll, skip this sample
 			if (++stale_count >= 64) {
@@ -499,6 +520,7 @@ int qscanner::run_cd_errc() {
 				stop_req = 1;
 				break;
 			}
+			msleep(5);
 			continue;
 		}
 		stale_count = 0;
@@ -549,13 +571,30 @@ int qscanner::run_cd_jb() {
 	wait_unit_ready(dev, 6);
 	printf("\nTesting %d sectors: %d - %d\n", lba_end - lba_sta + 1, lba_sta, lba_end);
 	printf("         lba |        speed        | Jitter |  Asymm\n");
+	int stale_count = 0;
 	for (; (!stop_req) && lba < lba_end;) {
 		lbao = lba;
 		clock_gettime(CLOCK_MONOTONIC, &blks);
 		if (plugin->scan_block((void*)&jb, &lba)) {
 			printf("\nBlock scan error! terminating...\n");
 			stop_req = 1;
+			break;
 		}
+		if (lba < lbao) {
+			printf("\nLBA regression detected (%u < %u)! Drive head may have slipped or recalibrated, terminating scan...\n", lba, lbao);
+			stop_req = 1;
+			break;
+		}
+		if (lba == lbao) {
+			if (++stale_count >= 64) {
+				printf("\nDrive not advancing, terminating...\n");
+				stop_req = 1;
+				break;
+			}
+			msleep(5);
+			continue;
+		}
+		stale_count = 0;
 		clock_gettime(CLOCK_MONOTONIC, &blke);
 		calc_cur_speed(lba - lbao);
 		printf("cur : %6d | %6.2f X %5d kB/s | %6.2f | %6.2f\r", lba, spdX, spdKB, jb.jitter / 1000.0, jb.asymm / 10.0);
@@ -618,13 +657,30 @@ int qscanner::run_dvd_errc() {
 	lbas = lba;
 	printf("\nTesting %d sectors: %d - %d\n", lba_end - lba_sta + 1, lba_sta, lba_end);
 	printf("          lba |        speed        |  PIE   PI8   PIF  |  POE   PO8   POF  |  UNCR\n");
+	int stale_count = 0;
 	for (; (!stop_req) && lba < lba_end;) {
 		lbao = lba;
 		clock_gettime(CLOCK_MONOTONIC, &blks);
 		if (plugin->scan_block((void*)&err, &lba)) {
 			printf("\nBlock scan error! terminating...\n");
 			stop_req = 1;
+			break;
 		}
+		if (lba < lbao) {
+			printf("\nLBA regression detected (%u < %u)! Drive head may have slipped or recalibrated, terminating scan...\n", lba, lbao);
+			stop_req = 1;
+			break;
+		}
+		if (lba == lbao) {
+			if (++stale_count >= 64) {
+				printf("\nDrive not advancing, terminating...\n");
+				stop_req = 1;
+				break;
+			}
+			msleep(5);
+			continue;
+		}
+		stale_count = 0;
 		err_tot += err;
 		err_max.EMAX(err);
 		pi8 += err.pie;
@@ -687,13 +743,30 @@ int qscanner::run_dvd_jb() {
 	wait_unit_ready(dev, 6);
 	printf("\nTesting %d sectors: %d - %d\n", lba_end - lba_sta + 1, lba_sta, lba_end);
 	printf("         lba |        speed        | Jitter |  Asymm\n");
+	int stale_count = 0;
 	for (; (!stop_req) && lba < lba_end;) {
 		lbao = lba;
 		clock_gettime(CLOCK_MONOTONIC, &blks);
 		if (plugin->scan_block((void*)&jb, &lba)) {
 			printf("\nBlock scan error! terminating...\n");
 			stop_req = 1;
+			break;
 		}
+		if (lba < lbao) {
+			printf("\nLBA regression detected (%u < %u)! Drive head may have slipped or recalibrated, terminating scan...\n", lba, lbao);
+			stop_req = 1;
+			break;
+		}
+		if (lba == lbao) {
+			if (++stale_count >= 64) {
+				printf("\nDrive not advancing, terminating...\n");
+				stop_req = 1;
+				break;
+			}
+			msleep(5);
+			continue;
+		}
+		stale_count = 0;
 		clock_gettime(CLOCK_MONOTONIC, &blke);
 		calc_cur_speed(lba - lbao);
 		printf("cur : %6d | %6.2f X %5d kB/s | %6.2f | %6.2f\r", lba, spdX, spdKB, jb.jitter / 1000.0, jb.asymm / 10.0);
@@ -841,13 +914,30 @@ int qscanner::run_bd_errc() {
 	lbas = lba;
 	printf("\nTesting %d sectors: %d - %d\n", lba_end - lba_sta + 1, lba_sta, lba_end);
 	printf("          lba |        speed        |  LDC   BIS  |  UNCR\n");
+	int stale_count = 0;
 	for (; (!stop_req) && lba < lba_end;) {
 		lbao = lba;
 		clock_gettime(CLOCK_MONOTONIC, &blks);
 		if (plugin->scan_block((void*)&err, &lba)) {
 			printf("\nBlock scan error! terminating...\n");
 			stop_req = 1;
+			break;
 		}
+		if (lba < lbao) {
+			printf("\nLBA regression detected (%u < %u)! Drive head may have slipped or recalibrated, terminating scan...\n", lba, lbao);
+			stop_req = 1;
+			break;
+		}
+		if (lba == lbao) {
+			if (++stale_count >= 64) {
+				printf("\nDrive not advancing, terminating...\n");
+				stop_req = 1;
+				break;
+			}
+			msleep(5);
+			continue;
+		}
+		stale_count = 0;
 		err_tot += err;
 		err_max.EMAX(err);
 		clock_gettime(CLOCK_MONOTONIC, &blke);
