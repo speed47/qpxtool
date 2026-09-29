@@ -42,6 +42,7 @@ private:
 
 	QCheckBox* ck_local;
 	QCheckBox* ck_remote;
+	QCheckBox* ck_lock_drive;
 
 	//	QGroupBox	*g_hosts;
 	//	QBoxLayout	*l_hosts;

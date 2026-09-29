@@ -188,6 +188,7 @@ device::device(QObject* p) : QObject(p) {
 	liteon_force_old = (env_liteon && strcmp(env_liteon, "1") == 0);
 	hldtst_test_mode = false;
 	force_probe = false;
+	lock_drive = true;
 	verbose = false;
 
 	tspeeds.rt = 1;
@@ -1034,6 +1035,7 @@ bool device::next_test() {
 		if (liteon_force_old) qopts << "--liteon-force-old";
 		if (hldtst_test_mode) qopts << "--hldtst-test-mode";
 		if (force_probe) qopts << "--force-probe";
+		if (!lock_drive) qopts << "--no-lock";
 
 #if (!defined(QT_NO_DEBUG) && 0)
 		for (int i = 0; i < qopts.size(); i++) qDebug("[" + QString::number(i) + "] " + qopts[i]);

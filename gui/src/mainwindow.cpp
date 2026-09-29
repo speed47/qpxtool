@@ -491,6 +491,7 @@ void QPxToolMW::run_tests()
 	connect(dev, SIGNAL(testsStopped()), this, SLOT(tests_stopped()));
 
 	set.tests = dev->test_req;
+	dev->lock_drive = set.lock_drive;
 	//	dev->mutex->unlock();
 	dev->start_tests();
 	mutex_dev.unlock();

@@ -474,6 +474,8 @@ extern int load_eject(drive_info* drive, bool load, bool IMMED);
 extern int load_eject(drive_info* drive, bool IMMED);
 extern int get_lock(drive_info* drive);
 extern int set_lock(drive_info* drive);
+extern int lock_drive(drive_info* drive);
+extern int unlock_drive(drive_info* drive);
 
 //extern void spinup(drive_info* drive);
 extern void spinup(drive_info* drive, uint8_t secs = 2);

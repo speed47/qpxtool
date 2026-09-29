@@ -336,6 +336,31 @@ int Scsi_Command::umount(int f) {
 
 int Scsi_Command::is_reload_needed() { return ioctl(fd, CDROM_MEDIA_CHANGED, CDSL_CURRENT) == 0; }
 
+int Scsi_Command::lock_device() {
+#if defined(__linux)
+	if (fd < 0) return -1;
+	// 1. Advisory lock: udisks2 and systemd-udevd monitor flock on block devices;
+	// holding LOCK_EX inhibits media polling (GESN/TUR) and prevents desktop automount.
+	flock(fd, LOCK_EX | LOCK_NB);
+	// 2. Kernel CD-ROM door lock ioctl
+	ioctl(fd, CDROM_LOCKDOOR, 1);
+	return 0;
+#else
+	return 0;
+#endif
+}
+
+int Scsi_Command::unlock_device() {
+#if defined(__linux)
+	if (fd < 0) return -1;
+	ioctl(fd, CDROM_LOCKDOOR, 0);
+	flock(fd, LOCK_UN);
+	return 0;
+#else
+	return 0;
+#endif
+}
+
 #elif defined(__OpenBSD__) || defined(__NetBSD__)
 
 #include <sys/ioctl.h>
@@ -469,6 +494,9 @@ int Scsi_Command::umount(int f) {
 }
 
 int Scsi_Command::is_reload_needed() { return 1; }
+
+int Scsi_Command::lock_device() { return 0; }
+int Scsi_Command::unlock_device() { return 0; }
 
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
 
@@ -659,6 +687,9 @@ int Scsi_Command::umount(int f) {
 
 int Scsi_Command::is_reload_needed() { return 0; }
 
+int Scsi_Command::lock_device() { return 0; }
+int Scsi_Command::unlock_device() { return 0; }
+
 //*
 #elif defined(_WIN32) || defined(_WIN64)
 
@@ -770,6 +801,78 @@ int Scsi_Command::umount(int f) {
 #pragma GCC diagnostic pop
 
 int Scsi_Command::is_reload_needed() { return 0; }
+
+int Scsi_Command::lock_device() {
+	DWORD junk;
+	if (fd == INVALID_HANDLE_VALUE) return -1;
+
+	// 1. Lock and dismount file system volume so Windows Explorer,
+	// search indexer, and antivirus don't access the file system
+	DeviceIoControl(fd, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &junk, NULL);
+	DeviceIoControl(fd, FSCTL_DISMOUNT_VOLUME, NULL, 0, NULL, 0, &junk, NULL);
+
+	// 2. Request CD-ROM driver exclusive access (cdrom.sys)
+	// This instructs Windows cdrom.sys to reject any other application's
+	// SCSI pass-through or read/write requests with STATUS_DEVICE_BUSY.
+#ifndef IOCTL_CDROM_EXCLUSIVE_ACCESS
+#define IOCTL_CDROM_EXCLUSIVE_ACCESS CTL_CODE(FILE_DEVICE_CD_ROM, 0x0501, METHOD_BUFFERED, FILE_READ_ACCESS | FILE_WRITE_ACCESS)
+#endif
+	typedef enum _EXCLUSIVE_ACCESS_REQUEST_TYPE {
+		ExclusiveAccessQueryState = 0,
+		ExclusiveAccessLockDevice = 1,
+		ExclusiveAccessUnlockDevice = 2
+	} EXCLUSIVE_ACCESS_REQUEST_TYPE;
+
+	typedef struct _CDROM_EXCLUSIVE_ACCESS {
+		EXCLUSIVE_ACCESS_REQUEST_TYPE RequestType;
+		ULONG Flags;
+	} CDROM_EXCLUSIVE_ACCESS;
+
+	typedef struct _CDROM_EXCLUSIVE_LOCK {
+		CDROM_EXCLUSIVE_ACCESS Access;
+		UCHAR CallerName[64];
+	} CDROM_EXCLUSIVE_LOCK;
+
+	CDROM_EXCLUSIVE_LOCK elock;
+	memset(&elock, 0, sizeof(elock));
+	elock.Access.RequestType = ExclusiveAccessLockDevice;
+	elock.Access.Flags = 0;
+	strncpy((char*)elock.CallerName, "qpxtool", sizeof(elock.CallerName) - 1);
+	DeviceIoControl(fd, IOCTL_CDROM_EXCLUSIVE_ACCESS, &elock, sizeof(elock), NULL, 0, &junk, NULL);
+
+	return 0;
+}
+
+int Scsi_Command::unlock_device() {
+	DWORD junk;
+	if (fd == INVALID_HANDLE_VALUE) return -1;
+
+	// 1. Release CD-ROM driver exclusive access
+#ifndef IOCTL_CDROM_EXCLUSIVE_ACCESS
+#define IOCTL_CDROM_EXCLUSIVE_ACCESS CTL_CODE(FILE_DEVICE_CD_ROM, 0x0501, METHOD_BUFFERED, FILE_READ_ACCESS | FILE_WRITE_ACCESS)
+#endif
+	typedef enum _EXCLUSIVE_ACCESS_REQUEST_TYPE {
+		ExclusiveAccessQueryState = 0,
+		ExclusiveAccessLockDevice = 1,
+		ExclusiveAccessUnlockDevice = 2
+	} EXCLUSIVE_ACCESS_REQUEST_TYPE;
+
+	typedef struct _CDROM_EXCLUSIVE_ACCESS {
+		EXCLUSIVE_ACCESS_REQUEST_TYPE RequestType;
+		ULONG Flags;
+	} CDROM_EXCLUSIVE_ACCESS;
+
+	CDROM_EXCLUSIVE_ACCESS eunlock;
+	memset(&eunlock, 0, sizeof(eunlock));
+	eunlock.RequestType = ExclusiveAccessUnlockDevice;
+	eunlock.Flags = 0;
+	DeviceIoControl(fd, IOCTL_CDROM_EXCLUSIVE_ACCESS, &eunlock, sizeof(eunlock), NULL, 0, &junk, NULL);
+
+	// 2. Unlock volume
+	DeviceIoControl(fd, FSCTL_UNLOCK_VOLUME, NULL, 0, NULL, 0, &junk, NULL);
+
+	return 0;
+}
 
 //*/
 
@@ -1067,6 +1170,9 @@ int Scsi_Command::umount(int f) {
 
 #define RELOAD_NEVER_NEEDED
 int Scsi_Command::is_reload_needed(int not_used) { return 0; }
+
+int Scsi_Command::lock_device() { return 0; }
+int Scsi_Command::unlock_device() { return 0; }
 
 
 #else

@@ -151,6 +151,7 @@ public:
 	// device settings
 	bool useLocal;
 	bool useRemote;
+	bool lock_drive;
 	QStringList hosts;
 	QStringList ports;
 

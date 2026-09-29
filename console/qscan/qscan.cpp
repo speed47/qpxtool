@@ -168,6 +168,7 @@ enum {
 	OPT_LITEON_FORCE_OLD = 256,
 	OPT_HLDTST_TEST_MODE,
 	OPT_FORCE_PROBE,
+	OPT_NO_LOCK,
 };
 
 static struct option long_options[] = {{"help", 0, NULL, 'h'},
@@ -189,6 +190,7 @@ static struct option long_options[] = {{"help", 0, NULL, 'h'},
                                        {"liteon-force-old", 0, NULL, OPT_LITEON_FORCE_OLD},
                                        {"hldtst-test-mode", 0, NULL, OPT_HLDTST_TEST_MODE},
                                        {"force-probe", 0, NULL, OPT_FORCE_PROBE},
+                                       {"no-lock", 0, NULL, OPT_NO_LOCK},
                                        {0, 0, 0, 0}};
 
 void show_available_errc_data(qscanner* scanner) {
@@ -233,6 +235,7 @@ int main(int argc, char** argv) {
 	bool liteon_force_old = false;
 	bool hldtst_test_mode = false;
 	bool force_probe = false;
+	bool lock_drive = true;
 	printf("qScan " VERSION " (C) 2007-2009  Gennady \"ShultZ\" Kozlov\n");
 	while (1) {
 		c = getopt_long(argc, argv, "hvliImMd:pf:t:WSs:r:w:", long_options, NULL);
@@ -263,6 +266,7 @@ int main(int argc, char** argv) {
 				printf("   --liteon-force-old  LiteOn: force old CD ERRC commands\n");
 				printf("   --hldtst-test-mode  LiteOn: try to enable test mode on some LG/Hitachi (HL-DT-ST) drives\n");
 				printf("   --force-probe       ignore hardcoded vendor/drive lists, always probe\n");
+				printf("   --no-lock           do not lock optical drive during tests\n");
 				printf("-I --shortinfo      print device info\n");
 				printf("-i --info           print device info (with supported features list)\n");
 				printf("-m --media          print media info\n");
@@ -349,6 +353,11 @@ int main(int argc, char** argv) {
 			case OPT_FORCE_PROBE:
 				force_probe = true;
 				break;
+			case OPT_NO_LOCK:
+				lock_drive = false;
+				break;
+			case '?':
+				return 1;
 			default:
 				break;
 		}
@@ -807,6 +816,7 @@ int main(int argc, char** argv) {
 	//	if (test && (strcmp(test,"rt") && strcmp(test,"wt")) && !scanner->is_plugin_attached()) {
 	//	}
 
+	scanner->set_lock_drive(lock_drive);
 	if (speed > 0) scanner->setTestSpeed(speed);
 	if (test) {
 //		printf("setting signal handlers...\n");

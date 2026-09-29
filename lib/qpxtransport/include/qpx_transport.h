@@ -118,7 +118,8 @@ public:
 
 #if defined(__linux) || defined(__GNU__)
 
-//#include <sys/ioctl.h>
+#include <sys/ioctl.h>
+#include <sys/file.h>
 #if defined(__linux)
 #include <linux/cdrom.h>
 #elif defined(__GNU__)
@@ -202,6 +203,8 @@ public:
 	int transport(Direction dir = NONE, void* buf = NULL, size_t sz = 0);
 	int umount(int f);
 	int is_reload_needed();
+	int lock_device();
+	int unlock_device();
 };
 
 #elif defined(__OpenBSD__) || defined(__NetBSD__)
@@ -242,6 +245,8 @@ public:
 	int transport(Direction dir = NONE, void* buf = NULL, size_t sz = 0);
 	int umount(int f);
 	int is_reload_needed();
+	int lock_device();
+	int unlock_device();
 };
 
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
@@ -291,6 +296,8 @@ public:
 	int umount(int f);
 #define RELOAD_NEVER_NEEDED // according to Matthew Dillon
 	int is_reload_needed();
+	int lock_device();
+	int unlock_device();
 };
 
 //*
@@ -334,6 +341,8 @@ public:
 
 #define RELOAD_NEVER_NEEDED
 	int is_reload_needed();
+	int lock_device();
+	int unlock_device();
 };
 //*/
 
@@ -413,6 +422,8 @@ public:
 	int umount(int f = -1);
 #define RELOAD_NEVER_NEEDED
 	int is_reload_needed(int not_used);
+	int lock_device();
+	int unlock_device();
 };
 
 #else
