@@ -1991,9 +1991,13 @@ void device::qscan_process_test() {
 						di.bd.res4 = 0;
 						di.bd.uncr = sl[8].toInt();
 
+						if (!testData.errc.isEmpty() && di.bd.lba < testData.errc.last().bd.lba) {
+							break;
+						}
+
 						ErrcADD(&testData.errcTOT, di);
 						ErrcMAX(&testData.errcMAX, di);
-						DVDErrcAVG(&testData.errcAVG, &testData.errcTOT, di.dvd.lba >> 5);
+						BDErrcAVG(&testData.errcAVG, &testData.errcTOT, di.bd.lba >> 5);
 						testData.errc.append(di);
 						testData.errc_time = time;
 						emit block_ERRC();
