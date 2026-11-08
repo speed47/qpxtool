@@ -460,6 +460,7 @@ int main(int argc, char* argv[]) {
 			printf("%s: writing T@2 test image...\n", device);
 			yamaha_f1_do_tattoo(drive, NULL, 0);
 		} else if (tattoofn != NULL) {
+			// codeql[cpp/path-injection] Local CLI caller intentionally selects the full input or output path.
 			tattoof = fopen(tattoofn, "rb");
 			if (!tattoof) {
 				printf("Can't open tattoo file: %s", tattoofn);

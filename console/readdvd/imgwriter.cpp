@@ -25,9 +25,10 @@ imgwriter::imgwriter(char* fn, smap* map) {
 #if !(defined(HAVE_FSEEKO) && defined(OFFT_64BIT)) && !defined(HAVE_FSEEK64)
 	printf("Warning! No 64-bit file offset. Image size limits to 2GiB\n");
 #endif
+	// codeql[cpp/path-injection] Local CLI caller intentionally selects the full input or output path.
 	if (!(iso = fopen64(fname, "r+"))) {
 		printf("can't open image file, creating new one!\n");
-		// codeql[cpp/world-writable-file-creation] Ordinary output file; intentionally honor the user's umask.
+		// codeql[cpp/world-writable-file-creation,cpp/path-injection] Caller-selected output path; intentionally honor the user's umask.
 		if (!(iso = fopen64(fname, "w+"))) { printf("can't create image file!\n"); }
 	} else {
 		printf("image opened: '%s'\n", fname);
@@ -47,6 +48,7 @@ int imgwriter::write(uint32_t lba, int scnt, int ssz, void* buff) {
 #endif
 
 	mutex->lock();
+	// codeql[cpp/path-injection] Local CLI caller intentionally selects the full input or output path.
 	iso = fopen64(fname, "r+");
 
 	if (iso) {

@@ -88,3 +88,16 @@ recorded in `actions.lock`.
 
 The four output-file permission suppressions intentionally retain the caller's
 umask for ordinary disc images, sector maps, EEPROM dumps, and strategy exports.
+
+Ten ordinary file-path findings are also suppressed: these local CLI operations
+intentionally accept caller-selected input and output paths, including absolute
+paths and parent-directory components. Calls with both intentional file creation
+and path selection list both rule IDs in the same suppression comment.
+
+The shared device-opening path (`cpp/path-injection`, alert #20) remains
+unsuppressed. `qscand` accepts a device path from network clients and forwards it
+to `qscan`; it currently checks its length, not authorization for the requested
+device. The daemon defaults to listening on all interfaces. Any future device
+allowlist should be enforced at the daemon request boundary, preserving arbitrary
+device selection for local CLI callers. A `/dev/` prefix alone is not device
+authorization.
