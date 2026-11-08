@@ -8,6 +8,8 @@ on:
     tags:
       - 'v*'
 
+permissions: {}
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -15,11 +17,13 @@ concurrency:
 jobs:
   win64:
     runs-on: windows-latest
+    permissions:
+      contents: write
     defaults:
       run:
         shell: msys2 {0}
     steps:
-      - uses: msys2/setup-msys2@v2
+      - uses: msys2/setup-msys2@v2.33.0
         with:
           msystem: MINGW64
           update: false
@@ -27,7 +31,7 @@ jobs:
       - name: git config
         run: git config --global core.autocrlf input
         shell: bash
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
       - name: configure (release)
@@ -84,7 +88,7 @@ jobs:
           assets: |
             qpxtool-*.zip
       - name: Upload new assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3.0.4
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: "${{ steps.tag.outputs.prerelease }}"
@@ -95,8 +99,10 @@ jobs:
 
   linux64-appimage:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
       - name: install prerequisites on host
@@ -182,7 +188,7 @@ jobs:
           assets: |
             QPxTool-*.AppImage
       - name: Upload new assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3.0.4
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: "${{ steps.tag.outputs.prerelease }}"
@@ -192,6 +198,8 @@ jobs:
           files: ${{ steps.dist.outputs.archive }}
 
   macos:
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -202,7 +210,7 @@ jobs:
             runs-on: macos-15-intel
     runs-on: ${{ matrix.runs-on }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
       - name: install prerequisites
@@ -282,7 +290,7 @@ jobs:
           assets: |
             qpxtool-*-macos-${{ matrix.arch }}.dmg
       - name: Upload new assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3.0.4
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: "${{ steps.tag.outputs.prerelease }}"

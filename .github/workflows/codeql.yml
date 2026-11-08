@@ -2,13 +2,15 @@ name: "CodeQL"
 
 on: [push, pull_request]
 
+permissions: {}
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   analyze:
-    name: Analyze
+    name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -18,15 +20,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'cpp' ]
+        include:
+          - language: cpp
+            build-mode: manual
+          - language: actions
+            build-mode: none
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v7.0.1
       with:
         persist-credentials: false
 
     - name: Install prereqs and run qmake
+      if: matrix.language == 'cpp'
       run: |
         nproc
         sudo apt-get update
@@ -35,16 +42,19 @@ jobs:
         make -C gui Makefile.qmake
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v4
+      uses: github/codeql-action/init@v4.39.3
       with:
         languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+        queries: security-extended
 
     - name: Build app
+      if: matrix.language == 'cpp'
       run: |
         echo "Building app (might segfault at the lrelease step)"
         make -j$(nproc) || true
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v4
+      uses: github/codeql-action/analyze@v4.39.3
       with:
         category: "/language:${{matrix.language}}"
