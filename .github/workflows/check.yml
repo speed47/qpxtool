@@ -69,6 +69,8 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
+      - name: Test macOS packaging recovery
+        run: python3 -m unittest discover -s .github/tests -v
       - name: install clang-format-19
         run: |
           wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/llvm.asc

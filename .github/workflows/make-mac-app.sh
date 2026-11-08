@@ -156,6 +156,6 @@ codesign --force --deep --sign - "$APP" || true
 # --- package as .dmg -------------------------------------------------------
 mkdir -p dist-mac
 mv "$APP" dist-mac/
-create-dmg "$archive" dist-mac
+python3 "$(dirname "$0")/package-mac-dmg.py" "$archive" dist-mac
 
 echo "dist done ($archive)"

@@ -101,3 +101,25 @@ device. The daemon defaults to listening on all interfaces. Any future device
 allowlist should be enforced at the daemon request boundary, preserving arbitrary
 device selection for local CLI callers. A `/dev/` prefix alone is not device
 authorization.
+
+## macOS disk-image recovery
+
+`make-mac-app.sh` calls `package-mac-dmg.py` to run `create-dmg` in a private
+temporary directory. It makes at most three attempts, retrying only failures
+whose logs contain "Resource busy", with five- and ten-second delays. Each
+attempt has a ten-minute timeout; a timed-out or interrupted process group is
+stopped before cleanup. Other failures stop immediately.
+
+Failed attempts print the packaging log, disk-image state, free space, and
+`lsof` output for the owned mounted volumes. Per-attempt logs remain beside the
+archive in `<archive>.logs`. Cleanup identifies owned images using
+`hdiutil info -plist` and their resolved paths, tries normal detach, then force
+detach for those images only. It never kills Finder or other runner services.
+If cleanup cannot confirm all owned images are detached, temporary files remain
+for investigation and packaging fails. A successful image passes `hdiutil verify`
+before being moved to its release filename. Existing release outputs are not
+overwritten.
+
+Recovery tests run in the lint job and can be run locally with
+`python3 -m unittest discover -s .github/tests -v`. They mock macOS commands;
+the release jobs retain the real mount, architecture, and launch checks.
