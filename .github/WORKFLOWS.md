@@ -67,5 +67,6 @@ The November 2026 update was checked against the upstream release notes:
   CodeQL bundle and checkout path, so the newer minimum bundle requirement does
   not require configuration changes.
 - [MSYS2 v2.33.0](https://github.com/msys2/setup-msys2/releases/tag/v2.33.0)
-  continues to support the configured MINGW64 environment, with a deprecation
-  warning. The workflows do not rely on the removed default Perl installation.
+  runs the Windows checks and releases in UCRT64 with GCC and Qt 6 packages
+  from the UCRT64 repository. Release packaging uses `MINGW_PREFIX` to find
+  runtime DLLs. The workflows do not rely on the removed default Perl installation.
