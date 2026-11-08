@@ -8,6 +8,7 @@ workflows:
         - 'msys2/setup-msys2@v2.33.0'
     '.github/workflows/codeql.yml':
         - 'actions/checkout@v7.0.1'
+        - 'advanced-security/dismiss-alerts@v2.0.3'
         - 'github/codeql-action@v4.39.3'
     '.github/workflows/release.yml':
         - 'actions/checkout@v7.0.1'
@@ -27,6 +28,11 @@ dependencies:
         commit: 'sha1-4391f3da665fdf50b6810c1a66712fb9ba21aa93'
         owner_id: 44036562
         repo_id: 200437066
+    'advanced-security/dismiss-alerts@v2.0.3':
+        ref: 'v2.0.3'
+        commit: 'sha1-a18f986bdb40edba0dd7a74382c15d4a3d50a1c8'
+        owner_id: 71494179
+        repo_id: 577956323
     'github/codeql-action@v4.39.3':
         ref: 'v4.39.3'
         commit: 'sha1-33d7b85da1a04171e211befe2c739303b9a4c066'

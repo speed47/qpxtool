@@ -206,8 +206,11 @@ int main(int argc, char** argv) {
 		exit(2);
 	}
 
-	strcpy(n_map, n_img);
-	strcat(n_map, ".smap");
+	if (strlen(n_img) > sizeof(n_map) - sizeof(".smap")) {
+		printf(" Image filename is too long!\n");
+		return 2;
+	}
+	snprintf(n_map, sizeof(n_map), "%s.smap", n_img);
 	printf(" image file   : '%s'\n", n_img);
 	printf(" bitmap file  : '%s'\n", n_map);
 	printf("\n");

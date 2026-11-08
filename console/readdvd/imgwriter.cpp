@@ -27,6 +27,7 @@ imgwriter::imgwriter(char* fn, smap* map) {
 #endif
 	if (!(iso = fopen64(fname, "r+"))) {
 		printf("can't open image file, creating new one!\n");
+		// codeql[cpp/world-writable-file-creation] Ordinary output file; intentionally honor the user's umask.
 		if (!(iso = fopen64(fname, "w+"))) { printf("can't create image file!\n"); }
 	} else {
 		printf("image opened: '%s'\n", fname);

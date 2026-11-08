@@ -70,3 +70,21 @@ The November 2026 update was checked against the upstream release notes:
   runs the Windows checks and releases in UCRT64 with GCC and Qt 6 packages
   from the UCRT64 repository. Release packaging uses `MINGW_PREFIX` to find
   runtime DLLs. The workflows do not rely on the removed default Perl installation.
+
+### Source suppressions
+
+The C/C++ job also runs `codeql/cpp-queries:AlertSuppression.ql`. Place a
+`// codeql[rule-id]` comment with a justification immediately before the flagged
+line to mark an intentional finding. Comments apply only to the next line;
+keep the rule enabled for all other code.
+
+The SHA-pinned `advanced-security/dismiss-alerts` action consumes the local
+SARIF and dismisses matching alerts as "won't fix" only on pushes to the
+repository's default branch. Pull requests and other branches generate the
+metadata but do not change dismissals, which are repository-wide. Removing a
+comment allows the action to reopen an alert it previously dismissed; manual
+dismissals are preserved. The action's SHA and repository identity are also
+recorded in `actions.lock`.
+
+The four output-file permission suppressions intentionally retain the caller's
+umask for ordinary disc images, sector maps, EEPROM dumps, and strategy exports.

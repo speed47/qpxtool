@@ -237,11 +237,12 @@ int qscanner::plugins_probe(bool test, bool probe_enable) {
 			while (dentry && !attached) {
 				if (!strncmp(dentry->d_name, "libqscan_", 9)) {
 					if (!dev->silent) printf("FOUND: %s\n", dentry->d_name);
-					pname = (char*)malloc(strlen(dentry->d_name) + strlen(ppath) + 2);
+					size_t pname_size = strlen(dentry->d_name) + strlen(ppath) + 2;
+					pname = (char*)malloc(pname_size);
 #if defined(_WIN32) || defined(_WIN64)
-					sprintf(pname, "%s\\%s", ppath, dentry->d_name);
+					snprintf(pname, pname_size, "%s\\%s", ppath, dentry->d_name);
 #else
-					sprintf(pname, "%s/%s", ppath, dentry->d_name);
+					snprintf(pname, pname_size, "%s/%s", ppath, dentry->d_name);
 #endif
 					plugin_attach(pname, probe_enable, 0, !test);
 					if (attached) {
@@ -283,11 +284,12 @@ int qscanner::plugins_probe_all(probe_result* results, int max_results) {
 			dentry = readdir(dir);
 			while (dentry && count < max_results) {
 				if (!strncmp(dentry->d_name, "libqscan_", 9)) {
-					pname = (char*)malloc(strlen(dentry->d_name) + strlen(ppath) + 2);
+					size_t pname_size = strlen(dentry->d_name) + strlen(ppath) + 2;
+					pname = (char*)malloc(pname_size);
 #if defined(_WIN32) || defined(_WIN64)
-					sprintf(pname, "%s\\%s", ppath, dentry->d_name);
+					snprintf(pname, pname_size, "%s\\%s", ppath, dentry->d_name);
 #else
-					sprintf(pname, "%s/%s", ppath, dentry->d_name);
+					snprintf(pname, pname_size, "%s/%s", ppath, dentry->d_name);
 #endif
 					dev->silent = 1;
 					plugin_attach(pname, true, 0, 1);
@@ -341,11 +343,12 @@ int qscanner::plugin_attach(const char* name) { // modernization
 			while (dentry && !attached) {
 				if (!strncmp(dentry->d_name, "libqscan_", 9)) {
 					if (!dev->silent) printf("FOUND: %s\n", dentry->d_name);
-					pname = (char*)malloc(strlen(dentry->d_name) + strlen(ppath) + 2);
+					size_t pname_size = strlen(dentry->d_name) + strlen(ppath) + 2;
+					pname = (char*)malloc(pname_size);
 #if defined(_WIN32) || defined(_WIN64)
-					sprintf(pname, "%s\\%s", ppath, dentry->d_name);
+					snprintf(pname, pname_size, "%s\\%s", ppath, dentry->d_name);
 #else
-					sprintf(pname, "%s/%s", ppath, dentry->d_name);
+					snprintf(pname, pname_size, "%s/%s", ppath, dentry->d_name);
 #endif
 					plugin_attach(pname, 0, 1, 1);
 

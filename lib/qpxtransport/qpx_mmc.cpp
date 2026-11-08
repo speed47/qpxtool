@@ -34,8 +34,9 @@
 int convert_to_ID(drive_info* drive);
 
 drive_info::drive_info(const char* _device) {
-	device = (char*)malloc(bufsz_dev);
-	strcpy(device, _device);
+	const size_t device_size = strlen(_device) + 1;
+	device = (char*)malloc(device_size);
+	snprintf(device, device_size, "%s", _device);
 	rd_buf = (unsigned char*)malloc(bufsz_rd);
 	if (!cmd.associate(device, NULL)) {
 		//		printf("** Can't open device: %16s\n",_device);
