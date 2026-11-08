@@ -66,7 +66,7 @@ jobs:
     # Alert dismissal is repository-wide; never apply feature-branch suppressions.
     - name: Apply source suppressions
       if: matrix.language == 'cpp' && github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-      uses: advanced-security/dismiss-alerts@a18f986bdb40edba0dd7a74382c15d4a3d50a1c8 # v2.0.3
+      uses: advanced-security/dismiss-alerts@v2.0.3
       with:
         sarif-id: ${{ steps.analyze.outputs.sarif-id }}
         sarif-file: sarif-results/cpp.sarif

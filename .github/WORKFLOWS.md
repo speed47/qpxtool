@@ -78,7 +78,7 @@ The C/C++ job also runs `codeql/cpp-queries:AlertSuppression.ql`. Place a
 line to mark an intentional finding. Comments apply only to the next line;
 keep the rule enabled for all other code.
 
-The SHA-pinned `advanced-security/dismiss-alerts` action consumes the local
+The `advanced-security/dismiss-alerts` action, pinned through `actions.lock`, consumes the local
 SARIF and dismisses matching alerts as "won't fix" only on pushes to the
 repository's default branch. Pull requests and other branches generate the
 metadata but do not change dismissals, which are repository-wide. Removing a
