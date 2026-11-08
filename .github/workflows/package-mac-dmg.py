@@ -57,7 +57,9 @@ def cleanup(workdir):
 
 
 def create_image(output, source, workdir, log):
-    command = ["create-dmg", "--hdiutil-retries", "5", str(output), str(source)]
+    # Finder cosmetics can trigger Launch Services (lsd) to hold the app binary
+    # open on the temporary volume, preventing even forced detach on CI runners.
+    command = ["create-dmg", "--skip-jenkins", "--hdiutil-retries", "5", str(output), str(source)]
     # A separate process group lets a timeout or cancellation stop children before cleanup.
     with log.open("wb") as stream:
         process = subprocess.Popen(command, cwd=workdir, stdout=stream,
