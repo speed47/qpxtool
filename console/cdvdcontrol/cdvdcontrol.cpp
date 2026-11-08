@@ -1288,7 +1288,7 @@ int main(int argc, char* argv[]) {
 		printf("AS RETR...\n");
 		plextor_get_strategy(dev);
 		printf("Saving AS DB...\n");
-		// codeql[cpp/world-writable-file-creation,cpp/path-injection] Caller-selected output path; intentionally honor the user's umask.
+		// codeql[cpp/world-writable-file-creation] codeql[cpp/path-injection] Caller-selected output path; intentionally honor the user's umask.
 		asf = fopen(assfn, "wb");
 		if (!asf) {
 			printf("can't create asdb file!\n");

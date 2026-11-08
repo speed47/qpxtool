@@ -28,7 +28,7 @@ imgwriter::imgwriter(char* fn, smap* map) {
 	// codeql[cpp/path-injection] Local CLI caller intentionally selects the full input or output path.
 	if (!(iso = fopen64(fname, "r+"))) {
 		printf("can't open image file, creating new one!\n");
-		// codeql[cpp/world-writable-file-creation,cpp/path-injection] Caller-selected output path; intentionally honor the user's umask.
+		// codeql[cpp/world-writable-file-creation] codeql[cpp/path-injection] Caller-selected output path; intentionally honor the user's umask.
 		if (!(iso = fopen64(fname, "w+"))) { printf("can't create image file!\n"); }
 	} else {
 		printf("image opened: '%s'\n", fname);

@@ -418,7 +418,7 @@ int main(int argc, char* argv[]) {
 		//		unsigned char buf[1024];
 		plextor_read_eeprom(dev, &eelen);
 		if (flags & FL_EEOF) {
-			// codeql[cpp/world-writable-file-creation,cpp/path-injection] Caller-selected output path; intentionally honor the user's umask.
+			// codeql[cpp/world-writable-file-creation] codeql[cpp/path-injection] Caller-selected output path; intentionally honor the user's umask.
 			eefile = fopen(eefname, "w");
 			if (!eefile) {
 				printf("%s: Can't write file: %s\n", argv[0], eefname);
