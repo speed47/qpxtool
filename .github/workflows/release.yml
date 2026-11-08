@@ -25,9 +25,9 @@ jobs:
     steps:
       - uses: msys2/setup-msys2@v2.33.0
         with:
-          msystem: MINGW64
+          msystem: UCRT64
           update: false
-          install: git make pkg-config mingw-w64-x86_64-gcc mingw-w64-x86_64-qt6-base mingw-w64-x86_64-qt6-tools mingw-w64-x86_64-ntldd unzip zip
+          install: git make pkg-config mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-qt6-base mingw-w64-ucrt-x86_64-qt6-tools mingw-w64-ucrt-x86_64-ntldd unzip zip
       - name: git config
         run: git config --global core.autocrlf input
         shell: bash

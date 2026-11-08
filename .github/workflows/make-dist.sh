@@ -5,7 +5,7 @@ set -x
 version="$1"
 
 case "$MSYSTEM" in
-    MINGW64) os=win64;;
+    UCRT64|MINGW64) os=win64;;
     MINGW32) os=win32;;
     *)       os=unknown;;
 esac
@@ -23,7 +23,12 @@ echo "Archive name is $archive"
 [ -n "$GITHUB_OUTPUT" ] && echo "archive=$archive" >> $GITHUB_OUTPUT
 
 mkdir dist
-for i in $(ntldd -R gui/$flavor/qpxtool.exe  | awk '/mingw/ {print $3}' | tr \\\\ / | grep -Eo '[^/]+$'); do cp -va $MINGW_PREFIX/bin/$i dist/; done
+# ntldd prints Windows paths. Match the active environment rather than a
+# hard-coded mingw directory, excluding Windows system DLLs.
+for i in $(ntldd -R gui/$flavor/qpxtool.exe | tr '\\' / |
+    awk -v prefix="$MINGW_PREFIX/bin/" 'index(tolower($3), tolower(prefix)) {n = split($3, parts, "/"); print parts[n]}'); do
+    cp -va "$MINGW_PREFIX/bin/$i" dist/
+done
 cp -va gui/$flavor/qpxtool.exe console/*/*.exe dist/
 find lib/lib -name "*.dll" | xargs cp -vat dist/
 mkdir -p dist/share/qt6/plugins/platforms
