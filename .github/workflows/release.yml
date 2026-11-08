@@ -216,37 +216,47 @@ jobs:
       - name: install prerequisites
         env:
           HOMEBREW_NO_INSTALL_CLEANUP: 1
-        run: brew install qt@6 create-dmg
+        run: |
+          test "$(uname -m)" = "${{ matrix.arch }}"
+          brew install qt@6 create-dmg
+      - name: set up Qt
+        run: |
+          qt_prefix="$(brew --prefix qt@6)"
+          echo "$qt_prefix/bin" >> "$GITHUB_PATH"
+          echo "CFLAGS=-L$qt_prefix/lib -I$qt_prefix/include" >> "$GITHUB_ENV"
+          echo "CXXFLAGS=-L$qt_prefix/lib -I$qt_prefix/include" >> "$GITHUB_ENV"
+          echo "PKG_CONFIG_PATH=$qt_prefix/lib/pkgconfig" >> "$GITHUB_ENV"
       - name: configure
         id: conf
-        env:
-          CFLAGS: -L/opt/homebrew/opt/qt@6/lib -I/opt/homebrew/opt/qt@6/include
-          CXXFLAGS: -L/opt/homebrew/opt/qt@6/lib -I/opt/homebrew/opt/qt@6/include
-          PKG_CONFIG_PATH: /opt/homebrew/opt/qt@6/lib/pkgconfig
         run: |
           git describe --dirty --tags --match 'v*'
           version="$(git describe --dirty --tags --match 'v*')"
           sed -i '' -re "s/^#define VERSION.*/#define VERSION \"${version:1}-speed47\"/" */*/version.h
           echo "version=${version:1}" >> $GITHUB_OUTPUT
-          export PATH="$(brew --prefix qt@6)/bin:$PATH"
           ./configure --prefix=/usr --libdir=/usr/lib
       - name: make
         run: |
-          export PATH="$(brew --prefix qt@6)/bin:$PATH"
           make -j$(sysctl -n hw.ncpu || echo 2)
       - name: make install (staging)
         run: |
-          export PATH="$(brew --prefix qt@6)/bin:$PATH"
           make install DESTDIR="$PWD/staging"
       - name: check executable
         run: |
           file staging/usr/bin/qpxtool
-          file staging/usr/bin/qpxtool | grep -q 'Mach-O'
+          lipo staging/usr/bin/qpxtool -verify_arch "${{ matrix.arch }}"
+          lipo staging/usr/bin/qscan -verify_arch "${{ matrix.arch }}"
       - name: prepare dist
         id: dist
         run: |
-          export PATH="$(brew --prefix qt@6)/bin:$PATH"
           ./.github/workflows/make-mac-app.sh "${{ steps.conf.outputs.version }}" "${{ matrix.arch }}" "$PWD/staging"
+      - name: verify bundled architectures
+        run: |
+          find dist-mac/qpxtool.app -type f -print0 |
+            while IFS= read -r -d '' binary; do
+              if file -b "$binary" | grep -q 'Mach-O'; then
+                lipo "$binary" -verify_arch "${{ matrix.arch }}"
+              fi
+            done
       - name: verify dmg mounts and app launches
         run: |
           set -x
