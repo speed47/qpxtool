@@ -1,4 +1,4 @@
-SRCS = $(patsubst %,%.cpp, qscand child)
+SRCS = $(patsubst %,%.cpp, qscand child device_policy)
 OBJS = $(patsubst %.cpp,%.o,$(SRCS))
 
 BIN = qscand$(BINSUFF)
@@ -9,6 +9,8 @@ LDLIBS   += -L../../lib/lib -lqpxtransport
 
 $(BIN): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ -o $@ $(LDLIBS) $(LIBS_THREAD) $(LIBS_INET)
+
+qscand.o child.o device_policy.o: device_policy.h
 
 all:$(BIN)
 

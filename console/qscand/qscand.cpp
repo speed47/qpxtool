@@ -21,6 +21,7 @@
 #include <threads.h>
 #include "child.h"
 #include "qscand.h"
+#include "device_policy.h"
 #if !defined(_WIN32) && !defined(_WIN64)
 #include <signal.h>
 #endif
@@ -76,6 +77,8 @@ int daemonize() {
 }
 #endif
 
+enum { OPT_ALLOW_DEVICE = 256, OPT_ALLOW_ALL_DEVICES };
+
 static struct option long_options[] = {{"help", 0, NULL, 'h'},
 #ifdef DAEMON_EN
                                        {"nodaemon", 0, NULL, 'n'},
@@ -86,6 +89,8 @@ static struct option long_options[] = {{"help", 0, NULL, 'h'},
 #ifdef AUTOPORT_ENABLE
                                        {"portauto", 0, NULL, 'a'},
 #endif
+                                       {"allow-device", 1, NULL, OPT_ALLOW_DEVICE},
+                                       {"allow-all-devices", 0, NULL, OPT_ALLOW_ALL_DEVICES},
                                        {0, 0, 0, 0}};
 
 int child_create(int idx) {
@@ -132,7 +137,7 @@ int main(int argc, char** argv) {
 	ip = htonl(INADDR_ANY);
 	port = 0;
 	while (1) {
-		char c = getopt_long(argc, argv, "hndai:p:", long_options, NULL);
+		int c = getopt_long(argc, argv, "hndai:p:", long_options, NULL);
 		if (c == -1) break;
 		switch (c) {
 			case 'h':
@@ -148,8 +153,23 @@ int main(int argc, char** argv) {
 				printf("-a --portauto       autoselect port listen to\n");
 #endif
 				printf("-d --debug          debug\n");
+				printf("   --allow-device PATH  allow only listed paths (repeatable; replaces defaults)\n");
+				printf("   --allow-all-devices  DANGEROUS: allow arbitrary client device paths\n");
+				printf("Default: optical-only device names; see qscand(1) for platform details.\n");
 				printf("\n");
 				exit(0);
+			case OPT_ALLOW_DEVICE: {
+				std::string path(optarg);
+				if (path.empty() || path.size() >= 128 || path.find_first_of("\r\n") != std::string::npos) {
+					fprintf(stderr, "Invalid --allow-device path (must be 1..127 bytes without line endings)\n");
+					return 1;
+				}
+				device_access.devices.push_back(path);
+				break;
+			}
+			case OPT_ALLOW_ALL_DEVICES:
+				device_access.allow_all = true;
+				break;
 			case 'n':
 				nodaemon = 1;
 #ifndef DAEMON_EN
@@ -176,9 +196,21 @@ int main(int argc, char** argv) {
 				break;
 #endif
 			default:
-				printf("Invalid option: -%c\n", c);
-				break;
+				fprintf(stderr, "Invalid command-line option\n");
+				return 1;
 		}
+	}
+	if (device_access.allow_all && !device_access.devices.empty()) {
+		fprintf(stderr, "--allow-device and --allow-all-devices are mutually exclusive\n");
+		return 1;
+	}
+	if (optind != argc) {
+		fprintf(stderr, "Unexpected positional argument\n");
+		return 1;
+	}
+	if (device_access.allow_all) {
+		fprintf(stderr, "WARNING: --allow-all-devices disables device restrictions. Strongly discouraged: "
+		                "network clients can select arbitrary paths with the daemon's privileges.\n");
 	}
 	if (!port && !portauto) port = DEFPORT;
 #if defined(_WIN32) || defined(_WIN64)

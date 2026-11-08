@@ -69,7 +69,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - name: Test macOS packaging recovery
+      - name: Test workflow helpers and device policy
         run: python3 -m unittest discover -s .github/tests -v
       - name: install clang-format-19
         run: |
@@ -98,6 +98,11 @@ jobs:
         run: ./configure --enable-debug
       - name: make (debug)
         run: nproc && make -j$(nproc)
+      - name: Test daemon device access
+        env:
+          QSCAND_TEST_BINARY: console/qscand/qscand
+          LD_LIBRARY_PATH: ${{ github.workspace }}/lib/lib
+        run: python3 -m unittest discover -s .github/tests -p test_qscand_devices.py -v
       - name: check executable (debug)
         run: |
             file gui/qpxtool

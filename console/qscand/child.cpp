@@ -21,6 +21,7 @@
 // <common_functions.h> calls <winsock2.h>, which "child.h" relies on
 #include <common_functions.h>
 #include "child.h"
+#include "device_policy.h"
 
 int clients;
 Mutex* cmutex;
@@ -191,6 +192,16 @@ void child_proc(child_arg_t* arg) {
 		}
 		if (n <= 1) continue;
 		linei[n] = 0;
+		if (memchr(linei, '\0', n)) {
+			device[0] = '\0';
+			const char* invalid = "QSCAND: embedded NUL in command!\n";
+#if defined(_WIN32) || defined(_WIN64)
+			send(arg->connfd, invalid, strlen(invalid), 0);
+#else
+			write(arg->connfd, invalid, strlen(invalid));
+#endif
+			continue;
+		}
 #if defined(_WIN32) || defined(_WIN64)
 		send(arg->connfd, "\n", 1, 0);
 #else
@@ -242,10 +253,15 @@ void child_proc(child_arg_t* arg) {
 			if (!strncmp(linet, "dev=", 4)) {
 				linet += 4;
 				len = strlen(linet);
-				if (len < sizeof(device)) {
-					strncpy(device, linet, sizeof(device) - 1);
+				// readline retains the protocol newline; it is not part of the path.
+				std::string requested(linet, len && linet[len - 1] == '\n' ? len - 1 : len);
+				std::string authorized;
+				if (requested.size() < sizeof(device) && device_access.authorize(requested, authorized) &&
+				    authorized.size() < sizeof(device)) {
+					snprintf(device, sizeof(device), "%s", authorized.c_str());
 				} else {
-					sprintf(lineo, "QSCAND: too long device name!\n");
+					device[0] = '\0';
+					sprintf(lineo, "QSCAND: device path not permitted by server policy!\n");
 #if defined(_WIN32) || defined(_WIN64)
 					send(arg->connfd, lineo, strlen(lineo), 0);
 #else
@@ -293,6 +309,19 @@ void child_proc(child_arg_t* arg) {
 		}
 
 		if (mode != none) {
+			// Enforce again immediately before spawning; list/scanbus takes no path.
+			std::string authorized;
+			if (mode != scanbus &&
+			    (!device_access.authorize(device, authorized) || authorized.size() >= sizeof(device))) {
+				const char* denied = "QSCAND: device path not permitted by server policy!\n";
+#if defined(_WIN32) || defined(_WIN64)
+				send(arg->connfd, denied, strlen(denied), 0);
+#else
+				write(arg->connfd, denied, strlen(denied));
+#endif
+				continue;
+			}
+			if (mode != scanbus) snprintf(device, sizeof(device), "%s", authorized.c_str());
 			int argc = 0;
 			char** argv = (char**)malloc(sizeof(char*));
 			argv[0] = NULL;
