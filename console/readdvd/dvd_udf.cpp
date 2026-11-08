@@ -959,8 +959,8 @@ uint32_t UDFFindFile(udf_t* udf, char* filename, uint32_t* filesize) {
 	uint8_t filetype;
 
 	if (filesize) { *filesize = 0; }
-	tokenline[0] = '\0';
-	strcat(tokenline, filename);
+	if (strlen(filename) >= sizeof(tokenline)) { return 0; }
+	strcpy(tokenline, filename);
 
 
 	if (!(GetUDFCache(udf, PartitionCache, 0, &partition) && GetUDFCache(udf, RootICBCache, 0, &RootICB))) {

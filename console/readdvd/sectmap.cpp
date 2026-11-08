@@ -170,6 +170,7 @@ int smap::load() {
 int smap::save() {
 	FILE* f;
 	printf("\nsaving map  : '%s'...\n", fname);
+	// codeql[cpp/world-writable-file-creation] Ordinary output file; intentionally honor the user's umask.
 	if (!(f = fopen(fname, "w"))) {
 		printf("can't create map file!\n");
 		return 1;

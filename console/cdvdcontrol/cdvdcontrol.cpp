@@ -663,7 +663,11 @@ int main(int argc, char* argv[]) {
 		} else if (!strcmp(argv[i], "--securec")) {
 			if (argc > (i + 1)) {
 				i++;
-				strcpy(passwd, argv[i]);
+				if (strlen(argv[i]) >= sizeof(passwd)) {
+					printf("Parameter for %s is too long!\n", argv[i - 1]);
+					return 5;
+				}
+				snprintf(passwd, sizeof(passwd), "%s", argv[i]);
 				flags |= FL_SECUREC;
 				//	printf("SecuRec pass: %s\n", passwd);
 			} else {
@@ -792,7 +796,11 @@ int main(int argc, char* argv[]) {
 			if (argc > (i + 1)) {
 				i++;
 				flags_as |= FLAS_RETR;
-				strcpy(assfn, argv[i]);
+				if (strlen(argv[i]) >= sizeof(assfn)) {
+					printf("Parameter for %s is too long!\n", argv[i - 1]);
+					return 5;
+				}
+				snprintf(assfn, sizeof(assfn), "%s", argv[i]);
 			} else {
 				printf("option %s needs parameter!\n", argv[i]);
 				return 5;
@@ -801,7 +809,11 @@ int main(int argc, char* argv[]) {
 			if (argc > (i + 1)) {
 				i++;
 				flags_as |= FLAS_STOR;
-				strcpy(aslfn, argv[i]);
+				if (strlen(argv[i]) >= sizeof(aslfn)) {
+					printf("Parameter for %s is too long!\n", argv[i - 1]);
+					return 5;
+				}
+				snprintf(aslfn, sizeof(aslfn), "%s", argv[i]);
 			} else {
 				printf("option %s needs parameter!\n", argv[i]);
 				return 5;
@@ -1276,6 +1288,7 @@ int main(int argc, char* argv[]) {
 		printf("AS RETR...\n");
 		plextor_get_strategy(dev);
 		printf("Saving AS DB...\n");
+		// codeql[cpp/world-writable-file-creation] Ordinary output file; intentionally honor the user's umask.
 		asf = fopen(assfn, "wb");
 		if (!asf) {
 			printf("can't create asdb file!\n");
