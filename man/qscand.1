@@ -34,6 +34,54 @@ qscand is a network wrapper which gives you access to your devices through the T
 .br
 		select port for listening  
 
+.TP
+.B \-\-allow-device PATH
+Allow only the exact device paths listed by the administrator. Repeat this
+option for multiple devices; the list replaces the default policy. Paths must
+be 1 to 127 bytes long and contain no line endings. No wildcard or prefix
+matching is performed. Administrator-listed aliases are trusted as supplied.
+.TP
+.B \-\-allow-all-devices
+Disable device-path restrictions and restore legacy unrestricted selection.
+This is strongly discouraged: network clients may select arbitrary paths using
+the daemon's privileges. A warning is printed at startup. This option cannot
+be combined with \fB\-\-allow-device\fR.
+.SH "DEVICE ACCESS"
+By default, Linux accepts only /dev/sr[0-9]+ and /dev/scd[0-9]+ device names.
+The /dev/cdrom and /dev/dvd aliases are accepted only if their resolved targets
+also match those optical device names. FreeBSD accepts /dev/cd[0-9]+ and
+/dev/acd[0-9]+. On Unix the resolved target must exist and be a block or
+character device; qscan receives that resolved path. These patterns are whole
+path matches, not shell wildcards.
+.PP
+Windows accepts drive letters such as D: only when Windows reports an optical
+drive. Other platforms, including macOS, require an explicit device list:
+/dev/diskN and /dev/rdiskN can identify non-optical disks and are not default
+allowlist entries. Linux /dev/sgN and legacy /dev/hdX paths also require an
+explicit list.
+.PP
+A denied device selection clears the current selection. Device access is
+checked again before starting a device-specific command. The list/scanbus
+command still discovers drives and is not filtered by this policy.
+.SH "EXAMPLES"
+Use the platform defaults:
+.PP
+.nf
+qscand -n
+.fi
+.PP
+Expose only two administrator-selected drives:
+.PP
+.nf
+qscand -n --allow-device /dev/sr0 --allow-device /dev/sg3
+.fi
+.SH "SECURITY"
+Device-path restrictions do not authenticate clients or restrict optical-drive
+operations such as write tests. The daemon listens on all interfaces by default;
+use a trusted network or select a suitable interface with \fB\-i\fR.
+The device namespace and administrator-listed aliases must be controlled by
+trusted administrators. Local qscan usage is unaffected by this daemon policy.
+
 \fR \fB
 \fR \fB
 \fR \fB
