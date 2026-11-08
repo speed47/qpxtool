@@ -9,8 +9,9 @@ MAIN=$(grep -r "^Exec=.*" "$HERE"/*.desktop | head -n 1 | cut -d "=" -f 2 | cut 
 ############################################################################################
 
 export PATH="${HERE}"/usr/bin/:"${HERE}"/usr/sbin/:"${HERE}"/usr/games/:"${HERE}"/bin/:"${HERE}"/sbin/:"${PATH}"
-export LD_LIBRARY_PATH="${HERE}"/usr/lib/:"${HERE}"/usr/lib/x86_64-linux-gnu/:"${LD_LIBRARY_PATH}"
 export XDG_DATA_DIRS="${HERE}"/usr/share/:"${XDG_DATA_DIRS}"
+# We don't yet set LD_LIBRARY_PATH so that host utils are using host libs:
+# we'll set it right before exec, further down.
 
 ############################################################################################
 # Use bundled Python
@@ -112,6 +113,7 @@ if [ -n "$1" ] ; then
         exit 1
       fi
       shift
+      export LD_LIBRARY_PATH="${HERE}"/usr/lib/:"${HERE}"/usr/lib/x86_64-linux-gnu/:"${LD_LIBRARY_PATH}"
       if [ -e "$LD_LINUX" ] ; then
         case $line in
           "ld-linux"*) exec "${LD_LINUX}" --inhibit-cache "${CLI_BIN}" "$@" ;;
@@ -150,6 +152,7 @@ if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ] ; then
   exit 1
 fi
 
+export LD_LIBRARY_PATH="${HERE}"/usr/lib/:"${HERE}"/usr/lib/x86_64-linux-gnu/:"${LD_LIBRARY_PATH}"
 if [ -e "$LD_LINUX" ] ; then
   case $line in
     "ld-linux"*) exec "${LD_LINUX}" --inhibit-cache "${MAIN_BIN}" "$@" ;;
