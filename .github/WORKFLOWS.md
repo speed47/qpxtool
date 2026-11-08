@@ -105,7 +105,11 @@ authorization.
 ## macOS disk-image recovery
 
 `make-mac-app.sh` calls `package-mac-dmg.py` to run `create-dmg` in a private
-temporary directory. It makes at most three attempts, retrying only failures
+temporary directory. It uses `--skip-jenkins` to avoid Finder's cosmetic
+AppleScript step: Launch Services (`lsd`) has been observed holding the bundled
+executable open on the temporary volume, blocking normal and forced detach.
+Finder window and icon positioning therefore use defaults. The app contents
+are unchanged. It makes at most three attempts, retrying only failures
 whose logs contain "Resource busy", with five- and ten-second delays. Each
 attempt has a ten-minute timeout; a timed-out or interrupted process group is
 stopped before cleanup. Other failures stop immediately.
